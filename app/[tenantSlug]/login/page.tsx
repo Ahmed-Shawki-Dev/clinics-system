@@ -20,7 +20,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { useAuthStore } from '../../../store/useAuthStore'
 import { LoginInput, LoginSchema } from '../../../validation/login'
-import { loginAction } from '../../../actions/auth/auth'
+import { loginAction } from '../../../actions/auth/login'
 
 export default function LoginPage() {
   const { tenantSlug } = useParams()

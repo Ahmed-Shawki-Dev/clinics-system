@@ -21,6 +21,7 @@ import { PermissionGate } from '../../../../components/auth/permission-gate'
 import { ROLES } from '../../../../config/roles'
 import { IPatient } from '../../../../types/patient'
 import { DeletePatientDialog } from './delete-patient-dialog'
+import { EditPatientModal } from './edit-patient-modal'
 
 interface PatientsListProps {
   data: IPatient[]
@@ -82,11 +83,13 @@ export function PatientsList({ data }: PatientsListProps) {
                       >
                         نسخ الرقم
                       </DropdownMenuItem>
-                      <DropdownMenuItem>تعديل البيانات</DropdownMenuItem>
-                      <DropdownMenuSeparator />
                       <PermissionGate
-                        allowedRoles={[ROLES.CLINIC_OWNER, ROLES.SUPER_ADMIN]}
+                        allowedRoles={[ROLES.CLINIC_OWNER, ROLES.CLINIC_MANAGER, ROLES.SUPER_ADMIN]}
                       >
+                        <EditPatientModal patient={patient} />
+                      </PermissionGate>
+                      <DropdownMenuSeparator />
+                      <PermissionGate allowedRoles={[ROLES.CLINIC_OWNER, ROLES.SUPER_ADMIN]}>
                         <DeletePatientDialog patientId={patient.id} patientName={patient.name} />
                       </PermissionGate>
                     </DropdownMenuContent>

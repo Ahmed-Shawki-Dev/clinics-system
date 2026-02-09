@@ -1,8 +1,9 @@
 'use client'
-import { usePathname } from 'next/navigation'
-import { SidebarTrigger } from './ui/sidebar'
-import { Separator } from './ui/separator'
+import { useParams, usePathname } from 'next/navigation'
+import { logoutAction } from '../actions/auth/logout'
+import { useAuthStore } from '../store/useAuthStore'
 import { ModeToggle } from './ModeToggle'
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,10 +12,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu'
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
+import { Separator } from './ui/separator'
+import { SidebarTrigger } from './ui/sidebar'
+import { LogoutButton } from './auth/LogoutButton'
 
 export function AppHeader() {
   const pathname = usePathname()
+
+  const { tenantSlug } = useParams()
+  const logoutFromStore = useAuthStore((state) => state.logout)
 
   const getTitle = () => {
     if (pathname.includes('/patients')) return 'سجل المرضى'
@@ -47,7 +53,7 @@ export function AppHeader() {
             <DropdownMenuLabel>د. أحمد شوقي</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>الملف الشخصي</DropdownMenuItem>
-            <DropdownMenuItem className='text-red-600 font-medium'>تسجيل الخروج</DropdownMenuItem>
+            <LogoutButton />
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
