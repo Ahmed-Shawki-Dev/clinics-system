@@ -1,5 +1,6 @@
 'use client'
-import { Activity, Calendar, LayoutDashboard, Settings, Stethoscope, Users } from 'lucide-react'
+
+import { Stethoscope } from 'lucide-react' // لوجو العيادة بس
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 
@@ -15,25 +16,30 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
+import { useAuthStore } from '@/store/useAuthStore'
+import { NAV_ITEMS } from '@/config/navigation'
+
 export function AppSidebar() {
   const pathname = usePathname()
   const { tenantSlug } = useParams()
+  const user = useAuthStore((state) => state.user)
 
-  const rootUrl = `/${tenantSlug}/dashboard`
+  const getFullUrl = (href: string) => `/${tenantSlug}/dashboard${href === '/' ? '' : href}`
 
-  const menuItems = [
-    { title: 'لوحة التحكم', url: `${rootUrl}`, icon: LayoutDashboard },
-    { title: 'سجل المرضى', url: `${rootUrl}/patients`, icon: Users },
-    { title: 'المواعيد', url: `${rootUrl}/appointments`, icon: Calendar },
-    { title: 'الانتظار', url: `${rootUrl}/queue`, icon: Activity },
-    { title: 'الإعدادات', url: `${rootUrl}/settings`, icon: Settings },
-  ]
+  const filteredMenu = NAV_ITEMS.filter((item) => {
+    if (!user) return false
+    return item.roles.includes(user.role)
+  })
 
   return (
     <Sidebar collapsible='icon'>
       <SidebarHeader className='h-16 flex flex-row items-center px-4 border-b font-bold text-xl text-primary gap-2 shrink-0'>
-        <Stethoscope className='h-6 w-6' />
-        <span className='group-data-[collapsible=icon]:hidden truncate'>Elite Clinic</span>
+        <div className='flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground'>
+          <Stethoscope className='h-5 w-5' />
+        </div>
+        <span className='group-data-[collapsible=icon]:hidden truncate font-extrabold'>
+          Elite Clinic
+        </span>
       </SidebarHeader>
 
       <SidebarContent>
@@ -41,16 +47,27 @@ export function AppSidebar() {
           <SidebarGroupLabel>القائمة الرئيسية</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url} tooltip={item.title}>
-                    <Link href={item.url}>
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {filteredMenu.map((item) => {
+                const fullUrl = getFullUrl(item.href)
+
+                const isActive = pathname === fullUrl || pathname.startsWith(`${fullUrl}/`)
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.title}
+                      className='transition-all duration-200 hover:translate-x-1'
+                    >
+                      <Link href={fullUrl}>
+                        <item.icon className='h-4 w-4' />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
