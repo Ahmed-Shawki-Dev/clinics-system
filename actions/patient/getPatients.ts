@@ -1,7 +1,7 @@
 'use server'
 
-import { cookies } from 'next/headers'
 import { PatientsListResponse } from '../../types/patient'
+import { getToken } from '../auth/getToken'
 
 export async function getPatients(
   tenantSlug: string,
@@ -9,8 +9,7 @@ export async function getPatients(
   limit: number = 10,
   search: string = '',
 ) {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('token')?.value
+  const token = await getToken()
 
   if (!token) return { items: [], totalCount: 0 }
 

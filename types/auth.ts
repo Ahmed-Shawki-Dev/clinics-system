@@ -1,10 +1,4 @@
-export type UserRole =
-  | 'SuperAdmin'
-  | 'ClinicOwner'
-  | 'ClinicManager'
-  | 'Receptionist'
-  | 'Doctor'
-  | 'Patient'
+import { UserRole } from "./api"
 
 export interface UserProfile {
   id: string
@@ -22,15 +16,4 @@ export interface AuthResponseData {
   refreshToken: string
   expiresAt: string
   user: UserProfile
-}
-
-export interface BaseApiResponse<T> {
-  success: boolean
-  message: string
-  data: T
-  errors: Array<{ field: string; message: string }>
-  meta: {
-    timestamp: string
-    requestId: string
-  }
 }

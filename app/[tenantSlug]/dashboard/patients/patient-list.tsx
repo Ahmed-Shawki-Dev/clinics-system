@@ -16,8 +16,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { MoreHorizontalIcon, Phone, User, Calendar } from 'lucide-react'
+import { Calendar, MoreHorizontalIcon, Phone, User } from 'lucide-react'
+import { PermissionGate } from '../../../../components/auth/permission-gate'
+import { ROLES } from '../../../../config/roles'
 import { IPatient } from '../../../../types/patient'
+import { DeletePatientDialog } from './delete-patient-dialog'
 
 interface PatientsListProps {
   data: IPatient[]
@@ -81,7 +84,11 @@ export function PatientsList({ data }: PatientsListProps) {
                       </DropdownMenuItem>
                       <DropdownMenuItem>تعديل البيانات</DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem variant='destructive'>حذف</DropdownMenuItem>
+                      <PermissionGate
+                        allowedRoles={[ROLES.CLINIC_OWNER, ROLES.SUPER_ADMIN]}
+                      >
+                        <DeletePatientDialog patientId={patient.id} patientName={patient.name} />
+                      </PermissionGate>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

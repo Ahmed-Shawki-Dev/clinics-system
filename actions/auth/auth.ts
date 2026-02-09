@@ -1,8 +1,9 @@
 'use server'
 
 import { cookies } from 'next/headers'
-import { LoginInput } from '../validation/login'
-import { AuthResponseData, BaseApiResponse } from '../types/auth'
+import { BaseApiResponse } from '../../types/api'
+import { AuthResponseData } from '../../types/auth'
+import { LoginInput } from '../../validation/login'
 
 export async function loginAction(values: LoginInput, tenantSlug: string) {
   try {
@@ -29,9 +30,9 @@ export async function loginAction(values: LoginInput, tenantSlug: string) {
     const maxAge = data.user.role === 'Patient' ? 31536000 : 28800
 
     cookieStore.set('token', data.token, {
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === 'production', 
-      sameSite: 'strict', 
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
       path: '/',
       maxAge: maxAge,
     })
