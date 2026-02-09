@@ -7,6 +7,7 @@ export async function logoutAction(tenantSlug: string) {
   const cookieStore = await cookies()
 
   cookieStore.delete('token')
+  cookieStore.delete('refreshToken')
 
   redirect(`/${tenantSlug}/login`)
 }
