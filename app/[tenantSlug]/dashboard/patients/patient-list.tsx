@@ -1,0 +1,104 @@
+'use client'
+
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { MoreHorizontalIcon, Phone, User, Calendar } from 'lucide-react'
+import { IPatient } from '../../../../types/patient'
+
+interface PatientsListProps {
+  data: IPatient[]
+}
+
+export function PatientsList({ data }: PatientsListProps) {
+  return (
+    <div className='rounded-md border shadow-sm'>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>المريض</TableHead>
+            <TableHead>رقم الهاتف</TableHead>
+            <TableHead>السن</TableHead>
+            <TableHead className='text-right'>الإجراءات</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.length > 0 ? (
+            data.map((patient) => (
+              <TableRow key={patient.id}>
+                <TableCell className='font-medium'>
+                  <div className='flex items-center gap-3'>
+                    <div className='flex h-9 w-9 items-center justify-center rounded-full border bg-muted'>
+                      <User className='h-4 w-4' />
+                    </div>
+                    <span className='font-semibold'>{patient.name}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <div className='flex items-center gap-2 '>
+                    <Phone className='h-3 w-3' />
+                    {patient.phone}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {patient.dateOfBirth ? (
+                    <div className='flex items-center gap-1.5'>
+                      <Calendar className='h-3.5 w-3.5' />
+                      <span>
+                        {new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear()} سنة
+                      </span>
+                    </div>
+                  ) : (
+                    <span>-</span>
+                  )}
+                </TableCell>
+                <TableCell className='text-right'>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant='ghost' size='icon' className='h-8 w-8'>
+                        <MoreHorizontalIcon className='h-4 w-4' />
+                        <span className='sr-only'>Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end'>
+                      <DropdownMenuItem
+                        onClick={() => navigator.clipboard.writeText(patient.phone)}
+                      >
+                        نسخ الرقم
+                      </DropdownMenuItem>
+                      <DropdownMenuItem>تعديل البيانات</DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem variant='destructive'>حذف</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={5} className='h-32 text-center text-muted-foreground'>
+                <div className='flex flex-col items-center justify-center gap-2'>
+                  <User className='h-8 w-8 opacity-50' />
+                  <p>لا يوجد مرضى مسجلين حتى الآن</p>
+                </div>
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </div>
+  )
+}
