@@ -1,7 +1,6 @@
 import { getDoctorsAction } from '@/actions/doctor/get-doctors'
+import { DashboardHeader, DashboardShell } from '@/components/shell'
 import { DataTable } from '@/components/ui/data-table'
-// تأكد إن المسار ده صح حسب مكان ملف الـ Typography بتاعك
-import { Typography } from '@/components/ui/typography'
 import { AddDoctorDialog } from './add-doctor-dialog'
 import { columns } from './columns'
 
@@ -18,21 +17,14 @@ export default async function DoctorsPage({ params }: Props) {
   ) as string[]
 
   return (
-    <div className=' h-full flex-1 flex-col space-y-4 flex'>
-      <div className='flex items-center justify-between space-y-2'>
-        <div>
-          <Typography variant='h2'>الأطباء</Typography>
-          <Typography variant='muted'>
-            إدارة قائمة الأطباء المسجلين بالعيادة ({data.items.length})
-          </Typography>
-        </div>
-        <div className='flex items-center space-x-2'>
-          <AddDoctorDialog tenantSlug={tenantSlug} />
-        </div>
-      </div>
+    <DashboardShell>
+      <DashboardHeader
+        heading='الأطباء'
+        text={`إدارة قائمة الأطباء المسجلين بالعيادة`}
+      >
+        <AddDoctorDialog tenantSlug={tenantSlug} />
+      </DashboardHeader>
 
-      {/* Table Section */}
-      <div className='flex-1 '>
         <DataTable
           data={data.items}
           columns={columns}
@@ -40,7 +32,6 @@ export default async function DoctorsPage({ params }: Props) {
           filterColumn='specialty'
           filterOptions={specialties}
         />
-      </div>
-    </div>
+    </DashboardShell>
   )
 }

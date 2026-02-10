@@ -1,12 +1,13 @@
+import { PermissionGate } from '@/components/auth/permission-gate'
+import { Typography } from '@/components/ui/typography'
+import { ROLES } from '@/config/roles'
 import { getPatients } from '../../../../actions/patient/getPatients'
 import { AddPatientModal } from './add-patient-modal'
 import { PatientsList } from './patient-list'
 import { PatientPagination } from './patient-pagination'
 import { PatientSearch } from './patient-search'
-import { PermissionGate } from '@/components/auth/permission-gate'
-import { ROLES } from '@/config/roles'
-// تأكد إن المسار ده صح
-import { Typography } from '@/components/ui/typography'
+// تأكد من المسار حسب مكان الملف
+import { DashboardHeader, DashboardShell } from '@/components/shell'
 
 interface PageProps {
   params: Promise<{ tenantSlug: string }>
@@ -24,30 +25,20 @@ export default async function PatientsPage({ params, searchParams }: PageProps) 
   const { items, totalCount } = await getPatients(tenantSlug, page, limit, search)
 
   return (
-    <div className='h-full flex  flex-col space-y-4 '>
-      {/* Header Section */}
-      <div className='flex items-center justify-between space-y-2'>
-        <div>
-          <Typography variant='h2'>سجل المرضى</Typography>
-          <Typography variant='muted'>إدارة بيانات المرضى والبحث المتقدم داخل العيادة</Typography>
-        </div>
-        <div className='flex items-center space-x-2'>
-          <PermissionGate
-            allowedRoles={[ROLES.CLINIC_OWNER, ROLES.CLINIC_MANAGER, ROLES.SUPER_ADMIN]}
-          >
-            <AddPatientModal />
-          </PermissionGate>
-        </div>
-      </div>
+    <DashboardShell>
+      <DashboardHeader heading='سجل المرضى' text='إدارة بيانات المرضى والبحث المتقدم داخل العيادة'>
+        <PermissionGate
+          allowedRoles={[ROLES.CLINIC_OWNER, ROLES.CLINIC_MANAGER, ROLES.SUPER_ADMIN]}
+        >
+          <AddPatientModal />
+        </PermissionGate>
+      </DashboardHeader>
 
-      {/* Content Section */}
       <div className='space-y-4'>
-        {/* Search Bar */}
         <div className='flex w-full max-w-sm items-center space-x-2'>
           <PatientSearch />
         </div>
 
-        {/* List & Pagination */}
         <PermissionGate
           allowedRoles={[ROLES.CLINIC_OWNER, ROLES.CLINIC_MANAGER, ROLES.SUPER_ADMIN, ROLES.DOCTOR]}
           fallback={
@@ -56,15 +47,13 @@ export default async function PatientsPage({ params, searchParams }: PageProps) 
             </div>
           }
         >
-          <div >
-            <PatientsList data={items} />
-          </div>
+          <PatientsList data={items} />
 
           <div className='mt-4 flex justify-end'>
             <PatientPagination totalCount={totalCount} pageSize={limit} />
           </div>
         </PermissionGate>
       </div>
-    </div>
+    </DashboardShell>
   )
 }

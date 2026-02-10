@@ -1,7 +1,6 @@
 'use client'
-import { useParams, usePathname } from 'next/navigation'
-import { logoutAction } from '../actions/auth/logout'
-import { useAuthStore } from '../store/useAuthStore'
+import { usePathname } from 'next/navigation'
+import { LogoutButton } from './auth/LogoutButton'
 import { ModeToggle } from './ModeToggle'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import {
@@ -14,13 +13,9 @@ import {
 } from './ui/dropdown-menu'
 import { Separator } from './ui/separator'
 import { SidebarTrigger } from './ui/sidebar'
-import { LogoutButton } from './auth/LogoutButton'
 
 export function AppHeader() {
   const pathname = usePathname()
-
-  const { tenantSlug } = useParams()
-  const logoutFromStore = useAuthStore((state) => state.logout)
 
   const getTitle = () => {
     if (pathname.includes('/patients')) return 'سجل المرضى'

@@ -27,3 +27,15 @@ export const PERMISSIONS = {
 
   CAN_WRITE_PRESCRIPTION: [ROLES.SUPER_ADMIN, ROLES.DOCTOR],
 }
+
+export const ROLE_CONFIG: Record<
+  string,
+  { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }
+> = {
+  [ROLES.SUPER_ADMIN]: { label: 'مدير النظام', variant: 'destructive' },
+  [ROLES.CLINIC_OWNER]: { label: 'مالك العيادة', variant: 'default' },
+  [ROLES.CLINIC_MANAGER]: { label: 'مدير عيادة', variant: 'default' },
+  [ROLES.DOCTOR]: { label: 'طبيب', variant: 'default' },
+  [ROLES.RECEPTIONIST]: { label: 'استقبال', variant: 'outline' },
+  [ROLES.PATIENT]: { label: 'مريض', variant: 'outline' },
+}

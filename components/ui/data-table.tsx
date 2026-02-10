@@ -80,7 +80,7 @@ export function DataTable<TData, TValue>({
           />
         </div>
 
-        <div className='flex items-center gap-2'>
+        <div className='flex items-center'>
           {filterColumn && filterOptions && (
             <Select
               value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? 'all'}
@@ -105,12 +105,11 @@ export function DataTable<TData, TValue>({
           {(!!table.getColumn(searchKey)?.getFilterValue() ||
             !!table.getColumn(filterColumn || '')?.getFilterValue()) && (
             <Button
-              variant='ghost'
+              variant='link'
               onClick={() => table.resetColumnFilters()}
-              className='h-8 px-2 lg:px-3'
+              className=''
             >
-              إلغاء
-              <X className='mr-2 h-4 w-4' />
+              <X  />
             </Button>
           )}
         </div>

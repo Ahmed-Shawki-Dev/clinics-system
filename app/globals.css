@@ -1,46 +1,32 @@
 @import 'tailwindcss';
 
-
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* --- Light Mode: Pure Medical White (Clean & Sterile) --- */
   --background: #ffffff;
   --foreground: #0f172a;
-
   --card: #ffffff;
   --card-foreground: #0f172a;
   --popover: #ffffff;
   --popover-foreground: #0f172a;
-
-  /* Sky Blue: اللون الطبي المريح */
   --primary: #0ea5e9;
   --primary-foreground: #ffffff;
-
   --secondary: #f0f9ff;
   --secondary-foreground: #0369a1;
-
   --muted: #f0f9ff;
   --muted-foreground: #64748b;
-
   --accent: #e0f2fe;
   --accent-foreground: #0284c7;
-
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-
   --border: #e0f2fe;
   --input: #e0f2fe;
   --ring: #0ea5e9;
-
-  /* Chart Colors (Cool Spectrum) */
   --chart-1: #0ea5e9;
   --chart-2: #06b6d4;
   --chart-3: #38bdf8;
   --chart-4: #67e8f9;
   --chart-5: #22d3ee;
-
-  /* Sidebar Light */
   --sidebar: #f8fafc;
   --sidebar-foreground: #0f172a;
   --sidebar-primary: #0ea5e9;
@@ -49,12 +35,10 @@
   --sidebar-accent-foreground: #0284c7;
   --sidebar-border: #e2e8f0;
   --sidebar-ring: #0ea5e9;
-
-  --font-sans: Cairo, sans-serif;
+  --font-sans: Tajawal, ui-sans-serif, system-ui, sans-serif;
   --font-serif: Source Serif 4, serif;
   --font-mono: JetBrains Mono, monospace;
   --radius: 1rem;
-
   --shadow-x: 0;
   --shadow-y: 1px;
   --shadow-blur: 3px;
@@ -74,48 +58,30 @@
 }
 
 .dark {
-  /* --- Dark Mode: Deep Void Medical --- */
-
-  /* اللون اللي أنت طلبته بالظبط */
   --background: #100e17;
   --foreground: #f8fafc;
-
-  /* درجة أفتح سنة صغيرة للكروت عشان تفصل عن الخلفية */
-  /* Hex: #16141f (مزيج متناسق مع الخلفية) */
   --card: #16141f;
   --card-foreground: #f8fafc;
   --popover: #16141f;
   --popover-foreground: #f8fafc;
-
-  /* Primary: Electric Cyan (بينور جامد على الخلفية الغامقة دي) */
   --primary: #38bdf8;
   --primary-foreground: #100e17;
-
-  /* Secondary Elements */
   --secondary: #1f1d29;
   --secondary-foreground: #f8fafc;
-
   --muted: #1f1d29;
   --muted-foreground: #94a3b8;
-
   --accent: #1f1d29;
   --accent-foreground: #38bdf8;
-
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-
-  /* Borders: Dark Navy/Grey blending with bg */
   --border: #252330;
   --input: #252330;
   --ring: #38bdf8;
-
   --chart-1: #38bdf8;
   --chart-2: #22d3ee;
   --chart-3: #0ea5e9;
   --chart-4: #06b6d4;
   --chart-5: #60a5fa;
-
-  /* Sidebar matches main background for immersive feel */
   --sidebar: #100e17;
   --sidebar-foreground: #f8fafc;
   --sidebar-primary: #38bdf8;
@@ -124,12 +90,10 @@
   --sidebar-accent-foreground: #f8fafc;
   --sidebar-border: #252330;
   --sidebar-ring: #38bdf8;
-
-  --font-sans: var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: Source Serif 4, serif;
+  --font-sans: Tajawal, sans-serif;
+  --font-serif: Cairo, serif;
   --font-mono: JetBrains Mono, monospace;
   --radius: 1rem;
-
   --shadow-x: 0;
   --shadow-y: 1px;
   --shadow-blur: 3px;
@@ -179,16 +143,13 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-serif: var(--font-serif);
-
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-
   --shadow-2xs: var(--shadow-2xs);
   --shadow-xs: var(--shadow-xs);
   --shadow-sm: var(--shadow-sm);

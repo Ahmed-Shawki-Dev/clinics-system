@@ -2,13 +2,13 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { DirectionProvider } from '@/components/ui/direction'
 import { Toaster } from '@/components/ui/sonner'
 import type { Metadata } from 'next'
-import { Cairo } from 'next/font/google'
+import { Tajawal } from 'next/font/google'
 import './globals.css'
 
-const cairo = Cairo({
+const tajawal = Tajawal({
   subsets: ['arabic'],
-  variable: '--font-cairo',
-  weight: ['200', '300', '400', '500', '600', '700', '800', '900'],
+  variable: '--font-tajawal', 
+  weight: ['200', '300', '400', '500', '700', '800', '900'], 
   display: 'swap',
 })
 
@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='ar' dir='rtl' suppressHydrationWarning>
-      <body className={`${cairo.variable} font-sans antialiased`} suppressHydrationWarning>
+      <body className={`${tajawal.variable} font-sans antialiased`} suppressHydrationWarning>
         <DirectionProvider direction='rtl' dir={'rtl'}>
           <ThemeProvider
             attribute='class'
