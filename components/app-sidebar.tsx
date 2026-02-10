@@ -1,6 +1,6 @@
 'use client'
 
-import { Stethoscope } from 'lucide-react' // لوجو العيادة بس
+import { Stethoscope } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 
@@ -16,14 +16,15 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 
-import { useAuthStore } from '@/store/useAuthStore'
 import { NAV_ITEMS } from '@/config/navigation'
+import { useAuthStore } from '@/store/useAuthStore'
 
 export function AppSidebar() {
   const pathname = usePathname()
   const { tenantSlug } = useParams()
   const user = useAuthStore((state) => state.user)
 
+  // دالة تحضير الرابط الكامل
   const getFullUrl = (href: string) => `/${tenantSlug}/dashboard${href === '/' ? '' : href}`
 
   const filteredMenu = NAV_ITEMS.filter((item) => {
@@ -32,7 +33,7 @@ export function AppSidebar() {
   })
 
   return (
-    <Sidebar collapsible='icon'>
+    <Sidebar collapsible='icon' side='right'>
       <SidebarHeader className='h-16 flex flex-row items-center px-4 border-b font-bold text-xl text-primary gap-2 shrink-0'>
         <div className='flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground'>
           <Stethoscope className='h-5 w-5' />
@@ -50,7 +51,10 @@ export function AppSidebar() {
               {filteredMenu.map((item) => {
                 const fullUrl = getFullUrl(item.href)
 
-                const isActive = pathname === fullUrl || pathname.startsWith(`${fullUrl}/`)
+                const isActive =
+                  item.href === '/'
+                    ? pathname === fullUrl
+                    : pathname === fullUrl || pathname.startsWith(`${fullUrl}/`)
 
                 return (
                   <SidebarMenuItem key={item.title}>

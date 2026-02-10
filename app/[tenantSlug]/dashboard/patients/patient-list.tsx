@@ -29,7 +29,7 @@ interface PatientsListProps {
 
 export function PatientsList({ data }: PatientsListProps) {
   return (
-    <div className='rounded-md border shadow-sm'>
+    <div className='rounded-md border '>
       <Table>
         <TableHeader>
           <TableRow>

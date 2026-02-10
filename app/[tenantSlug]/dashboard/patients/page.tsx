@@ -1,12 +1,12 @@
 import { getPatients } from '../../../../actions/patient/getPatients'
-import { Typography } from '../../../../components/ui/typography'
 import { AddPatientModal } from './add-patient-modal'
 import { PatientsList } from './patient-list'
 import { PatientPagination } from './patient-pagination'
 import { PatientSearch } from './patient-search'
-// 1. استدعاء البوابة والأدوار
 import { PermissionGate } from '@/components/auth/permission-gate'
 import { ROLES } from '@/config/roles'
+// تأكد إن المسار ده صح
+import { Typography } from '@/components/ui/typography'
 
 interface PageProps {
   params: Promise<{ tenantSlug: string }>
@@ -24,40 +24,47 @@ export default async function PatientsPage({ params, searchParams }: PageProps) 
   const { items, totalCount } = await getPatients(tenantSlug, page, limit, search)
 
   return (
-    <div className='flex flex-col gap-6 p-6 h-full'>
-      <div className='flex items-center justify-between'>
-        <div className='space-y-2'>
-          <Typography variant='h3' className='text-4xl'>
-            سجل المرضى
-          </Typography>
-          <Typography variant='muted'>إدارة بيانات المرضى والبحث المتقدم</Typography>
+    <div className='h-full flex  flex-col space-y-4 '>
+      {/* Header Section */}
+      <div className='flex items-center justify-between space-y-2'>
+        <div>
+          <Typography variant='h2'>سجل المرضى</Typography>
+          <Typography variant='muted'>إدارة بيانات المرضى والبحث المتقدم داخل العيادة</Typography>
+        </div>
+        <div className='flex items-center space-x-2'>
+          <PermissionGate
+            allowedRoles={[ROLES.CLINIC_OWNER, ROLES.CLINIC_MANAGER, ROLES.SUPER_ADMIN]}
+          >
+            <AddPatientModal />
+          </PermissionGate>
+        </div>
+      </div>
+
+      {/* Content Section */}
+      <div className='space-y-4'>
+        {/* Search Bar */}
+        <div className='flex w-full max-w-sm items-center space-x-2'>
+          <PatientSearch />
         </div>
 
+        {/* List & Pagination */}
         <PermissionGate
-          allowedRoles={[ROLES.CLINIC_OWNER, ROLES.CLINIC_MANAGER, ROLES.SUPER_ADMIN]}
+          allowedRoles={[ROLES.CLINIC_OWNER, ROLES.CLINIC_MANAGER, ROLES.SUPER_ADMIN, ROLES.DOCTOR]}
+          fallback={
+            <div className='flex h-100 shrink-0 items-center justify-center rounded-md border border-dashed bg-muted/20'>
+              <Typography variant='muted'>عذراً، لا تملك صلاحية عرض السجلات.</Typography>
+            </div>
+          }
         >
-          <AddPatientModal />
+          <div >
+            <PatientsList data={items} />
+          </div>
+
+          <div className='mt-4 flex justify-end'>
+            <PatientPagination totalCount={totalCount} pageSize={limit} />
+          </div>
         </PermissionGate>
       </div>
-
-      <div className='flex items-center gap-2'>
-        <PatientSearch />
-      </div>
-
-      <PermissionGate
-        allowedRoles={[ROLES.CLINIC_OWNER, ROLES.CLINIC_MANAGER, ROLES.SUPER_ADMIN, ROLES.DOCTOR]}
-        fallback={
-          <div className='p-10 text-center border rounded-lg bg-muted/20'>
-            عذراً، لا تملك صلاحية عرض سجلات المرضى.
-          </div>
-        }
-      >
-        <PatientsList data={items} />
-
-        <div className='mt-auto border-t pt-4'>
-          <PatientPagination totalCount={totalCount} pageSize={limit} />
-        </div>
-      </PermissionGate>
     </div>
   )
 }

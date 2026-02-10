@@ -1,13 +1,14 @@
 // config/navigation.ts
-import { UserRole } from './roles'
 import {
-  Users,
-  Stethoscope,
+  Banknote,
   ClipboardList,
+  LayoutDashboard,
   Settings,
-  LayoutDashboard, // 👈 ضيفنا الأيقونة دي
+  Stethoscope,
+  Users, // 👈 ضيفنا الأيقونة دي
   type LucideIcon,
 } from 'lucide-react'
+import { UserRole } from './roles'
 
 type NavItem = {
   title: string
@@ -19,7 +20,7 @@ type NavItem = {
 export const NAV_ITEMS: NavItem[] = [
   {
     title: 'لوحة التحكم',
-    href: '/', 
+    href: '/',
     icon: LayoutDashboard,
     roles: ['SuperAdmin', 'ClinicOwner', 'ClinicManager', 'Doctor', 'Receptionist', 'Patient'],
   },
@@ -30,10 +31,16 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ['ClinicOwner', 'ClinicManager', 'Doctor', 'Receptionist'],
   },
   {
-    title: 'الأطباء والخدمات',
+    title: 'الأطباء',
     href: '/doctors',
     icon: Stethoscope,
     roles: ['ClinicOwner', 'ClinicManager'],
+  },
+  {
+    title: 'الخدمات والأسعار',
+    href: '/services',
+    icon: Banknote,
+    roles: ['ClinicOwner', 'ClinicManager'], 
   },
   {
     title: 'قائمة الكشف',

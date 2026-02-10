@@ -1,12 +1,12 @@
 'use client'
 
 import { valibotResolver } from '@hookform/resolvers/valibot'
-import { Lock } from 'lucide-react'
+import { KeyRound, Loader2, UserRound } from 'lucide-react' // أيقونات بسيطة
 import { useParams, useRouter } from 'next/navigation'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
-// Shadcn Components (زي ما هي)
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -18,13 +18,15 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+
+import { loginAction } from '../../../actions/auth/login'
 import { useAuthStore } from '../../../store/useAuthStore'
 import { LoginInput, LoginSchema } from '../../../validation/login'
-import { loginAction } from '../../../actions/auth/login'
 
 export default function LoginPage() {
   const { tenantSlug } = useParams()
   const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<LoginInput>({
     resolver: valibotResolver(LoginSchema),
@@ -32,56 +34,44 @@ export default function LoginPage() {
   })
 
   const onSubmit = async (values: LoginInput) => {
+    setIsLoading(true)
     try {
       const result = await loginAction(values, tenantSlug as string)
-
-      if (!result.success || !result.data) {
-        throw new Error(result.message)
-      }
+      if (!result.success || !result.data) throw new Error(result.message)
 
       useAuthStore.getState().setAuth(result.data)
-
-      toast.success(`أهلاً بك يا ${result.data.user.displayName}`)
-
+      toast.success('تم تسجيل الدخول بنجاح')
       router.push(`/${tenantSlug}/dashboard`)
-      router.refresh()
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'خطأ غير معروف'
-      toast.error(message)
+      if(error instanceof Error)
+      toast.error(error.message || 'خطأ في الدخول')
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className='flex items-center justify-center min-h-screen bg-linear-to-br from-background to-muted/50 p-4'>
-      <Card className='w-full max-w-md border-none shadow-2xl bg-card/80 backdrop-blur-md'>
-        <CardHeader className='space-y-3 text-center pb-8'>
-          <div className='mx-auto bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mb-2'>
-            <Lock className='w-6 h-6 text-primary' />
-          </div>
-          <div className='space-y-1'>
-            <CardTitle className='text-3xl font-extrabold uppercase tracking-tighter text-primary'>
-              {tenantSlug}
-            </CardTitle>
-            <CardDescription className='text-sm font-medium'>
-              بوابة تسجيل دخول الموظفين والدكاترة
-            </CardDescription>
-          </div>
+    <div className='min-h-screen flex items-center justify-center  p-4'>
+      <Card className='w-full max-w-md shadow-xl'>
+        <CardHeader className='space-y-1 text-center pb-8'>
+          <CardTitle className='text-2xl font-bold tracking-tight'>تسجيل الدخول</CardTitle>
+          <CardDescription className='uppercase tracking-widest text-xs font-semibold text-primary'>
+            {tenantSlug} CLINIC
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5'>
+            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
               <FormField
                 control={form.control}
                 name='username'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='font-bold'>اسم المستخدم</FormLabel>
+                    <FormLabel>اسم المستخدم</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder='اسم المستخدم الخاص بك'
-                        className='bg-background/50 focus-visible:ring-primary'
-                        {...field}
-                      />
+                      <div className='relative'>
+                        <UserRound className='absolute right-3 top-2.5 h-4 w-4 text-muted-foreground' />
+                        <Input placeholder='user@example.com' className='pr-9' {...field} />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -92,21 +82,20 @@ export default function LoginPage() {
                 name='password'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='font-bold'>كلمة المرور</FormLabel>
+                    <FormLabel>كلمة المرور</FormLabel>
                     <FormControl>
-                      <Input
-                        type='password'
-                        placeholder='••••••••'
-                        className='bg-background/50 focus-visible:ring-primary'
-                        {...field}
-                      />
+                      <div className='relative'>
+                        <KeyRound className='absolute right-3 top-2.5 h-4 w-4  text-muted-foreground' />
+                        <Input type='password' placeholder='••••••••' className='pr-9' {...field} />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type='submit' variant={'destructive'} disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? 'جاري التحقق من الهوية...' : 'دخول النظام'}
+              <Button type='submit' className='w-full mt-4' disabled={isLoading}>
+                {isLoading && <Loader2 className='ml-2 h-4 w-4 animate-spin' />}
+                دخول
               </Button>
             </form>
           </Form>
