@@ -3,10 +3,10 @@
 import { PatientsListResponse } from '../../types/patient'
 import { getToken } from '../auth/getToken'
 
-export async function getPatients(
+export async function getPatientsAction(
   tenantSlug: string,
   page: number = 1,
-  limit: number = 10,
+  limit: number = 999999,
   search: string = '',
 ) {
   const token = await getToken()

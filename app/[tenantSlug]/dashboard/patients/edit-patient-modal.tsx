@@ -27,7 +27,7 @@ import { Input } from '@/components/ui/input'
 
 import { IPatient } from '../../../../types/patient'
 import { CreatePatientInput, CreatePatientSchema } from '../../../../validation/patient'
-import { updatePatientAction } from '../../../../actions/patient/update-pateint'
+import { updatePatientAction } from '../../../../actions/patient/update-patient'
 
 export function EditPatientModal({ patient }: { patient: IPatient }) {
   const [open, setOpen] = useState(false)

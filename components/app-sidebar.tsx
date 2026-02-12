@@ -21,28 +21,29 @@ import { useAuthStore } from '@/store/useAuthStore'
 
 export function AppSidebar() {
   const pathname = usePathname()
-  const { tenantSlug } = useParams()
+  const params = useParams()
+  const tenantSlug = params.tenantSlug as string
+
   const user = useAuthStore((state) => state.user)
 
-  // دالة تحضير الرابط الكامل
   const getFullUrl = (href: string) => `/${tenantSlug}/dashboard${href === '/' ? '' : href}`
 
   const filteredMenu = NAV_ITEMS.filter((item) => {
     if (!user) return false
+
     return item.roles.includes(user.role)
   })
 
   return (
     <Sidebar collapsible='icon' side='right'>
-      <SidebarHeader className='h-16 flex flex-row items-center px-4 border-b font-bold text-xl text-primary gap-2 shrink-0'>
+      <SidebarHeader className='flex h-16 shrink-0 flex-row items-center gap-2 border-b px-4 text-xl font-bold text-primary'>
         <div className='flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground'>
           <Stethoscope className='h-5 w-5' />
         </div>
-        <span className='group-data-[collapsible=icon]:hidden truncate font-extrabold'>
+        <span className='truncate font-extrabold group-data-[collapsible=icon]:hidden'>
           Elite Clinic
         </span>
       </SidebarHeader>
-
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>القائمة الرئيسية</SidebarGroupLabel>

@@ -11,31 +11,46 @@ export async function getDoctorsAction(tenantSlug: string) {
   }
 
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/clinic/doctors?pageNumber=1&pageSize=50`,
-      {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'X-Tenant': tenantSlug,
-          'Content-Type': 'application/json',
-        },
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL
+    if (!baseUrl) console.error('❌ NEXT_PUBLIC_API_URL is missing!')
+
+    const url = `${baseUrl}/api/clinic/doctors`
+
+    const res = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'X-Tenant': tenantSlug,
+        'Content-Type': 'application/json',
       },
-    )
+      cache: 'no-store',
+    })
 
-    const result = await res.json()
+    const text = await res.text()
 
-    if (!res.ok) {
-      console.error('[GetDoctors] API Error:', result)
-      return { success: false, data: { items: [] }, message: result.message || 'خطأ من السيرفر' }
+    if (!text) {
+      console.error(`❌ [GetDoctors] Empty Response! Status: ${res.status}`)
+      return { success: false, data: { items: [] }, message: 'لا توجد بيانات من السيرفر' }
     }
 
-    const doctorsData = result.data || { items: [] }
+    if (!res.ok) {
+      console.error(`❌ [GetDoctors] Server Error (${res.status}):`, text)
+      return { success: false, data: { items: [] }, message: `خطأ ${res.status}: فشل الجلب` }
+    }
 
-    return {
-      success: true,
-      data: doctorsData as DoctorsResponse,
-      message: result.message,
+    try {
+      const result = JSON.parse(text)
+      const doctorsData = result.data || { items: [] }
+
+      return {
+        success: true,
+        data: doctorsData as DoctorsResponse,
+        message: result.message,
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (jsonError) {
+      console.error(`❌ [GetDoctors] Invalid JSON received:`, text)
+      return { success: false, data: { items: [] }, message: 'بيانات غير صالحة من السيرفر' }
     }
   } catch (error) {
     console.error('[GetDoctors] Network Error:', error)

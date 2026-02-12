@@ -1,12 +1,11 @@
 import { PermissionGate } from '@/components/auth/permission-gate'
 import { Typography } from '@/components/ui/typography'
 import { ROLES } from '@/config/roles'
-import { getPatients } from '../../../../actions/patient/getPatients'
+import { getPatientsAction } from '../../../../actions/patient/getPatients'
 import { AddPatientModal } from './add-patient-modal'
 import { PatientsList } from './patient-list'
 import { PatientPagination } from './patient-pagination'
 import { PatientSearch } from './patient-search'
-// تأكد من المسار حسب مكان الملف
 import { DashboardHeader, DashboardShell } from '@/components/shell'
 
 interface PageProps {
@@ -22,7 +21,7 @@ export default async function PatientsPage({ params, searchParams }: PageProps) 
   const limit = 10
   const search = (queryParams.search as string) || ''
 
-  const { items, totalCount } = await getPatients(tenantSlug, page, limit, search)
+  const { items, totalCount } = await getPatientsAction(tenantSlug, page, limit, search)
 
   return (
     <DashboardShell>

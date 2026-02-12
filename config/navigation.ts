@@ -1,11 +1,12 @@
 import {
   Banknote,
+  Calendar1,
   ClipboardList,
   LayoutDashboard,
   Settings,
   Stethoscope,
-  Users, 
-  type LucideIcon,
+  Users,
+  type LucideIcon
 } from 'lucide-react'
 import { UserRole } from './roles'
 
@@ -48,15 +49,21 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
   },
   {
+    title: 'المواعيد',
+    href: '/appointments',
+    icon: Calendar1,
+    roles: ['ClinicOwner', 'SuperAdmin'],
+  },
+  {
     title: 'قائمة الكشف',
     href: '/my-queue',
     icon: ClipboardList,
-    roles: ['Doctor', 'SuperAdmin'  ],
+    roles: ['Doctor', 'SuperAdmin'],
   },
   {
     title: 'الإعدادات',
     href: '/settings',
     icon: Settings,
-    roles: ['ClinicOwner'],
+    roles: ['ClinicOwner', 'SuperAdmin'],
   },
 ]

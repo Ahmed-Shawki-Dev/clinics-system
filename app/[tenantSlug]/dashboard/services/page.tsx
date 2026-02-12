@@ -9,7 +9,6 @@ interface Props {
 export default async function ServicesPage({ params }: Props) {
   const { tenantSlug } = await params
 
-  // 1. نجيب الدكاترة
   const { data } = await getDoctorsAction(tenantSlug)
 
   return (

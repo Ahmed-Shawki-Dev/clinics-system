@@ -1,11 +1,14 @@
-import { NextResponse, type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  // 1. استخراج الـ Tenant Slug والـ Token
   const segments = pathname.split('/').filter(Boolean)
   const tenantSlug = segments[0]
+  const token = request.cookies.get('token')?.value
 
-  // 1. استثناءات الملفات والـ API
+  // 2. حماية المسارات (Exclude static files & API)
   if (
     !tenantSlug ||
     pathname.includes('.') ||
@@ -17,46 +20,21 @@ export async function middleware(request: NextRequest) {
   }
 
   const isAuthPage = segments[1] === 'login' || segments[1] === 'register'
+  const isProtectedPage = ['dashboard', 'doctor', 'patient'].includes(segments[1])
 
-  // أي صفحة جوه الداشبورد أو العيادة تعتبر محمية
-  const isProtectedPage =
-    segments[1] === 'dashboard' || segments[1] === 'doctor' || segments[1] === 'patient'
-
-  const token = request.cookies.get('token')?.value
-
-
-  // 2. توجيهات الحماية (Guards)
-
-  // لو رايح صفحة لوجن وهو معاه توكين -> وذيه الداشبورد
+  // 3. منطق التوجيه (Auth Logic)
+  // لو معاه توكن وداخل صفحة لوجن، ابعته للداشبورد
   if (isAuthPage && token) {
     return NextResponse.redirect(new URL(`/${tenantSlug}/dashboard`, request.url))
   }
 
-  // لو رايح صفحة محمية ومعهوش توكين -> اطرده على اللوجن
+  // لو ممعهوش توكن وداخل صفحة محمية، ارجع للوجن
   if (isProtectedPage && !token) {
     return NextResponse.redirect(new URL(`/${tenantSlug}/login`, request.url))
   }
 
-  // 3. التحقق من حالة العيادة (اختياري بس مفيد)
-  try {
-    // ممكن تخفف الحمل وتلغي الفتش ده لو واثق، بس خليه للأمان
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/public/${tenantSlug}/clinic`,
-      { next: { revalidate: 60 } }, // Cache عشان السرعة
-    )
-
-    if (response.status === 404) {
-      return NextResponse.rewrite(new URL('/404', request.url))
-    }
-
-    const result = await response.json()
-    if (!result.data?.isActive && !pathname.includes('/suspended')) {
-      return NextResponse.rewrite(new URL('/suspended', request.url))
-    }
-  } catch (error) {
-    // لو السيرفر وقع كمل عادي عشان منوقفش الدنيا
-    return NextResponse.next()
-  }
+  // ✅ شيلنا الـ Fetch من هنا عشان ده "خنق" للمشروع
+  // التأكد من الـ Clinic Active خليه في الـ Root Layout بتاع الداشبورد
 
   return NextResponse.next()
 }

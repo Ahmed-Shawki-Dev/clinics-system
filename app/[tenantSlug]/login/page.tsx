@@ -1,8 +1,7 @@
 'use client'
 
 import { valibotResolver } from '@hookform/resolvers/valibot'
-import { KeyRound, Loader2, UserRound } from 'lucide-react' // أيقونات بسيطة
-import { useParams, useRouter } from 'next/navigation'
+import { KeyRound, Loader2, UserRound } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -19,9 +18,10 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 
-import { loginAction } from '../../../actions/auth/login'
-import { useAuthStore } from '../../../store/useAuthStore'
-import { LoginInput, LoginSchema } from '../../../validation/login'
+import { loginAction } from '@/actions/auth/login'
+import { useAuthStore } from '@/store/useAuthStore'
+import { LoginInput, LoginSchema } from '@/validation/login'
+import { useParams, useRouter } from 'next/navigation'
 
 export default function LoginPage() {
   const { tenantSlug } = useParams()
@@ -43,8 +43,7 @@ export default function LoginPage() {
       toast.success('تم تسجيل الدخول بنجاح')
       router.push(`/${tenantSlug}/dashboard`)
     } catch (error) {
-      if(error instanceof Error)
-      toast.error(error.message || 'خطأ في الدخول')
+      if (error instanceof Error) toast.error(error.message || 'خطأ في الدخول')
       setIsLoading(false)
     }
   }
@@ -70,7 +69,7 @@ export default function LoginPage() {
                     <FormControl>
                       <div className='relative'>
                         <UserRound className='absolute right-3 top-2.5 h-4 w-4 text-muted-foreground' />
-                        <Input placeholder='user@example.com' className='pr-9' {...field} />
+                        <Input placeholder='example123' className='pr-9' {...field} />
                       </div>
                     </FormControl>
                     <FormMessage />

@@ -1,20 +1,28 @@
-'use client'
-import { AppHeader } from '@/components/app-header'
-import { AppSidebar } from '@/components/app-sidebar'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import DashboardLayoutClient from '@/components/dashboard-layout-client'
+import { notFound, redirect } from 'next/navigation'
+import * as Jose from 'jose'
+interface LayoutProps {
+  children: React.ReactNode
+  params: Promise<{ tenantSlug: string }>
+}
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <SidebarProvider>
-      <AppSidebar />
+export default async function DashboardServerLayout({ children, params }: LayoutProps) {
+  const { tenantSlug } = await params
 
-      <SidebarInset className='h-screen overflow-hidden flex flex-col'>
-        <AppHeader />
-
-        <main className='flex-1 overflow-y-auto no-scrollbar p-6'>
-          <div>{children}</div>
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/public/${tenantSlug}/clinic`,
+    { next: { revalidate: 3600 } },
   )
+
+  if (response.status === 404) {
+    notFound()
+  }
+
+  const result = await response.json()
+
+  if (!result.data?.isActive) {
+    redirect(`/${tenantSlug}/suspended`)
+  }
+
+  return <DashboardLayoutClient>{children}</DashboardLayoutClient>
 }
