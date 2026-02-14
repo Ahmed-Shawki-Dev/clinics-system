@@ -1,6 +1,7 @@
 'use server'
 
-import { PatientsListResponse } from '../../types/patient'
+import { BaseApiResponse, IPaginatedData } from '@/types/api'
+import { IPatient } from '@/types/patient'
 import { getToken } from '../auth/getToken'
 
 export async function getPatientsAction(
@@ -8,19 +9,15 @@ export async function getPatientsAction(
   page: number = 1,
   limit: number = 999999,
   search: string = '',
-) {
+): Promise<BaseApiResponse<IPaginatedData<IPatient>>> {
+  // هنا الـ Magic
   const token = await getToken()
-
-  if (!token) return { items: [], totalCount: 0 }
 
   const queryParams = new URLSearchParams({
     pageNumber: page.toString(),
     pageSize: limit.toString(),
   })
-
-  if (search) {
-    queryParams.append('search', search)
-  }
+  if (search) queryParams.append('search', search)
 
   try {
     const res = await fetch(
@@ -29,23 +26,30 @@ export async function getPatientsAction(
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
           'X-Tenant': tenantSlug,
         },
         cache: 'no-store',
       },
     )
 
-    if (!res.ok) {
-      return { items: [], totalCount: 0 }
-    }
-
-    const json = await res.json()
-    return (json.data || json) as PatientsListResponse
+    const result = await res.json()
+    // بنعمل كاست للداتا كـ PaginatedData شايلة IPatient
+    return result as BaseApiResponse<IPaginatedData<IPatient>>
   } catch (error) {
-    if (error instanceof Error) {
-      console.error('Error fetching patients:', error.message)
+    return {
+      success: false,
+      message: 'فشل جلب قائمة المرضى',
+      data: {
+        items: [],
+        totalCount: 0,
+        pageNumber: 0,
+        pageSize: 0,
+        totalPages: 0,
+        hasPreviousPage: false,
+        hasNextPage: false,
+      },
+      errors: [],
+      meta: { timestamp: new Date().toISOString(), requestId: '' },
     }
-    return { items: [], totalCount: 0 }
   }
 }

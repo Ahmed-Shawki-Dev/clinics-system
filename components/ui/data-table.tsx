@@ -36,9 +36,9 @@ import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
-  searchKey: string // اسم العمود اللي هنسيرش فيه (مثلاً name)
-  filterColumn?: string // اسم عمود الفلتر (مثلاً specialty)
-  filterOptions?: string[] // خيارات الفلتر (أسماء التخصصات)
+  searchKey: string
+  filterColumn?: string
+  filterOptions?: string[]
 }
 
 export function DataTable<TData, TValue>({
@@ -51,7 +51,6 @@ export function DataTable<TData, TValue>({
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,
@@ -67,25 +66,33 @@ export function DataTable<TData, TValue>({
     },
   })
 
+  // دالة مساعدة للتأكد من وجود العمود قبل محاولة الوصول إليه (منع الـ Console Error)
+  const safeGetColumn = (key: string | undefined) => {
+    if (!key) return null
+    return table.getColumn(key)
+  }
+
   return (
     <div className='space-y-4'>
       <div className='flex items-center justify-between gap-4'>
         <div className='relative max-w-sm w-full'>
           <Search className='absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+          {/* تأمين حقل البحث */}
           <Input
             placeholder='بحث سريع...'
-            value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
-            onChange={(event) => table.getColumn(searchKey)?.setFilterValue(event.target.value)}
+            value={(safeGetColumn(searchKey)?.getFilterValue() as string) ?? ''}
+            onChange={(event) => safeGetColumn(searchKey)?.setFilterValue(event.target.value)}
             className='pr-10 pl-3 w-full md:w-75 text-right'
           />
         </div>
 
         <div className='flex items-center'>
-          {filterColumn && filterOptions && (
+          {/* تأمين حقل الفلترة (التخصص) */}
+          {filterColumn && filterOptions && safeGetColumn(filterColumn) && (
             <Select
-              value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? 'all'}
+              value={(safeGetColumn(filterColumn)?.getFilterValue() as string) ?? 'all'}
               onValueChange={(value) =>
-                table.getColumn(filterColumn)?.setFilterValue(value === 'all' ? undefined : value)
+                safeGetColumn(filterColumn)?.setFilterValue(value === 'all' ? undefined : value)
               }
             >
               <SelectTrigger className='w-45'>
@@ -102,20 +109,17 @@ export function DataTable<TData, TValue>({
             </Select>
           )}
 
-          {(!!table.getColumn(searchKey)?.getFilterValue() ||
-            !!table.getColumn(filterColumn || '')?.getFilterValue()) && (
-            <Button
-              variant='link'
-              onClick={() => table.resetColumnFilters()}
-              className=''
-            >
-              <X  />
+          {/* زرار مسح الفلاتر: التأكد من وجود القيم قبل العرض */}
+          {(!!safeGetColumn(searchKey)?.getFilterValue() ||
+            (filterColumn && !!safeGetColumn(filterColumn)?.getFilterValue())) && (
+            <Button variant='link' onClick={() => table.resetColumnFilters()} className='px-2'>
+              <X className='h-4 w-4' />
             </Button>
           )}
         </div>
       </div>
 
-      <div className='rounded-md border '>
+      <div className='rounded-md border'>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -157,10 +161,8 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      {/* Pagination Controls */}
       <div className='flex items-center justify-end gap-2 py-4'>
         <div className='text-sm text-muted-foreground ml-4'>
-          {/* TanStack Table is 0-indexed, so we add 1 for display */}
           صفحة {table.getState().pagination.pageIndex + 1} من {table.getPageCount()}
         </div>
 

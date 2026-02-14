@@ -7,7 +7,7 @@ import { IServiceItem } from '@/types/services'
 import { Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { flatten, safeParse } from 'valibot'
-import { ServiceSchema } from '../../../../validation/services'
+import { SingleServiceSchema } from '../../../../validation/services'
 
 interface Props {
   services: IServiceItem[]
@@ -25,10 +25,13 @@ export function ServicesManager({ services, onAdd, onRemove }: Props) {
   const handleAdd = () => {
     const rawData = {
       serviceName: newName,
-      price: Number(newPrice),
+      price: newPrice === '' ? NaN : Number(newPrice), 
+      durationMinutes: 15,
+      isActive: true,
     }
 
-    const result = safeParse(ServiceSchema, rawData)
+    // استخدم السكيما المفردة هنا!
+    const result = safeParse(SingleServiceSchema, rawData)
 
     if (!result.success) {
       const flatErrors = flatten(result.issues)
@@ -37,12 +40,7 @@ export function ServicesManager({ services, onAdd, onRemove }: Props) {
     }
 
     setErrors({})
-    onAdd({
-      serviceName: result.output.serviceName,
-      price: result.output.price,
-      durationMinutes: 15,
-      isActive: true,
-    })
+    onAdd(result.output as IServiceItem)
     setNewName('')
     setNewPrice('')
   }
@@ -54,7 +52,6 @@ export function ServicesManager({ services, onAdd, onRemove }: Props) {
   return (
     <div className='pt-6 space-y-6'>
       <div className='flex items-start gap-3 p-4 bg-secondary/10 rounded-lg border border-dashed'>
-
         <div className='grid gap-2 flex-1'>
           <Label className={getError('serviceName') ? 'text-destructive' : ''}>اسم الخدمة</Label>
           <Input
@@ -62,7 +59,7 @@ export function ServicesManager({ services, onAdd, onRemove }: Props) {
             value={newName}
             onChange={(e) => {
               setNewName(e.target.value)
-              if (getError('serviceName')) setErrors({}) 
+              if (getError('serviceName')) setErrors({})
             }}
             className={getError('serviceName') ? 'border-destructive' : ''}
           />
@@ -95,7 +92,6 @@ export function ServicesManager({ services, onAdd, onRemove }: Props) {
           </Button>
         </div>
       </div>
-
 
       <div className='rounded-md border'>
         {services.length === 0 ? (

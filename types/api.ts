@@ -16,3 +16,13 @@ export interface BaseApiResponse<T> {
     requestId: string
   }
 }
+
+export interface IPaginatedData<T> {
+  items: T[]
+  totalCount: number
+  pageNumber: number
+  pageSize: number
+  totalPages: number
+  hasPreviousPage: boolean
+  hasNextPage: boolean
+}

@@ -2,11 +2,12 @@ import { PermissionGate } from '@/components/auth/permission-gate'
 import { Typography } from '@/components/ui/typography'
 import { ROLES } from '@/config/roles'
 import { getPatientsAction } from '../../../../actions/patient/getPatients'
+import { DashboardHeader, DashboardShell } from '../../../../components/shell'
 import { AddPatientModal } from './add-patient-modal'
+import { PatientSearch } from './patient-search'
 import { PatientsList } from './patient-list'
 import { PatientPagination } from './patient-pagination'
-import { PatientSearch } from './patient-search'
-import { DashboardHeader, DashboardShell } from '@/components/shell'
+
 
 interface PageProps {
   params: Promise<{ tenantSlug: string }>
@@ -21,7 +22,13 @@ export default async function PatientsPage({ params, searchParams }: PageProps) 
   const limit = 10
   const search = (queryParams.search as string) || ''
 
-  const { items, totalCount } = await getPatientsAction(tenantSlug, page, limit, search)
+  // 1. استلام الـ Response كامل بالعقد الجديد (BaseApiResponse)
+  const response = await getPatientsAction(tenantSlug, page, limit, search)
+
+  // 2. استخراج البيانات بأمان باستخدام Optional Chaining
+  // لاحظ إننا بندخل جوه response ثم data ثم items
+  const patients = response.data?.items || []
+  const totalCount = response.data?.totalCount || 0
 
   return (
     <DashboardShell>
@@ -46,9 +53,11 @@ export default async function PatientsPage({ params, searchParams }: PageProps) 
             </div>
           }
         >
-          <PatientsList data={items} />
+          {/* 3. باصينا المصفوفة الصافية للـ List */}
+          <PatientsList data={patients} />
 
           <div className='mt-4 flex justify-end'>
+            {/* 4. باصينا الـ totalCount اللي طلعناه من الـ data */}
             <PatientPagination totalCount={totalCount} pageSize={limit} />
           </div>
         </PermissionGate>

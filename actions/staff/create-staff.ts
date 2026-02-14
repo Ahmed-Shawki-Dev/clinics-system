@@ -1,13 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { cookies } from 'next/headers'
 import * as v from 'valibot'
 import { CreateStaffInput, createStaffSchema } from '../../validation/staff'
 import { getToken } from '../auth/getToken'
 
 export async function createStaffAction(data: CreateStaffInput, tenantSlug: string) {
-
   const validationResult = v.safeParse(createStaffSchema, data)
   if (!validationResult.success) {
     return { success: false, message: 'بيانات غير صحيحة' }
@@ -25,7 +23,7 @@ export async function createStaffAction(data: CreateStaffInput, tenantSlug: stri
         Authorization: `Bearer ${token}`,
         'X-Tenant': tenantSlug,
       },
-      body: JSON.stringify(data), 
+      body: JSON.stringify(data),
     })
 
     const result = await res.json()

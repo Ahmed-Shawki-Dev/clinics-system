@@ -1,26 +1,32 @@
 'use server'
 
-import { UpdateDoctorServicesPayload } from '@/types/services'
+import { BaseApiResponse } from '@/types/api'
+import { IDoctorService } from '@/types/doctor'
 import { revalidatePath } from 'next/cache'
 import { getToken } from '../auth/getToken'
+
+interface UpdateServicesParams {
+  doctorId: string
+  tenantSlug: string
+  services: IDoctorService[]
+}
+
+// actions/service/update-doctor-services.ts
 
 export async function updateDoctorServicesAction({
   doctorId,
   tenantSlug,
   services,
-}: UpdateDoctorServicesPayload) {
+}: UpdateServicesParams): Promise<BaseApiResponse<IDoctorService[]>> {
   const token = await getToken()
 
-  if (!token) {
-    return { success: false, message: 'Unauthorized' }
-  }
-
+  // السيرفر عايز أوبجيكت جواه مصفوفة اسمها services
   const payload = {
-    Services: services.map((s) => ({
-      ServiceName: s.serviceName,
-      Price: s.price,
-      DurationMinutes: s.durationMinutes || 15,
-      IsActive: true,
+    services: services.map((s) => ({
+      serviceName: s.serviceName,
+      price: s.price,
+      durationMinutes: s.durationMinutes || 15,
+      isActive: s.isActive ?? true,
     })),
   }
 
@@ -28,29 +34,30 @@ export async function updateDoctorServicesAction({
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/api/clinic/doctors/${doctorId}/services`,
       {
-        method: 'PUT',
+        method: 'PUT', // تأكيد الـ PUT
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
           'X-Tenant': tenantSlug,
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload), // بعت الـ Payload بالشكل اللي السيرفر طالبه
       },
     )
 
-    if (!res.ok) {
-      const errorData = await res.json()
-      return {
-        success: false,
-        message: errorData.message || 'Failed to update services',
-      }
+    const result = await res.json()
+
+    if (result.success) {
+      revalidatePath(`/${tenantSlug}/dashboard/services`)
     }
 
-    revalidatePath(`/${tenantSlug}/dashboard/services`)
-
-    return { success: true, message: 'Services updated successfully' }
+    return result as BaseApiResponse<IDoctorService[]>
   } catch (error) {
-    console.error('Update Services Error:', error)
-    return { success: false, message: 'Internal Server Error' }
+    return {
+      success: false,
+      data: [],
+      message: 'Network Error',
+      errors: [],
+      meta: { timestamp: '', requestId: '' },
+    }
   }
 }

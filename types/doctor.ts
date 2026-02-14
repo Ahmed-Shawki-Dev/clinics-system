@@ -1,7 +1,7 @@
 export enum UrgentCaseMode {
-  UrgentNext = 0, 
-  UrgentBucket = 1, 
-  UrgentFront = 2, 
+  UrgentNext = 0,
+  UrgentBucket = 1,
+  UrgentFront = 2,
 }
 
 export interface IDoctorService {
@@ -29,21 +29,15 @@ export interface IDoctor {
   userId: string
   name: string
   username: string
-  specialty?: string
-  phone?: string
-  photoUrl?: string
+  specialty: string
+  phone: string
+  photoUrl: string | null
   isEnabled: boolean
   urgentCaseMode: UrgentCaseMode
   avgVisitDurationMinutes: number
   services: IDoctorService[]
-  visitFieldConfig: IDoctorVisitConfig 
+  visitFieldConfig: IDoctorVisitConfig
   createdAt: string
 }
 
-export interface DoctorsResponse {
-  items: IDoctor[]
-  totalCount: number
-  pageNumber: number
-  pageSize: number
-  totalPages: number
-}
+

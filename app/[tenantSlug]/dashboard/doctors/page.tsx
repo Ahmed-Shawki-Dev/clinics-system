@@ -10,28 +10,29 @@ interface Props {
 
 export default async function DoctorsPage({ params }: Props) {
   const { tenantSlug } = await params
-  const { data } = await getDoctorsAction(tenantSlug)
+  const response = await getDoctorsAction(tenantSlug)
 
-  const specialties = Array.from(new Set(data.items.map((d) => d.specialty))).filter(
+  // بنستخرج الـ items اللي جوه الـ data
+  const doctors = response.data?.items || []
+
+  // الـ map دلوقتي هتشتغل 100% لأن doctors مصفوفة صريحة
+  const specialties = Array.from(new Set(doctors.map((d) => d.specialty))).filter(
     Boolean,
   ) as string[]
 
   return (
     <DashboardShell>
-      <DashboardHeader
-        heading='الأطباء'
-        text={`إدارة قائمة الأطباء المسجلين بالعيادة`}
-      >
+      <DashboardHeader heading='الأطباء' text='إدارة قائمة الأطباء المسجلين بالعيادة'>
         <AddDoctorDialog tenantSlug={tenantSlug} />
       </DashboardHeader>
 
-        <DataTable
-          data={data.items}
-          columns={columns}
-          searchKey='name'
-          filterColumn='specialty'
-          filterOptions={specialties}
-        />
+      <DataTable
+        data={doctors} // باصي المصفوفة الصافية
+        columns={columns}
+        searchKey='name'
+        filterColumn='specialty'
+        filterOptions={specialties}
+      />
     </DashboardShell>
   )
 }

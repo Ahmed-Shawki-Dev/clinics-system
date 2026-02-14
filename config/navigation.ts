@@ -6,7 +6,7 @@ import {
   Settings,
   Stethoscope,
   Users,
-  type LucideIcon
+  type LucideIcon,
 } from 'lucide-react'
 import { UserRole } from './roles'
 
@@ -54,12 +54,7 @@ export const NAV_ITEMS: NavItem[] = [
     icon: Calendar1,
     roles: ['ClinicOwner', 'SuperAdmin'],
   },
-  {
-    title: 'قائمة الكشف',
-    href: '/my-queue',
-    icon: ClipboardList,
-    roles: ['Doctor', 'SuperAdmin'],
-  },
+
   {
     title: 'الإعدادات',
     href: '/settings',

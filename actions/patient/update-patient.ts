@@ -1,6 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { BaseApiResponse } from '@/types/api'
+import { IPatient } from '@/types/patient'
 import { CreatePatientInput } from '../../validation/patient'
 import { getToken } from '../auth/getToken'
 
@@ -8,9 +10,8 @@ export async function updatePatientAction(
   id: string,
   data: CreatePatientInput,
   tenantSlug: string,
-) {
+): Promise<BaseApiResponse<IPatient>> {
   const token = await getToken()
-  if (!token) return { success: false, message: 'غير مصرح لك' }
 
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/clinic/patients/${id}`, {
@@ -23,11 +24,20 @@ export async function updatePatientAction(
       body: JSON.stringify(data),
     })
 
-    if (!res.ok) return { success: false, message: 'فشل تحديث البيانات' }
+    const result = await res.json()
 
-    revalidatePath(`/${tenantSlug}/dashboard/patients`)
-    return { success: true, message: 'تم تحديث بيانات المريض بنجاح' }
+    if (result.success) {
+      revalidatePath(`/${tenantSlug}/dashboard/patients`)
+    }
+
+    return result as BaseApiResponse<IPatient>
   } catch (error) {
-    return { success: false, message: 'حدث خطأ في السيرفر' }
+    return {
+      success: false,
+      message: 'حدث خطأ أثناء تحديث بيانات المريض',
+      data: {} as IPatient,
+      errors: [],
+      meta: { timestamp: new Date().toISOString(), requestId: '' },
+    }
   }
 }

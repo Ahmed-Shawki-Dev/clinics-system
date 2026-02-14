@@ -1,14 +1,14 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { BaseApiResponse } from '@/types/api'
 import { getToken } from '../auth/getToken'
 
-export async function deletePatientAction(id: string, tenantSlug: string) {
+export async function deletePatientAction(
+  id: string,
+  tenantSlug: string,
+): Promise<BaseApiResponse<null>> {
   const token = await getToken()
-
-  if (!token) {
-    return { success: false, message: 'غير مصرح لك بإتمام العملية' }
-  }
 
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/clinic/patients/${id}`, {
@@ -19,21 +19,20 @@ export async function deletePatientAction(id: string, tenantSlug: string) {
       },
     })
 
-    let result
-    try {
-      result = await res.json()
-    } catch {
-      result = { message: 'تمت العملية' }
+    const result = await res.json()
+
+    if (result.success) {
+      revalidatePath(`/${tenantSlug}/dashboard/patients`)
     }
 
-    if (!res.ok) {
-      return { success: false, message: result.message || 'فشل حذف المريض' }
-    }
-
-    revalidatePath(`/${tenantSlug}/dashboard/patients`)
-    return { success: true, message: 'تم حذف المريض بنجاح' }
+    return result as BaseApiResponse<null>
   } catch (error) {
-    console.error('Delete Error:', error)
-    return { success: false, message: 'حدث خطأ في الاتصال بالسيرفر' }
+    return {
+      success: false,
+      message: 'حدث خطأ أثناء محاولة حذف المريض',
+      data: null,
+      errors: [],
+      meta: { timestamp: new Date().toISOString(), requestId: '' },
+    }
   }
 }
