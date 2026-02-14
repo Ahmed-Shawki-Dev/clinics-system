@@ -1,33 +1,27 @@
 'use server'
 
-import { getToken } from '@/actions/auth/getToken'
+import { IBooking } from '@/types/booking'
 import { revalidatePath } from 'next/cache'
+import { fetchApi } from '../../lib/fetchApi'
 
+/**
+ * إلغاء حجز مؤكد بناءً على السياسة المتبعة
+ *
+ */
 export async function cancelBookingAction(bookingId: string, reason: string, tenantSlug: string) {
-  const token = await getToken()
+  const result = await fetchApi<IBooking>(`/api/clinic/bookings/${bookingId}/cancel`, {
+    method: 'POST',
+    tenantSlug,
+    body: JSON.stringify({ cancellationReason: reason }),
+  })
 
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/clinic/bookings/${bookingId}/cancel`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'X-Tenant': tenantSlug,
-        },
-        body: JSON.stringify({ cancellationReason: reason }),
-      },
-    )
-
-    if (!res.ok) {
-      const error = await res.json()
-      return { success: false, message: error.message || 'فشل إلغاء الحجز' }
-    }
-
-    revalidatePath(`/dashboard/${tenantSlug}/appointments`)
+  if (result.success) {
+    revalidatePath(`/${tenantSlug}/dashboard/appointments`)
     return { success: true, message: 'تم إلغاء الحجز بنجاح' }
-  } catch (error) {
-    return { success: false, message: 'خطأ في الاتصال بالسيرفر' }
+  }
+
+  return {
+    success: false,
+    message: result.message || 'فشل إلغاء الحجز',
   }
 }

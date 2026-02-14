@@ -21,8 +21,8 @@ export default async function AppointmentsPage({ params }: PageProps) {
   ])
 
   const doctorsList = doctorsData?.data?.items || []
-  const patientsList = patientsData?.items || []
-  const bookingsList = bookingsData?.items || []
+  const patientsList = patientsData?.data?.items || [] // ضيفنا .data هنا
+  const bookingsList = bookingsData?.data?.items || [] // ضيفنا .data هنا
 
   return (
     <DashboardShell>

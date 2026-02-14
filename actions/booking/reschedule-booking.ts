@@ -1,38 +1,37 @@
 'use server'
 
-import { getToken } from '@/actions/auth/getToken'
 import { revalidatePath } from 'next/cache'
+import { IBooking } from '@/types/booking'
+import { fetchApi } from '../../lib/fetchApi'
 
+/**
+ * تعديل موعد حجز قائم (Reschedule)
+ *
+ */
 export async function rescheduleBookingAction(
   bookingId: string,
   date: string,
   time: string,
   tenantSlug: string,
 ) {
-  const token = await getToken()
+  const result = await fetchApi<IBooking>(`/api/clinic/bookings/${bookingId}/reschedule`, {
+    method: 'POST',
+    tenantSlug,
+    // الـ Payload متوافق مع مواصفات المرحلة الرابعة
+    body: JSON.stringify({
+      bookingDate: date,
+      bookingTime: time,
+    }),
+  })
 
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/clinic/bookings/${bookingId}/reschedule`,
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'X-Tenant': tenantSlug,
-        },
-        body: JSON.stringify({ bookingDate: date, bookingTime: time }),
-      },
-    )
-
-    if (!res.ok) {
-      const error = await res.json()
-      return { success: false, message: error.message || 'فشل تأجيل الحجز' }
-    }
-
-    revalidatePath(`/dashboard/${tenantSlug}/appointments`)
+  if (result.success) {
+    // تحديث المسار ليعكس المواعيد الجديدة في الـ UI
+    revalidatePath(`/${tenantSlug}/dashboard/appointments`)
     return { success: true, message: 'تم تعديل الموعد بنجاح' }
-  } catch (error) {
-    return { success: false, message: 'خطأ في الاتصال بالسيرفر' }
+  }
+
+  return {
+    success: false,
+    message: result.message || 'فشل تأجيل الحجز',
   }
 }

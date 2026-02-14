@@ -1,26 +1,14 @@
 'use server'
 
-import { getToken } from '../auth/getToken'
+import { fetchApi } from '../../lib/fetchApi'
+import { BaseApiResponse } from '../../types/api'
+import { IBooking } from '../../types/booking'
 
-export async function getBookingsAction(tenantSlug: string) {
-  const token = await getToken()
-  if (!token) return { items: [], totalCount: 0 }
-
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/clinic/bookings`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'X-Tenant': tenantSlug,
-      },
-      cache: 'no-store',
-    })
-
-    if (!res.ok) return { items: [], totalCount: 0 }
-
-    const data = await res.json()
-    return data.data || { items: [], totalCount: 0 }
-  } catch (error) {
-    console.error(error)
-    return { items: [], totalCount: 0 }
-  }
+export async function getBookingsAction(
+  tenantSlug: string,
+): Promise<BaseApiResponse<{ items: IBooking[]; totalCount: number }>> {
+  return await fetchApi<{ items: IBooking[]; totalCount: number }>('/api/clinic/bookings', {
+    tenantSlug,
+    cache: 'no-store',
+  })
 }

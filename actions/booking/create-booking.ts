@@ -1,14 +1,12 @@
 'use server'
 
-import { CreateBookingInput } from '@/validation/booking'
 import { format } from 'date-fns'
 import { revalidatePath } from 'next/cache'
-import { getToken } from '../auth/getToken'
+import { CreateBookingInput } from '@/validation/booking'
+import { IBooking } from '@/types/booking'
+import { fetchApi } from '../../lib/fetchApi'
 
 export async function createBookingAction(data: CreateBookingInput, tenantSlug: string) {
-  const token = await getToken()
-  if (!token) return { success: false, message: 'غير مصرح لك' }
-
   const payload = {
     patientId: data.patientId,
     doctorId: data.doctorId,
@@ -18,27 +16,19 @@ export async function createBookingAction(data: CreateBookingInput, tenantSlug: 
     notes: data.notes,
   }
 
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/clinic/bookings`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'X-Tenant': tenantSlug,
-      },
-      body: JSON.stringify(payload),
-    })
+  const result = await fetchApi<IBooking>('/api/clinic/bookings', {
+    method: 'POST',
+    tenantSlug,
+    body: JSON.stringify(payload),
+  })
 
-    const result = await res.json()
-
-    if (!res.ok) {
-      return { success: false, message: result.message || 'فشل حجز الموعد' }
-    }
-
+  if (result.success) {
     revalidatePath(`/${tenantSlug}/dashboard/appointments`)
     return { success: true, message: 'تم تأكيد الحجز بنجاح' }
-  } catch (error) {
-    console.error('Booking Error:', error)
-    return { success: false, message: 'خطأ في الاتصال بالسيرفر' }
+  }
+
+  return {
+    success: false,
+    message: result.message || 'فشل حجز الموعد',
   }
 }
