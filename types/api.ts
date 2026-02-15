@@ -9,7 +9,7 @@ export type UserRole =
 export interface BaseApiResponse<T> {
   success: boolean
   message: string
-  data: T
+  data: T | null
   errors: Array<{ field: string; message: string }>
   meta: {
     timestamp: string
