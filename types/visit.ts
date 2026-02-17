@@ -83,3 +83,15 @@ export interface IVisit {
   labRequests: ILabRequest[]
   invoice: IInvoice | null
 }
+
+export interface DoctorVisitFieldConfig {
+  bloodPressure: boolean
+  heartRate: boolean
+  temperature: boolean
+  weight: boolean
+  height: boolean
+  bmi: boolean
+  bloodSugar: boolean
+  oxygenSaturation: boolean
+  respiratoryRate: boolean
+}

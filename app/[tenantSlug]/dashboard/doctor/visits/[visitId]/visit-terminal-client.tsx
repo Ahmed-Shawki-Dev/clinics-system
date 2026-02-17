@@ -5,24 +5,41 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { IVisit } from '@/types/visit'
 import { LogOut, Save } from 'lucide-react'
-import { useState } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation' // الـ Import الصح هنا
+import { ClinicalTab } from './clinical-tab'
+import { LabsTab } from './lab-tab'
+import { PrescriptionTab } from './prescription-tab'
 
 export function VisitTerminalClient({
-  visit: initialVisit,
+  visit,
   tenantSlug,
+  defaultTab,
 }: {
   visit: IVisit
   tenantSlug: string
+  defaultTab: string
 }) {
-  const [visit, setVisit] = useState<IVisit>(initialVisit)
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  // دالة تغيير التابة وتحديث الـ URL بدون Reload
+  const handleTabChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    params.set('tab', value)
+
+    // التحديث الفعلي للـ URL في المتصفح
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+  }
 
   return (
     <div className='flex flex-col gap-4'>
+      {/* Header الزيارة */}
       <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-card p-4 rounded-xl border shadow-sm'>
         <div className='flex items-center gap-4 w-full sm:w-auto'>
           <div className='space-y-1.5'>
-            <h2 className='text-xl font-bold leading-none'>{visit.patientName}</h2>
-            <div className='flex flex-wrap gap-2 pt-1'>
+            <h2 className='text-xl font-bold leading-none text-right'>{visit.patientName}</h2>
+            <div className='flex flex-wrap gap-2 pt-1 justify-start'>
               <Badge variant='outline' className='whitespace-nowrap'>
                 زيارة كشف
               </Badge>
@@ -40,67 +57,38 @@ export function VisitTerminalClient({
           <Button variant='outline' size='sm' className='flex-1 sm:flex-none h-10 sm:h-9'>
             <LogOut className='w-4 h-4 ml-2' /> خروج
           </Button>
-          <Button
-            size='sm'
-            className='bg-emerald-600 hover:bg-emerald-700 flex-1 sm:flex-none h-10 sm:h-9'
-          >
+          <Button size='sm' className='bg-blue-600 hover:bg-blue-700'>
             <Save className='w-4 h-4 ml-2' /> إنهاء الزيارة
           </Button>
         </div>
       </div>
 
-      {/* Tabs: منطقة العمل */}
-      <Tabs defaultValue='clinical' className='w-full'>
-        {/* الحاوية قابلة للسحب الأفقي */}
-        <TabsList className='flex w-full h-12 overflow-x-auto justify-start sm:justify-center bg-muted/50 p-1 mb-4 [&::-webkit-scrollbar]:hidden'>
-
-          <TabsTrigger value='clinical' className='shrink-0 whitespace-nowrap px-4 sm:px-8 text-sm'>
+      {/* التابات */}
+      <Tabs defaultValue={defaultTab} onValueChange={handleTabChange} className='w-full'>
+        <TabsList className='flex w-full h-12 overflow-x-auto justify-start sm:justify-center bg-muted/50 p-1 mb-4'>
+          <TabsTrigger value='clinical' className='px-4 sm:px-8 text-sm'>
             التشخيص والشكوى
           </TabsTrigger>
-          <TabsTrigger
-            value='prescription'
-            className='shrink-0 whitespace-nowrap px-4 sm:px-8 text-sm'
-          >
+          <TabsTrigger value='prescription' className='px-4 sm:px-8 text-sm'>
             الروشتة
           </TabsTrigger>
-          <TabsTrigger value='labs' className='shrink-0 whitespace-nowrap px-4 sm:px-8 text-sm'>
+          <TabsTrigger value='labs' className='px-4 sm:px-8 text-sm'>
             التحاليل والأشعة
-          </TabsTrigger>
-          <TabsTrigger value='billing' className='shrink-0 whitespace-nowrap px-4 sm:px-8 text-sm'>
-            الفاتورة
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent
-          value='clinical'
-          className='focus-visible:outline-none focus-visible:ring-0 mt-2'
-        >
-          <div className='p-8 border-2 border-dashed rounded-xl text-center text-muted-foreground'>
-            قريباً: فورمة الشكوى والتشخيص
-          </div>
+        <TabsContent value='clinical' className='focus-visible:outline-none mt-2'>
+          <ClinicalTab visit={visit} tenantSlug={tenantSlug} />
         </TabsContent>
 
-        <TabsContent
-          value='prescription'
-          className='focus-visible:outline-none focus-visible:ring-0 mt-2'
-        >
-          <div className='p-8 border-2 border-dashed rounded-xl text-center text-muted-foreground'>
-            قريباً: الروشتة
-          </div>
+        <TabsContent value='prescription' className='focus-visible:outline-none mt-2'>
+          <PrescriptionTab visit={visit} tenantSlug={tenantSlug} />
         </TabsContent>
-        <TabsContent value='labs' className='focus-visible:outline-none focus-visible:ring-0 mt-2'>
-          <div className='p-8 border-2 border-dashed rounded-xl text-center text-muted-foreground'>
-            قريباً: التحاليل
-          </div>
+
+        <TabsContent value='labs' className='focus-visible:outline-none mt-2'>
+          <LabsTab tenantSlug={tenantSlug} visit={visit} />
         </TabsContent>
-        <TabsContent
-          value='billing'
-          className='focus-visible:outline-none focus-visible:ring-0 mt-2'
-        >
-          <div className='p-8 border-2 border-dashed rounded-xl text-center text-muted-foreground'>
-            قريباً: الفاتورة
-          </div>
-        </TabsContent>
+
       </Tabs>
     </div>
   )
