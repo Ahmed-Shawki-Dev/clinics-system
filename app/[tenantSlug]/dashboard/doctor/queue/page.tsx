@@ -11,7 +11,6 @@ export default async function DoctorQueuePage({
   const { tenantSlug } = await params
 
   const queueRes = await getMyQueueAction(tenantSlug)
-console.log(queueRes)
   if (!queueRes.success || !queueRes.data) {
     return (
       <DashboardShell>

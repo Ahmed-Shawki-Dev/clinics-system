@@ -40,7 +40,7 @@ export async function fetchApi<T>(
     // لو الباك إند رجع 401 أو 403 أو 500، الداتا ستظل بصيغة BaseApiResponse
     const data = await response.json()
     return data as BaseApiResponse<T>
-  } catch (error) {
+  } catch {
     // معالجة السقوط الكامل للشبكة (Network/CORS) بنفس الـ Interface
     return {
       success: false,

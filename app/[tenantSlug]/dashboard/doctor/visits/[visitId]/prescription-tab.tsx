@@ -57,7 +57,6 @@ export function PrescriptionTab({ visit, tenantSlug }: PrescriptionTabProps) {
   const onSubmit = async (data: PrescriptionFormInput) => {
     const res = await createPrescriptionAction(tenantSlug, visit.id, data)
     if (res.success) {
-      console.log(visit.id)
       toast.success('تم إضافة الدواء للروشتة')
       form.reset() // تصفير الفورمة فوراً لكتابة الدواء التالي
     } else {

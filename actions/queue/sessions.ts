@@ -1,3 +1,5 @@
+'use server'
+
 import { fetchApi } from '../../lib/fetchApi'
 import { BaseApiResponse } from '../../types/api'
 import { IQueueSession } from '../../types/queue'
