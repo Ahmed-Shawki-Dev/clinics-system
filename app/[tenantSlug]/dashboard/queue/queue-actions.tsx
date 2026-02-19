@@ -5,7 +5,6 @@ import { IPatient } from '@/types/patient'
 import { IQueueBoardSession } from '@/types/queue'
 import { AddPatientModal } from '../patients/add-patient-modal'
 import { CutTicketDialog } from './cut-ticket-dialog'
-import { OpenSessionDialog } from './open-session-dialog'
 
 interface QueueActionsProps {
   tenantSlug: string
@@ -20,11 +19,6 @@ export function QueueActions({ tenantSlug, doctors, patients, activeSessions }: 
   return (
     <div className='flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row sm:items-center'>
       {/* 1. زرار فتح عيادة (ثانوي) */}
-      <OpenSessionDialog
-        tenantSlug={tenantSlug}
-        doctors={doctors}
-        activeSessions={activeSessions}
-      />
 
       <AddPatientModal />
 

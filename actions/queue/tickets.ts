@@ -9,12 +9,11 @@ import { CutTicketInput } from '../../validation/queue'
 // 1. إنشاء تذكرة (الريسبشن)
 export async function createTicket(
   tenantSlug: string,
-  data: CutTicketInput,
+  data: Partial<CutTicketInput>,
 ): Promise<BaseApiResponse<IQueueTicket>> {
-  // رجعنا الكود لأصله: بنبعت الداتا اللي السكيما عارفاها بس
   const response = await fetchApi<IQueueTicket>('/api/clinic/queue/tickets', {
     method: 'POST',
-    tenantSlug, // بنمرر السلج هنا والـ fetchApi هيحطه في الهيدر أوتوماتيك
+    tenantSlug, 
     body: JSON.stringify({
       sessionId: data.sessionId,
       patientId: data.patientId,

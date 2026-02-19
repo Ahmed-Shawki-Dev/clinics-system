@@ -34,7 +34,7 @@ export default async function QueuePage({ params }: { params: Promise<{ tenantSl
         />
       </DashboardHeader>
 
-      <QueueView tenantSlug={tenantSlug} activeSessions={activeSessions} />
+      <QueueView tenantSlug={tenantSlug} activeSessions={activeSessions} doctors={doctors} />
     </DashboardShell>
   )
 }

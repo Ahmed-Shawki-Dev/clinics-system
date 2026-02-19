@@ -88,10 +88,7 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>إلغاء</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleCloseSession}
-                className='bg-destructive hover:bg-destructive/90'
-              >
+              <AlertDialogAction onClick={handleCloseSession} variant={'destructive'}>
                 تأكيد الإغلاق
               </AlertDialogAction>
             </AlertDialogFooter>

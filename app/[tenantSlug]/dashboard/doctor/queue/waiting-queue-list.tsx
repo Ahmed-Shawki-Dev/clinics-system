@@ -32,16 +32,12 @@ export function WaitingQueueList({ waitingTickets, waitingCount }: Props) {
             return (
               <Card
                 key={ticket.id}
-                className={`group relative overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-background/50 backdrop-blur-sm border-border/50
-                  ${isNext ? 'ring-2 ring-primary/20 shadow-primary/5' : ''}
+                className={`group relative  overflow-hidden rounded-2xl transition-all duration-300 hover:shadow-xl hover:-translate-y-1 bg-background/50 backdrop-blur-sm border-border
+                  ${isNext ? 'shadow-primary/20 border border-primary' : ''}
                   ${ticket.isUrgent ? 'border-destructive/40 bg-destructive/5' : ''}
                 `}
               >
-                {/* شريط علوي للحالات الخاصة */}
-                {isNext && <div className='absolute top-0 left-0 w-full h-1 bg-primary/60' />}
-                {ticket.isUrgent && (
-                  <div className='absolute top-0 left-0 w-full h-1 bg-destructive/60 animate-pulse' />
-                )}
+
 
                 <CardContent className='p-6'>
                   <div className='flex flex-col space-y-4'>

@@ -51,7 +51,6 @@ export function OpenSessionDialog({ tenantSlug, doctors, activeSessions }: OpenS
     defaultValues: { notes: '' },
   })
 
-  // هندسة: إظهار فقط الدكاترة اللي معندهمش جلسة مفتوحة حالياً
   const availableDoctors = React.useMemo(() => {
     const activeDoctorIds = new Set(activeSessions.map((s) => s.doctorId))
     return doctors.filter((doc) => !activeDoctorIds.has(doc.id))
@@ -78,7 +77,7 @@ export function OpenSessionDialog({ tenantSlug, doctors, activeSessions }: OpenS
           variant='outline'
         >
           <PlayCircle className='h-5 w-5' />
-          فتح عيادة (شفت جديد)
+          فتح شفت
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -138,7 +137,7 @@ export function OpenSessionDialog({ tenantSlug, doctors, activeSessions }: OpenS
               className='w-full h-12'
               disabled={isSubmitting || availableDoctors.length === 0}
             >
-              {isSubmitting ? <Loader2 className='animate-spin' /> : 'بدء العيادة الآن'}
+              {isSubmitting ? <Loader2 className='animate-spin' /> : 'بدء الشفت الآن'}
             </Button>
           </form>
         </Form>

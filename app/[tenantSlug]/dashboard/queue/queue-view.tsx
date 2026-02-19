@@ -7,14 +7,17 @@ import { cn } from '@/lib/utils'
 import { IQueueBoardSession } from '@/types/queue'
 import { LayoutGrid } from 'lucide-react'
 import * as React from 'react'
+import { IDoctor } from '../../../../types/doctor'
 import { DoctorQueueCard } from './doctor-queue-card'
+import { OpenSessionDialog } from './open-session-dialog'
 
 interface QueueViewProps {
   tenantSlug: string
   activeSessions: IQueueBoardSession[]
+  doctors: IDoctor[]
 }
 
-export function QueueView({ tenantSlug, activeSessions }: QueueViewProps) {
+export function QueueView({ tenantSlug, activeSessions, doctors }: QueueViewProps) {
   const [selectedSessionId, setSelectedSessionId] = React.useState<string | null>(
     activeSessions.length > 0 ? activeSessions[0].sessionId : null,
   )
@@ -36,12 +39,16 @@ export function QueueView({ tenantSlug, activeSessions }: QueueViewProps) {
         <div className='flex flex-col md:flex-row flex-1 gap-4 md:gap-6 overflow-hidden'>
           {/* Sidebar List (Fixed for Mobile & Desktop) */}
           <Card className='w-full md:w-72 shrink-0 flex flex-col overflow-hidden border bg-muted/20'>
-            <div className='p-3 border-b bg-background/50'>
+            <div className='p-3 border-b bg-background/50 flex items-center justify-between'>
               <h3 className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                 قائمة العيادات
               </h3>
+              <OpenSessionDialog
+                tenantSlug={tenantSlug}
+                doctors={doctors}
+                activeSessions={activeSessions}
+              />
             </div>
-
 
             <div className='flex-1 overflow-x-auto md:overflow-x-hidden md:overflow-y-auto'>
               <div className='flex md:flex-col p-2 gap-2 min-w-max md:min-w-0'>
@@ -53,7 +60,6 @@ export function QueueView({ tenantSlug, activeSessions }: QueueViewProps) {
                       onClick={() => setSelectedSessionId(session.sessionId)}
                       className={cn(
                         'flex items-center justify-between p-3 rounded-md text-sm transition-colors border text-right',
-                        // min-w-[200px]: مهمة جداً في الموبايل عشان الزرار ياخد راحته ومينفعصش
                         'min-w-50 md:min-w-0',
                         isSelected
                           ? 'bg-background border-primary shadow-sm text-primary font-medium'
@@ -102,8 +108,12 @@ export function QueueView({ tenantSlug, activeSessions }: QueueViewProps) {
           <div className='p-4 rounded-full bg-muted/30 mb-4'>
             <LayoutGrid className='h-8 w-8 text-muted-foreground' />
           </div>
-          <h3 className='text-lg font-medium'>لا توجد عيادات نشطة</h3>
-          <p className='text-sm text-muted-foreground mt-1'>شغل عيادة</p>
+          <h3 className='text-lg font-medium mb-2'>لا توجد عيادات نشطة</h3>
+          <OpenSessionDialog
+            tenantSlug={tenantSlug}
+            doctors={doctors}
+            activeSessions={activeSessions}
+          />
         </div>
       )}
     </div>
