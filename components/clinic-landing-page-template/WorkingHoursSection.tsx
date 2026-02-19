@@ -100,7 +100,7 @@ export default function WorkingHoursSection({
         </div>
 
         <div className='mt-16 text-center'>
-          <div className='inline-block p-[1px] rounded-full bg-gradient-to-r from-transparent via-primary/50 to-transparent w-full max-w-md mb-6' />
+          <div className='inline-block p-px rounded-full bg-linear-to-r from-transparent via-primary/50 to-transparent w-full max-w-md mb-6' />
           <p className='text-muted-foreground text-sm'>
             * جميع المواعيد قد تخضع لتعديلات بسيطة في أيام العطلات الرسمية والأعياد.
           </p>

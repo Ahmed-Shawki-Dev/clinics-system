@@ -176,7 +176,7 @@ export function CutTicketDialog({
                 name='doctorServiceId'
                 render={({ field }) => (
                   <FormItem className='md:col-span-1'>
-                    <FormLabel>الخدمة (اختياري)</FormLabel>
+                    <FormLabel>الخدمة</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger className='h-11' disabled={!selectedDoctor}>

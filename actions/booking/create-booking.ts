@@ -16,19 +16,27 @@ export async function createBookingAction(data: CreateBookingInput, tenantSlug: 
     notes: data.notes,
   }
 
-  const result = await fetchApi<IBooking>('/api/clinic/bookings', {
-    method: 'POST',
-    tenantSlug,
-    body: JSON.stringify(payload),
-  })
+  try {
+    const result = await fetchApi<IBooking>('/api/clinic/bookings', {
+      method: 'POST',
+      tenantSlug,
+      body: JSON.stringify(payload),
+    })
 
-  if (result.success) {
-    revalidatePath(`/${tenantSlug}/dashboard/appointments`)
-    return { success: true, message: 'تم تأكيد الحجز بنجاح' }
-  }
+    if (result.success) {
+      revalidatePath(`/${tenantSlug}/dashboard/appointments`)
+      return { success: true, message: 'تم تأكيد الحجز بنجاح' }
+    }
 
-  return {
-    success: false,
-    message: result.message || 'فشل حجز الموعد',
+    return {
+      success: false,
+      message: result.message || 'فشل حجز الموعد',
+    }
+  } catch (error) {
+    console.error('[CREATE_BOOKING_ERROR]:', error)
+    return {
+      success: false,
+      message: 'حدث خطأ أثناء حجز الموعد، يرجى المحاولة مرة أخرى',
+    }
   }
 }

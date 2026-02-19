@@ -26,7 +26,7 @@ export function QueueView({ tenantSlug, activeSessions }: QueueViewProps) {
     ) {
       setSelectedSessionId(activeSessions[0].sessionId)
     }
-  }, [activeSessions.length, activeSessions, selectedSessionId])
+  }, [activeSessions, selectedSessionId])
 
   const selectedSession = activeSessions.find((s) => s.sessionId === selectedSessionId)
 
@@ -42,12 +42,7 @@ export function QueueView({ tenantSlug, activeSessions }: QueueViewProps) {
               </h3>
             </div>
 
-            {/* التعديل الهندسي هنا:
-                1. شلنا ScrollArea واستخدمنا div عادي.
-                2. overflow-x-auto: عشان يسكرول بالعرض في الموبايل.
-                3. md:overflow-y-auto: عشان يسكرول بالطول في الديسك توب.
-                4. md:overflow-x-hidden: عشان نمنع السكرول العرضي في الديسك توب.
-            */}
+
             <div className='flex-1 overflow-x-auto md:overflow-x-hidden md:overflow-y-auto'>
               <div className='flex md:flex-col p-2 gap-2 min-w-max md:min-w-0'>
                 {activeSessions.map((session) => {
