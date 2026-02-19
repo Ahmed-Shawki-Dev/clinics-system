@@ -25,7 +25,7 @@ const Navbar = ({ clinic }: { clinic: IPublicClinic }) => {
 
           {/* Mobile Menu */}
           <div className='md:hidden'>
-            <NavigationSheet />
+            <NavigationSheet clinic={clinic} />
           </div>
         </div>
       </div>
