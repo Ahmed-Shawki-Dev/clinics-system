@@ -11,9 +11,10 @@ export async function createTicket(
   tenantSlug: string,
   data: CutTicketInput,
 ): Promise<BaseApiResponse<IQueueTicket>> {
+  // رجعنا الكود لأصله: بنبعت الداتا اللي السكيما عارفاها بس
   const response = await fetchApi<IQueueTicket>('/api/clinic/queue/tickets', {
     method: 'POST',
-    tenantSlug,
+    tenantSlug, // بنمرر السلج هنا والـ fetchApi هيحطه في الهيدر أوتوماتيك
     body: JSON.stringify({
       sessionId: data.sessionId,
       patientId: data.patientId,
@@ -114,7 +115,6 @@ export async function finishTicketAction(
   }
   return result
 }
-
 
 // 7. تخطي المريض (Called -> Skipped)
 export async function skipTicketAction(

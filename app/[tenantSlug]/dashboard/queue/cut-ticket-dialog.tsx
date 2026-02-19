@@ -1,11 +1,6 @@
 'use client'
 
-import { valibotResolver } from '@hookform/resolvers/valibot'
-import { Loader2, Ticket } from 'lucide-react'
-import * as React from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-
+import { createTicket, markTicketUrgent } from '@/actions/queue/tickets'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -31,19 +26,22 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-
-import { createTicket, markTicketUrgent } from '@/actions/queue/tickets'
 import { IDoctor } from '@/types/doctor'
 import { IPatient } from '@/types/patient'
 import { IQueueBoardSession } from '@/types/queue'
 import { CutTicketSchema, type CutTicketInput } from '@/validation/queue'
+import { valibotResolver } from '@hookform/resolvers/valibot'
+import { Loader2, Ticket } from 'lucide-react'
+import * as React from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { PatientSearch } from './patient-search'
 
 interface CutTicketDialogProps {
   tenantSlug: string
   patients: IPatient[]
-  activeSessions: IQueueBoardSession[] // الجلسات المفتوحة حالياً
-  doctors: IDoctor[] // بنحتاجهم عشان نجيب الخدمات بتاعتهم
+  activeSessions: IQueueBoardSession[]
+  doctors: IDoctor[]
 }
 
 export function CutTicketDialog({
@@ -53,6 +51,7 @@ export function CutTicketDialog({
   doctors,
 }: CutTicketDialogProps) {
   const [open, setOpen] = React.useState(false)
+  const [, setIsAddPatientOpen] = React.useState(false)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
   const form = useForm<CutTicketInput>({
@@ -60,10 +59,10 @@ export function CutTicketDialog({
     defaultValues: {
       isUrgent: false,
       notes: '',
+      // هام: شيلنا أي قيم افتراضية للفلوس عشان متبوظش الدنيا
     },
   })
 
-  // مراقبة اختيار الجلسة عشان نحدد الدكتور والخدمات بتاعته
   const selectedSessionId = form.watch('sessionId')
 
   const selectedDoctor = React.useMemo(() => {
@@ -75,26 +74,21 @@ export function CutTicketDialog({
   async function onSubmit(values: CutTicketInput) {
     setIsSubmitting(true)
     try {
-      // الخطوة 1: إنشاء التذكرة
       const res = await createTicket(tenantSlug, values)
 
       if (!res.success) {
         throw new Error(res.message || 'فشل إصدار التذكرة')
       }
 
-      // الخطوة 2: لو طارئة، نادي الـ Urgent API فوراً
       if (values.isUrgent && res.data?.id) {
-        const urgentRes = await markTicketUrgent(tenantSlug, res.data.id)
-        if (!urgentRes.success) {
-          toast.error('تم إنشاء التذكرة ولكن فشل رفعها كحالة طارئة')
-        }
+        await markTicketUrgent(tenantSlug, res.data.id)
       }
 
-      toast.success('تم إصدار التذكرة بنجاح')
+      toast.success('تم الحجز وإصدار التذكرة بنجاح')
       setOpen(false)
       form.reset()
     } catch (error) {
-      if (error instanceof Error) toast.error(error.message || 'حدث خطأ غير متوقع')
+      if (error instanceof Error) toast.error(error.message)
     } finally {
       setIsSubmitting(false)
     }
@@ -103,19 +97,22 @@ export function CutTicketDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className='gap-2 h-11 px-6'>
+        <Button className='gap-2 shadow-md'>
           <Ticket className='h-5 w-5' />
-          قطع تذكرة جديدة
+          قطع تذكرة
         </Button>
       </DialogTrigger>
       <DialogContent className='sm:max-w-125'>
         <DialogHeader>
-          <DialogTitle className='text-xl font-bold'>إصدار تذكرة مريض</DialogTitle>
+          <DialogTitle className='text-xl font-bold flex items-center gap-2'>
+            <Ticket className='h-6 w-6 text-primary' />
+            حجز موعد جديد
+          </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5'>
-            {/* 1. اختيار العيادة/الدكتور */}
+            {/* اختيار العيادة */}
             <FormField
               control={form.control}
               name='sessionId'
@@ -125,21 +122,24 @@ export function CutTicketDialog({
                   <Select
                     onValueChange={(val) => {
                       field.onChange(val)
-                      // أوتوماتيك حط الـ doctorId في الفورم بناءً على الجلسة
                       const docId = activeSessions.find((s) => s.sessionId === val)?.doctorId
+                      // تأكد إن السطر ده شغال عشان الـ Validation
                       if (docId) form.setValue('doctorId', docId)
                     }}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className='h-11'>
+                      <SelectTrigger className='h-11 bg-muted/20'>
                         <SelectValue placeholder='اختر العيادة...' />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {activeSessions.map((session) => (
                         <SelectItem key={session.sessionId} value={session.sessionId}>
-                          عيادة د. {session.doctorName} ({session.waitingCount} في الانتظار)
+                          عيادة د. {session.doctorName}
+                          <span className='text-muted-foreground mr-2 text-xs'>
+                            ({session.waitingCount} انتظار)
+                          </span>
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -149,7 +149,7 @@ export function CutTicketDialog({
               )}
             />
 
-            {/* 2. البحث عن المريض (المكون اللي عملناه) */}
+            {/* المريض */}
             <FormField
               control={form.control}
               name='patientId'
@@ -161,6 +161,7 @@ export function CutTicketDialog({
                       patients={patients}
                       selectedPatientId={field.value}
                       onSelect={field.onChange}
+                      onAddNew={() => setIsAddPatientOpen(true)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -168,67 +169,69 @@ export function CutTicketDialog({
               )}
             />
 
-            {/* 3. اختيار الخدمة (فلترة ذكية بناءً على الدكتور) */}
-            <FormField
-              control={form.control}
-              name='doctorServiceId'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>نوع الخدمة</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <div className='grid grid-cols-2 gap-4'>
+              {/* الخدمة */}
+              <FormField
+                control={form.control}
+                name='doctorServiceId'
+                render={({ field }) => (
+                  <FormItem className='md:col-span-1'>
+                    <FormLabel>الخدمة (اختياري)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className='h-11' disabled={!selectedDoctor}>
+                          <SelectValue placeholder='اختر...' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {selectedDoctor?.services
+                          .filter((s) => s.isActive)
+                          .map((service) => (
+                            <SelectItem key={service.id} value={service.id!}>
+                              {service.serviceName}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* الطوارئ */}
+              <FormField
+                control={form.control}
+                name='isUrgent'
+                render={({ field }) => (
+                  <FormItem className='flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-destructive/5 border-destructive/10 md:col-span-1 h-11 mt-8'>
+                    <div className='space-y-0.5'>
+                      <FormLabel className='text-destructive font-bold cursor-pointer ml-2'>
+                        حالة طارئة
+                      </FormLabel>
+                    </div>
                     <FormControl>
-                      <SelectTrigger className='h-11' disabled={!selectedDoctor}>
-                        <SelectValue
-                          placeholder={selectedDoctor ? 'اختر الخدمة...' : 'اختر العيادة أولاً'}
-                        />
-                      </SelectTrigger>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className='data-[state=checked]:bg-destructive data-[state=checked]:border-destructive'
+                      />
                     </FormControl>
-                    <SelectContent>
-                      {selectedDoctor?.services
-                        .filter((s) => s.isActive)
-                        .map((service) => (
-                          <SelectItem key={service.id} value={service.id!}>
-                            {service.serviceName} - {service.price} ج.م
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-            {/* 4. خيار الاستعجال (الطوارئ) */}
-            <FormField
-              control={form.control}
-              name='isUrgent'
-              render={({ field }) => (
-                <FormItem className='flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 bg-destructive/5 border-destructive/20'>
-                  <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
-                  </FormControl>
-                  <div className='space-y-1 leading-none'>
-                    <FormLabel className='text-destructive font-bold cursor-pointer'>
-                      حالة طارئة (Urgent Case)
-                    </FormLabel>
-                    <p className='text-xs text-muted-foreground'>
-                      سيتم وضع المريض في قمة الطابور فوراً.
-                    </p>
-                  </div>
-                </FormItem>
-              )}
-            />
-
+            {/* الملاحظات */}
             <FormField
               control={form.control}
               name='notes'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>ملاحظات إضافية</FormLabel>
+                  <FormLabel>ملاحظات</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder='شكوى المريض أو ملاحظات للريسبشن...'
-                      className='resize-none'
+                      placeholder='أي تفاصيل إضافية...'
+                      className='resize-none h-20'
                       {...field}
                     />
                   </FormControl>
@@ -237,15 +240,8 @@ export function CutTicketDialog({
               )}
             />
 
-            <Button type='submit' className='w-full h-12 text-lg' disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className='ml-2 h-5 w-5 animate-spin' />
-                  جاري إصدار التذكرة...
-                </>
-              ) : (
-                'تأكيد وقطع التذكرة'
-              )}
+            <Button type='submit' className='w-full h-12 text-lg font-bold' disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className='animate-spin' /> : 'حجز وقطع التذكرة'}
             </Button>
           </form>
         </Form>

@@ -2,14 +2,14 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { DirectionProvider } from '@/components/ui/direction'
 import { Toaster } from '@/components/ui/sonner'
 import type { Metadata } from 'next'
-import { Tajawal } from 'next/font/google'
+import { Zain } from 'next/font/google'
 import './globals.css'
 
-const tajawal = Tajawal({
+const zain = Zain({
   subsets: ['arabic'],
-  variable: '--font-tajawal', 
-  weight: ['200', '300', '400', '500', '700', '800', '900'], 
+  variable: '--font-tajawal',
   display: 'swap',
+  weight: ['200', '300', '400', '700', '800', '900'],
 })
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='ar' dir='rtl' suppressHydrationWarning>
-      <body className={`${tajawal.variable} font-sans antialiased`} suppressHydrationWarning>
+      <body className={`${zain.variable} font-sans antialiased`} suppressHydrationWarning>
         <DirectionProvider direction='rtl' dir={'rtl'}>
           <ThemeProvider
             attribute='class'

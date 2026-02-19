@@ -1,7 +1,5 @@
 'use client'
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -12,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ColumnDef } from '@tanstack/react-table'
-import { Clock, MoreHorizontal, Phone, Stethoscope } from 'lucide-react'
+import { Clock, MoreHorizontal, Phone, Stethoscope, User } from 'lucide-react'
 import { IDoctor } from '../../../../types/doctor'
 
 export const columns: ColumnDef<IDoctor>[] = [
@@ -23,10 +21,9 @@ export const columns: ColumnDef<IDoctor>[] = [
       const name = row.getValue('name') as string
       return (
         <div className='flex items-center gap-3'>
-          <Avatar className='h-9 w-9'>
-            <AvatarImage src={`https://ui-avatars.com/api/?name=${name}&background=random`} />
-            <AvatarFallback>{name.charAt(0)}</AvatarFallback>
-          </Avatar>
+          <div className='flex h-9 w-9 items-center justify-center rounded-full border bg-muted'>
+            <User className='h-4 w-4' />
+          </div>
           <div className='flex flex-col'>
             <span className='font-medium text-sm'>{name}</span>
             <span className='text-xs text-muted-foreground'>{row.original.username}</span>
@@ -39,10 +36,10 @@ export const columns: ColumnDef<IDoctor>[] = [
     accessorKey: 'specialty',
     header: 'التخصص',
     cell: ({ row }) => (
-      <Badge variant='secondary' className='gap-1'>
-        <Stethoscope className='w-3 h-3' />
+      <div className='flex gap-2'>
+        <Stethoscope className='w-4 h-4 text-primary' />
         {row.getValue('specialty')}
-      </Badge>
+      </div>
     ),
     // ده مهم عشان الفلتر يشتغل صح
     filterFn: (row, id, value) => {
@@ -53,8 +50,8 @@ export const columns: ColumnDef<IDoctor>[] = [
     accessorKey: 'phone',
     header: 'الهاتف',
     cell: ({ row }) => (
-      <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-        <Phone className='w-3 h-3' />
+      <div className='flex items-center gap-2 '>
+        <Phone className='w-4 h-4 text-primary' />
         {row.getValue('phone') || '-'}
       </div>
     ),
@@ -71,6 +68,7 @@ export const columns: ColumnDef<IDoctor>[] = [
   },
   {
     id: 'actions',
+    header: 'الإجراءات',
     cell: ({ row }) => {
       const doctor = row.original
       return (

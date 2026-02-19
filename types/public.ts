@@ -1,21 +1,23 @@
-export const dayOrder: Record<string, number> = {
-  Sunday: 0,
-  Monday: 1,
-  Tuesday: 2,
-  Wednesday: 3,
-  Thursday: 4,
-  Friday: 5,
-  Saturday: 6,
+export const DAYS_AR: Record<string, string> = {
+  Saturday: 'السبت',
+  Sunday: 'الأحد',
+  Monday: 'الاثنين',
+  Tuesday: 'الثلاثاء',
+  Wednesday: 'الأربعاء',
+  Thursday: 'الخميس',
+  Friday: 'الجمعة',
 }
 
-export type PublicDayOfWeek =
-  | 'Sunday'
-  | 'Monday'
-  | 'Tuesday'
-  | 'Wednesday'
-  | 'Thursday'
-  | 'Friday'
-  | 'Saturday'
+// 2. قاموس لترتيب الأيام (زي ما أنت باعته في التايبس)
+export const DAY_ORDER: Record<string, number> = {
+  Saturday: 0, // بدأت بالسبت عشان ده العرف في مصر، ممكن تغير الترتيب براحتك
+  Sunday: 1,
+  Monday: 2,
+  Tuesday: 3,
+  Wednesday: 4,
+  Thursday: 5,
+  Friday: 6,
+}
 
 export interface IPublicClinic {
   clinicName: string
@@ -49,7 +51,7 @@ export interface IPublicDoctor {
 }
 
 export interface IPublicWorkingHour {
-  dayOfWeek: PublicDayOfWeek
+  dayOfWeek: DAY_ORDER
   startTime: string
   endTime: string
   isActive: boolean

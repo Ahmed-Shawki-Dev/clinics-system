@@ -1,11 +1,8 @@
-// app/[tenantSlug]/page.tsx
-
-import { IPublicClinic, IPublicDoctor, IPublicService, IPublicWorkingHour } from '@/types/public'
+import { IPublicClinic, IPublicDoctor, IPublicWorkingHour } from '@/types/public'
 import DoctorsSection from '../../components/clinic-landing-page-template/DoctorsSection'
 import Footer from '../../components/clinic-landing-page-template/Footer'
 import Hero from '../../components/clinic-landing-page-template/Hero'
-import Navbar from '../../components/clinic-landing-page-template/Navbar'
-import ServicesSection from '../../components/clinic-landing-page-template/ServicesSection'
+import Navbar from '../../components/clinic-landing-page-template/Navbar/Navbar'
 import WorkingHoursSection from '../../components/clinic-landing-page-template/WorkingHoursSection'
 import { fetchApi } from '../../lib/fetchApi'
 
@@ -16,10 +13,9 @@ interface PageProps {
 export default async function Page({ params }: PageProps) {
   const { tenantSlug } = await params
 
-  const [clinic, doctors, services, workingHours] = await Promise.all([
+  const [clinic, doctors, workingHours] = await Promise.all([
     fetchApi<IPublicClinic>(`/api/public/${tenantSlug}/clinic`),
     fetchApi<IPublicDoctor[]>(`/api/public/${tenantSlug}/doctors`),
-    fetchApi<IPublicService[]>(`/api/public/${tenantSlug}/services`),
     fetchApi<IPublicWorkingHour[]>(`/api/public/${tenantSlug}/working-hours`),
   ])
 
@@ -27,13 +23,12 @@ export default async function Page({ params }: PageProps) {
   const activeWorkingHours = workingHours.data?.filter((w) => w.isActive)
 
   return (
-    <>
+    <main className='w-full min-h-screen'>
       <Navbar clinic={clinic.data!} />
       <Hero clinic={clinic.data!} />
       <DoctorsSection doctors={enabledDoctors!} />
-      <ServicesSection services={services.data!} />
       <WorkingHoursSection workingHours={activeWorkingHours!} />
       <Footer clinic={clinic.data!} />
-    </>
+    </main>
   )
 }

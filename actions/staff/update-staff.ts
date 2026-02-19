@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 import * as v from 'valibot'
-import { getToken } from '../auth/getToken'
 import { UpdateStaffInput, updateStaffSchema } from '../../validation/staff'
+import { getToken } from '../auth/getToken'
 
 export async function updateStaffAction(data: UpdateStaffInput, tenantSlug: string) {
   // 1. Validation

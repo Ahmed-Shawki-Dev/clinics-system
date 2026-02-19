@@ -8,7 +8,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Edit, MoreHorizontal, Trash } from 'lucide-react'
+import { Edit, MoreHorizontal } from 'lucide-react'
 import { useParams } from 'next/navigation' // عشان نجيب الـ tenantSlug
 import { useState } from 'react'
 import { UpdateStaffDialog } from '../../app/[tenantSlug]/dashboard/staff/update-staff-dialog'
@@ -40,10 +40,6 @@ export function StaffActionsCell({ staff }: { staff: IStaff }) {
           {/* بنفتح المودال لما يدوس تعديل */}
           <DropdownMenuItem onClick={() => setOpenUpdate(true)}>
             <Edit className='ml-2 h-4 w-4' /> تعديل
-          </DropdownMenuItem>
-
-          <DropdownMenuItem className='text-destructive focus:text-destructive'>
-            <Trash className='ml-2 h-4 w-4' /> تعطيل الحساب
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

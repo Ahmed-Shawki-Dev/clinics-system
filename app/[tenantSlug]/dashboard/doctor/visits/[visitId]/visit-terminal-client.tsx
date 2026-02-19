@@ -6,6 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { IVisit } from '@/types/visit'
 import { LogOut, Save } from 'lucide-react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation' // الـ Import الصح هنا
+import { useState } from 'react'
+import { toast } from 'sonner'
+import { completeVisitAction } from '../../../../../../actions/visit/complete-visit'
 import { ClinicalTab } from './clinical-tab'
 import { LabsTab } from './lab-tab'
 import { PrescriptionTab } from './prescription-tab'
@@ -22,6 +25,22 @@ export function VisitTerminalClient({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+
+  const [isCompleting, setIsCompleting] = useState(false)
+
+  const handleCompleteVisit = async () => {
+    setIsCompleting(true)
+    const res = await completeVisitAction(tenantSlug, visit.id)
+    setIsCompleting(false)
+
+    if (res.success) {
+      toast.success('تم إنهاء الزيارة بنجاح')
+      // دي اللي هترمي الدكتور بره وترجعه للطابور!
+      router.push(`/${tenantSlug}/dashboard/doctor/queue`)
+    } else {
+      toast.error(res.message || 'حدث خطأ أثناء إنهاء الزيارة')
+    }
+  }
 
   // دالة تغيير التابة وتحديث الـ URL بدون Reload
   const handleTabChange = (value: string) => {
@@ -54,12 +73,16 @@ export function VisitTerminalClient({
         </div>
 
         <div className='flex w-full sm:w-auto gap-2 mt-2 sm:mt-0'>
-          <Button variant='outline' size='sm' className='flex-1 sm:flex-none h-10 sm:h-9'>
+          <Button variant='outline'>
             <LogOut className='w-4 h-4 ml-2' /> خروج
           </Button>
-          <Button size='sm' className='bg-blue-600 hover:bg-blue-700'>
-            <Save className='w-4 h-4 ml-2' /> إنهاء الزيارة
-          </Button>
+
+          {!visit.completedAt && (
+            <Button onClick={handleCompleteVisit} disabled={isCompleting}>
+              <Save className='w-4 h-4 ml-2' />
+              {isCompleting ? 'جاري الإنهاء...' : 'إنهاء الزيارة'}
+            </Button>
+          )}
         </div>
       </div>
 
@@ -88,7 +111,6 @@ export function VisitTerminalClient({
         <TabsContent value='labs' className='focus-visible:outline-none mt-2'>
           <LabsTab tenantSlug={tenantSlug} visit={visit} />
         </TabsContent>
-
       </Tabs>
     </div>
   )

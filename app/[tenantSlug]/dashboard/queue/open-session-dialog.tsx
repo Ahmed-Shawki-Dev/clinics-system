@@ -76,7 +76,6 @@ export function OpenSessionDialog({ tenantSlug, doctors, activeSessions }: OpenS
       <DialogTrigger asChild>
         <Button
           variant='outline'
-          className='gap-2 h-11 border-primary text-primary hover:bg-primary/5'
         >
           <PlayCircle className='h-5 w-5' />
           فتح عيادة (شفت جديد)

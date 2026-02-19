@@ -8,15 +8,15 @@ import { CreateInvoiceFormInput } from '../../validation/invoice'
 
 export const createInvoiceAction = async (
   tenantSlug: string,
-  visitId: string,
+  visitId: string, // هنا هنبعت الـ TicketID مؤقتاً لو مفيش Visit أو string فاضي حسب الباك إند
   data: CreateInvoiceFormInput,
 ): Promise<BaseApiResponse<IInvoice>> => {
   try {
-    // الباك إند محتاج الـ visitId مع الـ amount
+    // التعديل: بنبعت الداتا التفصيلية للباك إند
+    // وبنضيف عليها الـ visitId (الباك إند المفروض يهندل لو ده ticketId أو visitId)
     const payload = {
-      visitId,
-      amount: data.amount,
-      notes: data.notes || '',
+      ...data,
+      visitId: visitId,
     }
 
     const result = await fetchApi<IInvoice>(`/api/clinic/invoices`, {
@@ -29,8 +29,11 @@ export const createInvoiceAction = async (
     })
 
     if (result.success) {
-      // ريفاليديت عشان تابة الفاتورة تـ Re-render وتقرأ الفاتورة الجديدة
-      revalidatePath(`/${tenantSlug}/dashboard/doctor/visits/${visitId}`)
+      revalidatePath(`/${tenantSlug}/dashboard/queue`)
+      // لو فيه visitId حقيقي، نعمل revalidate لصفحته
+      if (visitId) {
+        revalidatePath(`/${tenantSlug}/dashboard/doctor/visits/${visitId}`)
+      }
     }
 
     return result
@@ -38,7 +41,7 @@ export const createInvoiceAction = async (
     console.error('[CREATE_INVOICE_ERROR]:', error)
     return {
       success: false,
-      message: 'فشل في إنشاء المطالبة المالية',
+      message: 'فشل في إنشاء الفاتورة',
       data: null,
       errors: [],
       meta: { timestamp: new Date().toISOString(), requestId: '' },

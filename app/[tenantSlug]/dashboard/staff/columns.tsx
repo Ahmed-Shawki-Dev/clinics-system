@@ -1,6 +1,5 @@
 'use client'
 
-import { Badge } from '@/components/ui/badge'
 import { IStaff } from '@/types/staff'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { Phone } from 'lucide-react'
@@ -21,10 +20,8 @@ export const columns = [
     header: 'الهاتف',
     cell: (info) => (
       <div className='flex items-center gap-2'>
-        <Phone className='h-3 w-3 text-muted-foreground' />
-        <span dir='ltr' className='font-mono text-sm'>
-          {info.getValue()}
-        </span>
+        <Phone className='h-4 w-4 text-primary' />
+        {info.getValue() ? <span>{info.getValue()}</span> : <span>لا يوجد رقم</span>}
       </div>
     ),
   }),
@@ -32,15 +29,7 @@ export const columns = [
   // الوظيفة
   columnHelper.accessor('role', {
     header: 'الوظيفة',
-    cell: (info) => {
-      const role = info.getValue()
-      const variant = role === 'ClinicManager' ? 'default' : 'secondary'
-      return (
-        <Badge variant={variant} className='rounded-sm'>
-          {role}
-        </Badge>
-      )
-    },
+    cell: (info) => info.getValue(),
   }),
 
   // الحالة
@@ -59,16 +48,13 @@ export const columns = [
   // تاريخ الإضافة
   columnHelper.accessor('createdAt', {
     header: 'تاريخ الإضافة',
-    cell: (info) => (
-      <span className='text-muted-foreground text-xs'>
-        {new Date(info.getValue()).toLocaleDateString('ar-EG')}
-      </span>
-    ),
+    cell: (info) => <span>{new Date(info.getValue()).toLocaleDateString('ar-EG')}</span>,
   }),
 
   // الإجراءات
   columnHelper.display({
     id: 'actions',
+    header: 'الإجراءات',
     cell: ({ row }) => <StaffActionsCell staff={row.original} />,
   }),
 ] as ColumnDef<IStaff>[]

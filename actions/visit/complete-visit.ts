@@ -25,7 +25,6 @@ export const completeVisitAction = async (
     })
 
     if (result.success) {
-      // ريفاليديت لصفحة الطابور عشان المريض يختفي منها
       revalidatePath(`/${tenantSlug}/dashboard/doctor/queue`)
     }
 

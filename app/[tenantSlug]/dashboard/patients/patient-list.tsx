@@ -31,12 +31,12 @@ export function PatientsList({ data }: PatientsListProps) {
   return (
     <div className='rounded-md border '>
       <Table>
-        <TableHeader>
+        <TableHeader className='h-12 bg-muted/50'>
           <TableRow>
-            <TableHead>المريض</TableHead>
-            <TableHead>رقم الهاتف</TableHead>
-            <TableHead>السن</TableHead>
-            <TableHead className='text-right'>الإجراءات</TableHead>
+            <TableHead className='font-bold'>المريض</TableHead>
+            <TableHead className='font-bold'>رقم الهاتف</TableHead>
+            <TableHead className='font-bold'>السن</TableHead>
+            <TableHead className='text-right font-bold'>الإجراءات</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -53,14 +53,14 @@ export function PatientsList({ data }: PatientsListProps) {
                 </TableCell>
                 <TableCell>
                   <div className='flex items-center gap-2 '>
-                    <Phone className='h-3 w-3' />
+                    <Phone className='h-4 w-4 text-primary' />
                     {patient.phone}
                   </div>
                 </TableCell>
                 <TableCell>
                   {patient.dateOfBirth ? (
                     <div className='flex items-center gap-1.5'>
-                      <Calendar className='h-3.5 w-3.5' />
+                      <Calendar className='h-4 w-4 text-primary' />
                       <span>
                         {new Date().getFullYear() - new Date(patient.dateOfBirth).getFullYear()} سنة
                       </span>

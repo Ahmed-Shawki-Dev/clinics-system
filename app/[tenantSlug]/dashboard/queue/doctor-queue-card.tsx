@@ -1,6 +1,7 @@
 'use client'
 
 import { closeQueueSession } from '@/actions/queue/sessions'
+import { cancelTicket, markTicketUrgent } from '@/actions/queue/tickets'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,14 +13,20 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DataTable } from '@/components/ui/data-table'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { IQueueBoardSession } from '@/types/queue'
-import { Clock, StopCircle, UserCheck, Users } from 'lucide-react'
+import { ArrowUp, MoreHorizontal, Power, X } from 'lucide-react'
 import * as React from 'react'
 import { toast } from 'sonner'
-import { getQueueColumns } from './queue-columns'
 
 interface DoctorQueueCardProps {
   tenantSlug: string
@@ -27,7 +34,6 @@ interface DoctorQueueCardProps {
 }
 
 export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
-  // ترتيب الطابور برمجياً: طوارئ أولاً ثم رقم التذكرة
   const sortedWaitlist = React.useMemo(() => {
     return [...session.waitingTickets].sort((a, b) => {
       if (a.isUrgent && !b.isUrgent) return -1
@@ -36,53 +42,52 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
     })
   }, [session.waitingTickets])
 
-  const columns = React.useMemo(() => getQueueColumns(tenantSlug), [tenantSlug])
-
   const handleCloseSession = async () => {
     const res = await closeQueueSession(tenantSlug, session.sessionId)
-    if (res.success) {
-      toast.success(`تم إنهاء شفت د. ${session.doctorName}`)
-    } else {
-      toast.error(res.message || 'فشل إغلاق العيادة')
-    }
+    if (res.success) toast.success(`تم إنهاء شفت د. ${session.doctorName}`)
+    else toast.error(res.message)
+  }
+
+  const handleUrgent = async (ticketId: string) => {
+    const res = await markTicketUrgent(tenantSlug, ticketId)
+    if (res.success) toast.success('تم رفع الحالة لطوارئ')
+    else toast.error(res.message)
+  }
+
+  const handleCancel = async (ticketId: string) => {
+    const res = await cancelTicket(tenantSlug, ticketId)
+    if (res.success) toast.success('تم إلغاء التذكرة')
+    else toast.error(res.message)
   }
 
   return (
-    <Card className='border-2 shadow-md'>
-      <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-4 bg-muted/30'>
-        <div className='flex flex-col gap-1'>
-          <CardTitle className='text-xl font-extrabold flex items-center gap-2'>
-            <span className='h-3 w-3 rounded-full bg-green-500 animate-pulse' />
-            د. {session.doctorName}
-          </CardTitle>
-          <div className='flex gap-4 text-sm text-muted-foreground'>
-            <span className='flex items-center gap-1'>
-              <Clock className='h-3 w-3' /> {session.waitingCount} منتظر
-            </span>
-            <span className='flex items-center gap-1'>
-              <UserCheck className='h-3 w-3' /> {session.completedCount} انتهى
-            </span>
+    <div className='flex flex-col h-full'>
+      {/* Header */}
+      <div className='flex items-center justify-between p-4 border-b bg-card'>
+        <div className='flex items-center gap-3'>
+          <div className='h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold'>
+            {session.doctorName.charAt(0)}
+          </div>
+          <div>
+            <h2 className='font-semibold'>د. {session.doctorName}</h2>
+            <p className='text-xs text-muted-foreground'>تم الكشف: {session.completedCount}</p>
           </div>
         </div>
 
-        {/* زر إنهاء الشفت مع تأكيد */}
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant='ghost' size='sm' className='text-destructive hover:bg-destructive/10'>
-              <StopCircle className='h-4 w-4 ml-1' />
-              إنهاء الشفت
+              <Power className='h-4 w-4 md:mr-2' />
+              <span className='hidden md:inline'>إنهاء</span>
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>هل أنت متأكد من إغلاق العيادة؟</AlertDialogTitle>
-              <AlertDialogDescription>
-                سيتم إنهاء شفت د. {session.doctorName}. يوجد {session.waitingCount} مريض في
-                الانتظار.
-              </AlertDialogDescription>
+              <AlertDialogTitle>إغلاق العيادة؟</AlertDialogTitle>
+              <AlertDialogDescription>هل أنت متأكد من إنهاء شفت الطبيب؟</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>تراجع</AlertDialogCancel>
+              <AlertDialogCancel>إلغاء</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleCloseSession}
                 className='bg-destructive hover:bg-destructive/90'
@@ -92,42 +97,102 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </CardHeader>
+      </div>
 
-      <CardContent className='pt-6 space-y-6'>
-        {/* المريض الحالي - Main Focus */}
-        <div className='rounded-xl border-2 border-primary/20 bg-primary/5 p-4 relative overflow-hidden'>
-          <div className='absolute top-0 left-0 bg-primary text-white px-3 py-1 text-xs font-bold rounded-br-lg'>
-            الحالة الحالية
-          </div>
+      <div className='flex-1 overflow-y-auto p-4 space-y-6'>
+        {/* Current Patient (Minimal) */}
+        <div className='rounded-lg border bg-muted/30 p-6 flex flex-col items-center justify-center text-center space-y-2'>
           {session.currentTicket ? (
-            <div className='flex items-center justify-between mt-2'>
-              <div>
-                <p className='text-sm text-muted-foreground font-medium'>المريض الحالي</p>
-                <h3 className='text-2xl font-black text-primary'>
-                  {session.currentTicket.patientName}
-                </h3>
+            <>
+              <h1 className='text-3xl font-bold tracking-tight text-primary'>
+                {session.currentTicket.patientName}
+              </h1>
+              <div className='flex items-center gap-2 text-muted-foreground'>
+                <span className='font-mono font-bold text-foreground'>
+                  #{session.currentTicket.ticketNumber}
+                </span>
+                <span>•</span>
+                <span>{session.currentTicket.serviceName || 'كشف'}</span>
               </div>
-              <div className='text-center'>
-                <p className='text-xs text-muted-foreground uppercase'>تذكرة رقم</p>
-                <p className='text-3xl font-black'>#{session.currentTicket.ticketNumber}</p>
-              </div>
-            </div>
+              {session.currentTicket.isUrgent && (
+                <Badge variant='destructive' className='mt-2'>
+                  حالة طارئة
+                </Badge>
+              )}
+            </>
           ) : (
-            <p className='text-center py-4 text-muted-foreground font-medium italic'>
-              العيادة جاهزة لاستقبال المريض التالي...
-            </p>
+            <p className='text-muted-foreground py-4'>بانتظار دخول المريض التالي...</p>
           )}
         </div>
 
-        {/* جدول طابور الانتظار باستخدام جدولك الجينيريك */}
-        <div className='space-y-3'>
-          <h4 className='font-bold flex items-center gap-2 text-muted-foreground uppercase text-xs tracking-wider'>
-            <Users className='h-4 w-4' /> قائمة الانتظار
-          </h4>
-          <DataTable columns={columns} data={sortedWaitlist} searchKey='patientName' />
+        {/* Waiting List */}
+        <div>
+          <h3 className='font-semibold text-sm mb-3 flex items-center gap-2'>
+            الانتظار
+            <Badge variant='secondary' className='rounded-full'>
+              {sortedWaitlist.length}
+            </Badge>
+          </h3>
+
+          <div className='rounded-md border divide-y'>
+            {sortedWaitlist.length > 0 ? (
+              sortedWaitlist.map((ticket) => (
+                <div
+                  key={ticket.id}
+                  className='flex items-center justify-between p-3 hover:bg-muted/50 transition-colors'
+                >
+                  <div className='flex items-center gap-4'>
+                    <div className='flex items-center justify-center w-8 h-8 rounded bg-muted text-sm font-bold font-mono'>
+                      {ticket.ticketNumber}
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium leading-none'>
+                        {ticket.patientName}
+                        {ticket.isUrgent && (
+                          <Badge variant='destructive' className='mr-2 text-[10px] h-4 px-1'>
+                            طوارئ
+                          </Badge>
+                        )}
+                      </p>
+                      <p className='text-xs text-muted-foreground mt-1'>
+                        {ticket.serviceName || 'كشف عام'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Actions Dropdown for Cleanliness */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant='ghost' size='icon' className='h-8 w-8'>
+                        <MoreHorizontal className='h-4 w-4' />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align='end'>
+                      <DropdownMenuLabel>إجراءات</DropdownMenuLabel>
+                      {!ticket.isUrgent && (
+                        <DropdownMenuItem onClick={() => handleUrgent(ticket.id)}>
+                          <ArrowUp className='ml-2 h-4 w-4' /> استعجال
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => handleCancel(ticket.id)}
+                        className='text-destructive focus:text-destructive'
+                      >
+                        <X className='ml-2 h-4 w-4' /> إلغاء التذكرة
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              ))
+            ) : (
+              <div className='p-8 text-center text-muted-foreground text-sm'>
+                لا يوجد مرضى في الانتظار
+              </div>
+            )}
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

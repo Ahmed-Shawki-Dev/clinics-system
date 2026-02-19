@@ -1,22 +1,37 @@
-import { IPublicClinic } from '@/types/public'
+import { Typography } from '@/components/ui/typography'
+import Link from 'next/link'
+import { ClinicLogo } from './Navbar/logo'
+import { IPublicClinic } from '../../types/public'
 
-interface FooterProps {
-  clinic: IPublicClinic
-}
-
-export default function Footer({ clinic }: FooterProps) {
+export default function Footer({clinic}:{clinic:IPublicClinic}) {
   return (
-    <footer className='w-full bg-black text-white py-8'>
-      <div className='container mx-auto px-4 text-center space-y-2'>
-        <p className='font-semibold'>{clinic.clinicName}</p>
+    <footer className='w-full bg-background py-6 md:py-5 border-t '>
+      <div className='container mx-auto flex flex-col md:flex-row items-center w-full  justify-between gap-6 md:gap-4'>
+        {/* Logo */}
+        <Link href='#' className='flex items-center gap-2' prefetch={false}>
+          <ClinicLogo />
+          <span className='sr-only'>Acme Inc</span>
+        </Link>
 
-        {clinic.address && <p className='text-sm text-gray-300'>{clinic.address}</p>}
+        {/* Navigation Links */}
+        <nav className='flex flex-wrap items-center justify-center gap-4 sm:gap-6'>
+          {['About', 'Services', 'Contact', 'Privacy'].map((item) => (
+            <Link key={item} href='#' prefetch={false}>
+              <Typography
+                variant='small'
+                as='span'
+                className='hover:underline underline-offset-4 transition-colors'
+              >
+                {item}
+              </Typography>
+            </Link>
+          ))}
+        </nav>
 
-        {clinic.phone && <p className='text-sm text-gray-300'>{clinic.phone}</p>}
-
-        <p className='text-xs text-gray-500 mt-4'>
-          © {new Date().getFullYear()} جميع الحقوق محفوظة
-        </p>
+        {/* Copyright */}
+        <Typography variant='muted' className='text-xs text-center md:text-right'>
+          &copy; 2024 Acme Inc. All rights reserved.
+        </Typography>
       </div>
     </footer>
   )

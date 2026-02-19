@@ -25,6 +25,7 @@ import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { toggleStaffStatusAction } from '../../../../actions/staff/toggle-staff-status'
 import { updateStaffAction } from '../../../../actions/staff/update-staff'
 import { IStaff } from '../../../../types/staff'
 import { UpdateStaffInput, updateStaffSchema } from '../../../../validation/staff'
@@ -48,20 +49,39 @@ export function UpdateStaffDialog({ staff, tenantSlug, open, onOpenChange }: Pro
       phone: staff.phone || '',
       role: staff.role,
       isEnabled: staff.isEnabled,
-      password: '', // فاضي عشان مش عايزين نغيره إلا لو اليوزر كتب
+      password: '',
     },
   })
 
   async function onSubmit(values: UpdateStaffInput) {
     setLoading(true)
-    const res = await updateStaffAction(values, tenantSlug)
-    setLoading(false)
+    let hasError = false
 
-    if (res.success) {
-      toast.success(res.message)
-      onOpenChange(false)
-    } else {
-      toast.error(res.message)
+    try {
+      const updateRes = await updateStaffAction(values, tenantSlug)
+
+      if (!updateRes.success) {
+        toast.error(updateRes.message)
+        hasError = true
+      }
+
+      if (!hasError && values.isEnabled !== staff.isEnabled) {
+        const statusRes = await toggleStaffStatusAction(staff.id, values.isEnabled, tenantSlug)
+
+        if (!statusRes.success) {
+          toast.error(statusRes.message)
+          hasError = true
+        }
+      }
+
+      if (!hasError) {
+        toast.success('تم الحفظ بنجاح')
+        onOpenChange(false)
+      }
+    } catch (err) {
+      toast.error('حدث خطأ غير متوقع')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -155,7 +175,7 @@ export function UpdateStaffDialog({ staff, tenantSlug, open, onOpenChange }: Pro
                     <FormLabel>تفعيل الحساب</FormLabel>
                   </div>
                   <FormControl>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    <Switch checked={field.value} onCheckedChange={field.onChange} dir='ltr' />
                   </FormControl>
                 </FormItem>
               )}
