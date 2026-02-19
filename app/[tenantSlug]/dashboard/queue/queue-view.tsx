@@ -26,7 +26,7 @@ export function QueueView({ tenantSlug, activeSessions }: QueueViewProps) {
     ) {
       setSelectedSessionId(activeSessions[0].sessionId)
     }
-  }, [activeSessions.length, activeSessions, selectedSessionId])
+  }, [activeSessions, selectedSessionId])
 
   const selectedSession = activeSessions.find((s) => s.sessionId === selectedSessionId)
 
