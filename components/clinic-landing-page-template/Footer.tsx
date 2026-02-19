@@ -1,15 +1,15 @@
 import { Typography } from '@/components/ui/typography'
 import Link from 'next/link'
-import { ClinicLogo } from './Navbar/logo'
 import { IPublicClinic } from '../../types/public'
+import { ClinicLogo } from './Navbar/logo'
 
-export default function Footer({clinic}:{clinic:IPublicClinic}) {
+export default function Footer({ clinic }: { clinic: IPublicClinic }) {
   return (
     <footer className='w-full bg-background py-6 md:py-5 border-t '>
       <div className='container mx-auto flex flex-col md:flex-row items-center w-full  justify-between gap-6 md:gap-4'>
         {/* Logo */}
         <Link href='#' className='flex items-center gap-2' prefetch={false}>
-          <ClinicLogo />
+          <ClinicLogo logoUrl={clinic.logoUrl} clinicName={clinic.clinicName} />
           <span className='sr-only'>Acme Inc</span>
         </Link>
 
