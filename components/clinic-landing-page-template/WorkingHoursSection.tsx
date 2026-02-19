@@ -1,12 +1,9 @@
 import { Card } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography'
 import { DAY_ORDER, DAYS_AR, IPublicWorkingHour } from '@/types/public'
-import { Clock, CalendarClock } from 'lucide-react'
+import { Clock, CalendarClock, Ban } from 'lucide-react'
 import { formatTime } from '../../lib/formatTime'
-
-
-
-
+import { cn } from '@/lib/utils'
 
 export default function WorkingHoursSection({
   workingHours,
@@ -15,105 +12,98 @@ export default function WorkingHoursSection({
 }) {
   if (!workingHours || workingHours.length === 0) return null
 
-  // 4. ترتيب الأيام قبل العرض
   const sortedHours = [...workingHours].sort((a, b) => {
     return (DAY_ORDER[a.dayOfWeek] || 0) - (DAY_ORDER[b.dayOfWeek] || 0)
   })
 
   return (
-    <section
-      id='working-hours'
-      className='py-24 bg-background flex justify-center items-center text-primary-foreground relative overflow-hidden'
-    >
-      {/* Background Decor (Optional Subtle Pattern) */}
-      <div className='absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_center,var(--tw-gradient-stops))] from-white/20 to-transparent' />
+    <section id='working-hours' className='py-24 bg-muted/30 relative overflow-hidden flex justify-center'>
+      {/* عناصر ديكورية في الخلفية */}
+      <div className='absolute top-0 left-0 w-64 h-64 bg-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl' />
+      <div className='absolute bottom-0 right-0 w-96 h-96 bg-primary/10 rounded-full translate-x-1/3 translate-y-1/3 blur-3xl' />
 
       <div className='container px-4 md:px-6 relative z-10'>
-        {/* --- Header Centered with Flex --- */}
-        <div className='flex flex-col items-center justify-center text-center space-y-6 mb-12'>
-          <div className='inline-flex items-center justify-center rounded-full bg-white/10 p-4 shadow-lg backdrop-blur-sm'>
-            <CalendarClock className='h-8 w-8 text-white' />
+        <div className='text-center space-y-4 mb-16'>
+          <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium'>
+            <Clock className='w-4 h-4' />
+            <span>متواجدون دائماً لأجلكم</span>
           </div>
-
-          <div className='space-y-2'>
-            <Typography variant='h2' className='text-white text-3xl md:text-4xl'>
-              مواعيد العمل
-            </Typography>
-            <Typography variant='lead' className='text-primary-foreground/80 max-w-150'>
-              نحن متواجدون لخدمتكم طوال أيام الأسبوع وفق الجدول التالي.
-            </Typography>
-          </div>
+          <Typography variant='h2' className='text-3xl md:text-5xl font-bold tracking-tight'>
+            مواعيد العمل الرسمية
+          </Typography>
+          <Typography variant='lead' className='text-muted-foreground max-w-175 mx-auto'>
+            نستقبلكم في عيادتنا طوال أيام الأسبوع في المواعيد المحددة أدناه. يمكنك دائماً حجز موعد
+            مسبق لتجنب الانتظار.
+          </Typography>
         </div>
 
-        {/* --- Schedule Card --- */}
-        <div className='flex justify-center'>
-          <Card className='w-full max-w-3xl bg-background/95 backdrop-blur shadow-2xl border-0 overflow-hidden'>
-            <div className='flex flex-col'>
-              {/* Table Header (Hidden on mobile, visible on desktop) */}
-              <div className='hidden md:flex bg-muted/50 p-4 text-sm font-medium text-muted-foreground border-b'>
-                <div className='flex-1 text-right pr-4'>اليوم</div>
-                <div className='flex-1 text-center'>من</div>
-                <div className='flex-1 text-center'>إلى</div>
-                <div className='flex-1 text-left pl-4'>الحالة</div>
-              </div>
+        {/* Grid Layout بدلاً من الجدول */}
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
+          {sortedHours.map((wh, index) => (
+            <Card
+              key={index}
+              className={cn(
+                'group relative p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border-2',
+                wh.isActive
+                  ? 'bg-background border-transparent hover:border-primary/20'
+                  : 'bg-muted/50 border-transparent opacity-75 grayscale-[0.5]',
+              )}
+            >
+              {/* أيقونة الحالة */}
+              <div
+                className={cn(
+                  'absolute top-4 left-4 w-2 h-2 rounded-full',
+                  wh.isActive ? 'bg-green-500 animate-pulse' : 'bg-muted-foreground/30',
+                )}
+              />
 
-              {/* Rows */}
-              <div className='divide-y divide-border'>
-                {sortedHours.map((wh, index) => (
+              <div className='space-y-4'>
+                <div className='flex items-center gap-3 border-b pb-3 border-muted'>
                   <div
-                    key={index}
-                    className='flex flex-col md:flex-row items-center justify-between p-5 hover:bg-muted/30 transition-colors gap-4 md:gap-0'
+                    className={cn(
+                      'p-2 rounded-lg transition-colors',
+                      wh.isActive ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground',
+                    )}
                   >
-                    {/* Day Name */}
-                    <div className='flex-1 w-full md:w-auto text-right md:pr-4 flex items-center justify-between md:justify-start'>
-                      <Typography variant='large' className='font-bold text-foreground'>
-                        {DAYS_AR[wh.dayOfWeek] || wh.dayOfWeek}
-                      </Typography>
-                      {/* Mobile Only Label */}
-                      <span className='md:hidden text-xs text-muted-foreground bg-muted px-2 py-1 rounded'>
-                        {wh.isActive ? 'متاح' : 'مغلق'}
+                    <CalendarClock className='w-5 h-5' />
+                  </div>
+                  <Typography variant='h4' className='font-bold text-xl'>
+                    {DAYS_AR[wh.dayOfWeek] || wh.dayOfWeek}
+                  </Typography>
+                </div>
+
+                {wh.isActive ? (
+                  <div className='space-y-3 pt-2'>
+                    <div className='flex items-center justify-between text-sm'>
+                      <span className='text-muted-foreground'>الفترة الصباحية</span>
+                      <span className='font-bold text-primary bg-primary/5 px-2 py-0.5 rounded'>
+                        متاح
                       </span>
                     </div>
-
-                    {/* Start Time */}
-                    <div className='flex-1 w-full md:w-auto flex items-center justify-between md:justify-center bg-muted/20 md:bg-transparent p-2 md:p-0 rounded md:rounded-none'>
-                      <span className='md:hidden text-muted-foreground text-sm'>من:</span>
-                      <div className='flex items-center gap-2'>
-                        <Clock className='w-4 h-4 text-primary' />
-                        <Typography variant='p' className='font-mono m-0 ltr'>
-                          {formatTime(wh.startTime)}
-                        </Typography>
+                    <div className='flex flex-col gap-1'>
+                      <div className='flex items-center justify-between font-mono text-lg tracking-tight ltr'>
+                        <span>{formatTime(wh.startTime)}</span>
+                        <span className='text-muted-foreground text-xs mx-2 italic'>إلى</span>
+                        <span>{formatTime(wh.endTime)}</span>
                       </div>
-                    </div>
-
-                    {/* End Time */}
-                    <div className='flex-1 w-full md:w-auto flex items-center justify-between md:justify-center bg-muted/20 md:bg-transparent p-2 md:p-0 rounded md:rounded-none'>
-                      <span className='md:hidden text-muted-foreground text-sm'>إلى:</span>
-                      <div className='flex items-center gap-2'>
-                        <Clock className='w-4 h-4 text-muted-foreground' />
-                        <Typography variant='p' className='font-mono m-0 ltr'>
-                          {formatTime(wh.endTime)}
-                        </Typography>
-                      </div>
-                    </div>
-
-                    {/* Status Badge (Desktop) */}
-                    <div className='hidden md:flex flex-1 justify-end pl-4'>
-                      {wh.isActive ? (
-                        <div className='inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent bg-green-500/15 text-green-700 dark:text-green-400'>
-                          متاح للعمل
-                        </div>
-                      ) : (
-                        <div className='inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors border-transparent bg-destructive/15 text-destructive'>
-                          مغلق
-                        </div>
-                      )}
                     </div>
                   </div>
-                ))}
+                ) : (
+                  <div className='flex flex-col items-center justify-center py-4 text-muted-foreground space-y-2 italic'>
+                    <Ban className='w-8 h-8 opacity-20' />
+                    <span className='text-sm'>مغلق (عطلة رسمية)</span>
+                  </div>
+                )}
               </div>
-            </div>
-          </Card>
+            </Card>
+          ))}
+        </div>
+
+        <div className='mt-16 text-center'>
+          <div className='inline-block p-[1px] rounded-full bg-gradient-to-r from-transparent via-primary/50 to-transparent w-full max-w-md mb-6' />
+          <p className='text-muted-foreground text-sm'>
+            * جميع المواعيد قد تخضع لتعديلات بسيطة في أيام العطلات الرسمية والأعياد.
+          </p>
         </div>
       </div>
     </section>

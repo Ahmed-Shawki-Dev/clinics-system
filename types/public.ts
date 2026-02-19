@@ -51,7 +51,7 @@ export interface IPublicDoctor {
 }
 
 export interface IPublicWorkingHour {
-  dayOfWeek: DAY_ORDER
+  dayOfWeek: keyof typeof DAY_ORDER
   startTime: string
   endTime: string
   isActive: boolean
