@@ -9,7 +9,7 @@ export default function WorkingHoursSection({
   workingHours,
 }: {
   workingHours: IPublicWorkingHour[]
-}) {
+}) { 
   if (!workingHours || workingHours.length === 0) return null
 
   const sortedHours = [...workingHours].sort((a, b) => {

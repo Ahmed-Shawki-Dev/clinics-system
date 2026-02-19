@@ -12,7 +12,6 @@ export const createPrescriptionAction = async (
   data: PrescriptionFormInput,
 ): Promise<BaseApiResponse<IPrescription>> => {
   try {
-    console.log(visitId)
     // 1. إرسال الطلب لإضافة الدواء
     const result = await fetchApi<IPrescription>(`/api/clinic/visits/${visitId}/prescriptions`, {
       method: 'POST',
