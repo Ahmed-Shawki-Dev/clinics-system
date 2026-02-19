@@ -20,7 +20,7 @@ export async function middleware(request: NextRequest) {
   }
 
   const isAuthPage = segments[1] === 'login' || segments[1] === 'register'
-  const isProtectedPage = ['dashboard', 'doctor', 'patient'].includes(segments[1])
+  const isProtectedPage = ['dashboard', 'doctor', 'patient', 'queue', 'staff', 'billing', 'services', 'labs'].includes(segments[1])
 
   // 3. منطق التوجيه (Auth Logic)
   // لو معاه توكن وداخل صفحة لوجن، ابعته للداشبورد

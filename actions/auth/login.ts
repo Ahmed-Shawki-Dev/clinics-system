@@ -25,7 +25,7 @@ export async function loginAction(values: LoginInput, tenantSlug: string) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       path: '/',
-      maxAge: 30 * 24 * 60, // 30 يوم (بالثواني)
+      maxAge: 30 * 24 * 60 * 60, // 30 يوم (بالثواني)
     })
 
     // ❌ مسحنا الجزء بتاع تخزين الـ RefreshToken
