@@ -1,0 +1,63 @@
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
+import { ArrowLeft, Rocket, Sparkles } from 'lucide-react'
+import Link from 'next/link'
+
+export function HeroSection() {
+  return (
+    <section className='relative flex flex-col items-center justify-start  pt-16 md:pt-32 pb-10 text-center overflow-hidden'>
+      {/* Pattern Background */}
+      <div className='absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[16px_16px] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)] opacity-30'></div>
+
+      {/* Ambient Glow */}
+      <div className='absolute top-0 z-[-1] h-screen w-full overflow-hidden pointer-events-none'>
+        <div className='absolute left-1/2 top-[20%] -translate-x-1/2 h-100 w-150 rounded-full bg-primary/20 blur-[120px]'></div>
+      </div>
+
+      <div className='container px-4 md:px-6 z-10 flex flex-col items-center'>
+        {/* 1. Micro-copy / Badge */}
+        <div className='mb-8 flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary transition-colors'>
+          <Sparkles className='h-4 w-4' />
+          <span>نظام إدارة العيادات الأذكى في مصر</span>
+        </div>
+
+        {/* 2. Massive Typography */}
+        <Typography
+          variant='h1'
+          className='mb-6 max-w-4xl text-5xl md:text-7xl lg:text-8xl leading-tight tracking-tighter'
+        >
+          ارتقِ بعيادتك مع <br className='hidden md:block' />
+          <span className='text-transparent tracking-wide bg-clip-text bg-linear-to-r from-primary to-cyan-400 uppercase'>
+            Beta Clinics
+          </span>
+        </Typography>
+
+        <Typography
+          variant='lead'
+          className='mx-auto mb-10 max-w-2xl text-lg md:text-xl leading-relaxed'
+        >
+          نظام سحابي متكامل، مصمم خصيصاً لإدارة الحجوزات، الطوابير، والتقارير المالية بدقة وسرعة
+          فائقة. حول عيادتك لبيئة عمل رقمية بالكامل.
+        </Typography>
+
+        <div className='flex flex-col sm:flex-row gap-4 justify-center items-center mb-16'>
+          <Button size='lg' className='w-full sm:w-auto h-12 px-8 text-base gap-2' asChild>
+            <Link href='/login'>
+              ابدأ الآن <ArrowLeft className='h-5 w-5' />
+            </Link>
+          </Button>
+          <Button
+            size='lg'
+            variant='outline'
+            className='w-full sm:w-auto h-12 px-8 text-base gap-2'
+            asChild
+          >
+            <Link href='#features'>
+              <Rocket className='h-5 w-5' /> تصفح المميزات
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </section>
+  )
+}
