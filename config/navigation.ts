@@ -24,9 +24,9 @@ type NavItem = {
 export const NAV_ITEMS: NavItem[] = [
   {
     title: 'لوحة التحكم',
-    href: '/', // المسار الأساسي جوه الداشبورد
+    href: '/', 
     icon: LayoutDashboard,
-    roles: ['SuperAdmin', 'ClinicOwner', 'ClinicManager', 'Receptionist', 'Doctor'],
+    roles: ['SuperAdmin', 'ClinicOwner', 'ClinicManager', 'Receptionist'],
   },
   {
     title: 'الطابور والاستقبال',

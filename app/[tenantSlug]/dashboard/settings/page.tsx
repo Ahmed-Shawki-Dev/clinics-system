@@ -1,7 +1,7 @@
 import { getClinicSettings } from '@/actions/settings/get-settings'
 import { notFound } from 'next/navigation'
-import { SettingsForm } from './settings-form'
 import { DashboardHeader, DashboardShell } from '../../../../components/shell'
+import { SettingsForm } from './settings-form'
 
 interface SettingsPageProps {
   params: Promise<{ tenantSlug: string }>
