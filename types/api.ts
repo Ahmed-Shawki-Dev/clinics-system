@@ -4,7 +4,6 @@ export type UserRole =
   | 'ClinicManager'
   | 'Receptionist'
   | 'Doctor'
-  | 'Patient'
 
 export interface BaseApiResponse<T> {
   success: boolean
