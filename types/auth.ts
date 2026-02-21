@@ -1,4 +1,4 @@
-import { UserRole } from "./api"
+import { UserRole } from './api'
 
 export interface UserProfile {
   id: string
@@ -11,7 +11,7 @@ export interface UserProfile {
   profiles?: Array<{ id: string; name: string; isDefault: boolean }> // للمرضى فقط
 }
 
-export interface AuthResponseData {
+export interface ILogin {
   token: string
   refreshToken: string
   expiresAt: string

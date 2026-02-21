@@ -1,11 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { AuthResponseData, UserProfile } from '../types/auth'
+import { ILogin, UserProfile } from '../types/auth'
 
 interface AuthState {
   user: UserProfile | null
   isAuthenticated: boolean
-  setAuth: (data: AuthResponseData) => void
+  setAuth: (data: ILogin) => void
   logout: () => void
 }
 

@@ -1,14 +1,24 @@
 import { type NextRequest, NextResponse } from 'next/server'
 
+// دالة خفيفة لفك التوكن في الـ Edge Middleware
+function decodeJwt(token: string) {
+  try {
+    const payload = token.split('.')[1]
+    // atob is available in edge runtime
+    return JSON.parse(atob(payload))
+  } catch (error) {
+    if (error instanceof Error) return null
+  }
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // 1. استخراج الـ Tenant Slug والـ Token
   const segments = pathname.split('/').filter(Boolean)
   const tenantSlug = segments[0]
-  const token = request.cookies.get('token')?.value
+  const employeeToken = request.cookies.get('token')?.value
+  const patientToken = request.cookies.get('patient_token')?.value
 
-  // 2. حماية المسارات (Exclude static files & API)
   if (
     !tenantSlug ||
     pathname.includes('.') ||
@@ -19,22 +29,58 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  const isAuthPage = segments[1] === 'login' || segments[1] === 'register'
-  const isProtectedPage = ['dashboard', 'doctor', 'patient', 'queue', 'staff', 'billing', 'services', 'labs'].includes(segments[1])
+  // ==========================================
+  // 1. منطق المريض (Patient Logic)
+  // ==========================================
+  if (segments[1] === 'patient') {
+    const isPatientAuthPage = segments[2] === 'login' || segments[2] === 'register'
 
-  // 3. منطق التوجيه (Auth Logic)
-  // لو معاه توكن وداخل صفحة لوجن، ابعته للداشبورد
-  if (isAuthPage && token) {
+    if (isPatientAuthPage && patientToken) {
+      // يفضل هنا برضه تفك توكن المريض وتتأكد من صلاحيته لو حبيت
+      return NextResponse.redirect(new URL(`/${tenantSlug}/patient`, request.url))
+    }
+
+    if (!isPatientAuthPage && !patientToken) {
+      return NextResponse.redirect(new URL(`/${tenantSlug}/patient/login`, request.url))
+    }
+
+    return NextResponse.next()
+  }
+
+  // ==========================================
+  // 2. منطق الموظف (Employee Logic)
+  // ==========================================
+  const isAuthPage = segments[1] === 'login' || segments[1] === 'register'
+  const isProtectedPage = [
+    'dashboard',
+    'doctor',
+    'queue',
+    'staff',
+    'billing',
+    'services',
+    'labs',
+  ].includes(segments[1])
+
+  // التحقق الحقيقي من التوكن
+  let decodedEmployee = null
+  if (employeeToken) {
+    decodedEmployee = decodeJwt(employeeToken)
+  }
+
+  // لو معاه توكن بس مضروب أو منتهي أو بتاع مريض (ملوش role إداري)
+  // نعتبره كأنه مفيش توكن
+  const isValidEmployee = decodedEmployee && decodedEmployee.role
+
+  if (isAuthPage && isValidEmployee) {
     return NextResponse.redirect(new URL(`/${tenantSlug}/dashboard`, request.url))
   }
 
-  // لو ممعهوش توكن وداخل صفحة محمية، ارجع للوجن
-  if (isProtectedPage && !token) {
-    return NextResponse.redirect(new URL(`/${tenantSlug}/login`, request.url))
+  if (isProtectedPage && !isValidEmployee) {
+    // لو التوكن مضروب، امسحه ووجهه للوجين
+    const response = NextResponse.redirect(new URL(`/${tenantSlug}/login`, request.url))
+    response.cookies.delete('token')
+    return response
   }
-
-  // ✅ شيلنا الـ Fetch من هنا عشان ده "خنق" للمشروع
-  // التأكد من الـ Clinic Active خليه في الـ Root Layout بتاع الداشبورد
 
   return NextResponse.next()
 }
