@@ -5,7 +5,7 @@ import Link from 'next/link'
 
 export function HeroSection() {
   return (
-    <section className='relative flex flex-col items-center justify-start  pt-16 md:pt-32 pb-10 text-center overflow-hidden'>
+    <section className='relative flex flex-col  items-center justify-start  pt-16 md:pt-32 pb-10 text-center overflow-hidden'>
       {/* Pattern Background */}
       <div className='absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[16px_16px] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)] opacity-30'></div>
 

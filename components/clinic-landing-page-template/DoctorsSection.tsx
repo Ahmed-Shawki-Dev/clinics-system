@@ -2,21 +2,17 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Typography } from '@/components/ui/typography' // مسارك المظبوط
 import { IPublicDoctor } from '@/types/public'
-import { Stethoscope, UserRound } from 'lucide-react'
+import { UserRound } from 'lucide-react'
 import Image from 'next/image'
 
 export default function DoctorsSection({ doctors }: { doctors: IPublicDoctor[] }) {
   if (!doctors || doctors.length === 0) return null
 
   return (
-    <section id='doctors' className='py-24  flex justify-center items-center bg-muted/50'>
+    <section id='doctors' className='py-24  flex justify-center items-center '>
       <div className='container px-4 md:px-6'>
         {/* --- Header with Strict Flex Centering --- */}
         <div className='flex flex-col items-center justify-center text-center space-y-4 mb-16'>
-          <div className='inline-flex items-center justify-center rounded-full border border-primary/20 bg-primary/10 p-3 shadow-sm'>
-            <Stethoscope className='h-6 w-6 text-primary' />
-          </div>
-
           <Typography variant='h2' className='text-3xl md:text-4xl font-bold tracking-tight'>
             نخبة من الأطباء
           </Typography>
@@ -31,7 +27,7 @@ export default function DoctorsSection({ doctors }: { doctors: IPublicDoctor[] }
           {doctors.map((doctor) => (
             <Card
               key={doctor.id}
-              className='group overflow-hidden border-border/50 bg-card transition-all duration-300 hover:shadow-lg hover:-translate-y-1'
+              className='group pt-0 overflow-hidden border-border/50 bg-card transition-all duration-300 hover:shadow-lg hover:-translate-y-1'
             >
               {/* Image Container */}
               <div className='relative h-80 w-full overflow-hidden bg-muted flex items-center justify-center'>
@@ -40,7 +36,7 @@ export default function DoctorsSection({ doctors }: { doctors: IPublicDoctor[] }
                     src={doctor.photoUrl}
                     alt={doctor.name}
                     fill
-                    className='object-cover transition-transform duration-500 group-hover:scale-105'
+                    className='object-cover object-center transition-transform duration-500 group-hover:scale-105'
                   />
                 ) : (
                   <div className='flex flex-col items-center gap-2 text-muted-foreground/50'>

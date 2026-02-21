@@ -1,7 +1,6 @@
 import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Menu } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { ModeToggle } from '../ModeToggle'
 
@@ -28,6 +27,7 @@ export function Navbar() {
             /> */}
             <span className='font-bold text-xl inline-block text-primary'>Beta Clinics</span>
           </Link>
+
           <nav className='hidden md:flex gap-6'>
             {routes.map((route) => (
               <Link
@@ -64,16 +64,22 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent side='right' className='pr-0 sm:max-w-xs'>
               <div className='flex flex-col gap-6 px-6 pt-10'>
+                <SheetTitle className='text-lg font-bold mb-4 sr-only'>Beta Clinic</SheetTitle>
+
                 <Link href='/' className='flex items-center space-x-2 mb-4'>
-                  <Image
+                  {/* <Image
                     src='/logo.png'
                     alt='Elite Clinic Logo'
                     width={32}
                     height={32}
                     className='ms-2'
-                  />
-                  <span className='font-bold text-xl text-primary'>Elite Clinic</span>
+                  /> */}
+                  <span className='font-bold text-xl text-primary'>Beta Clinic</span>
                 </Link>
+                <div className='flex justify-between items-center mb-2'>
+                  <span className='text-sm text-muted-foreground'>المظهر</span>
+                  <ModeToggle />
+                </div>
                 <div className='flex flex-col gap-4'>
                   {routes.map((route) => (
                     <Link
@@ -86,10 +92,6 @@ export function Navbar() {
                   ))}
                 </div>
                 <div className='flex flex-col gap-3 mt-4'>
-                  <div className='flex justify-between items-center mb-2'>
-                    <span className='text-sm text-muted-foreground'>المظهر</span>
-                    <ModeToggle />
-                  </div>
                   <Button asChild variant='outline' className='w-full justify-center'>
                     <Link href='/login'>تسجيل الدخول</Link>
                   </Button>

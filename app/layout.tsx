@@ -25,7 +25,7 @@ export default function RootLayout({
   return (
     <html lang='ar' dir='rtl' suppressHydrationWarning>
       <body
-        className={`${cairo.variable} font-sans antialiased`}
+        className={`${cairo.variable} font-sans antialiased `}
         suppressHydrationWarning
       >
         <DirectionProvider direction='rtl' dir={'rtl'}>
