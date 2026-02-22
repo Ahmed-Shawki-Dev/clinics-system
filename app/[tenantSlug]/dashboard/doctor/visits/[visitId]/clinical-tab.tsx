@@ -1,6 +1,6 @@
 'use client'
 
-import { DoctorVisitFieldConfig, IVisit } from '@/types/visit'
+import { IVisit } from '@/types/visit'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { useForm } from 'react-hook-form'
 
@@ -18,15 +18,16 @@ import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { updateVisit } from '../../../../../../actions/visit/update-visit'
 import { notesFields, vitalsFields } from '../../../../../../constants/vitals-fields'
+import { IDoctor } from '../../../../../../types/doctor'
 import { ClinicalFormInput, clinicalSchema } from '../../../../../../validation/visit'
 
 interface ClinicalTabProps {
   tenantSlug: string
   visit: IVisit
-  doctorConfig?: DoctorVisitFieldConfig
+  doctor?: IDoctor
 }
 
-export function ClinicalTab({ tenantSlug, visit, doctorConfig }: ClinicalTabProps) {
+export function ClinicalTab({ tenantSlug, visit, doctor }: ClinicalTabProps) {
   const form = useForm<ClinicalFormInput>({
     resolver: valibotResolver(clinicalSchema),
     defaultValues: {
@@ -72,7 +73,7 @@ export function ClinicalTab({ tenantSlug, visit, doctorConfig }: ClinicalTabProp
               .filter(
                 (fieldConfig) =>
                   // لو مفيش config (لسه مجبناهوش) اعرض كله، لو فيه، اعرض اللي بـ true بس
-                  !doctorConfig || doctorConfig[fieldConfig.configKey],
+                  !doctor?.visitFieldConfig || doctor?.visitFieldConfig[fieldConfig.configKey],
               )
               .map((fieldConfig) => (
                 <FormField

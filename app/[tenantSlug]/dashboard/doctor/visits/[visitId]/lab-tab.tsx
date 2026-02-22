@@ -157,12 +157,7 @@ export function LabsTab({ visit, tenantSlug }: LabsTabProps) {
                 )}
               />
 
-              <Button
-                type='submit'
-                size='lg'
-                className='px-8 bg-blue-600'
-                disabled={form.formState.isSubmitting}
-              >
+              <Button type='submit' size='lg' variant={'secondary'} disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting ? (
                   <Loader2 className='animate-spin' />
                 ) : (
