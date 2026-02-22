@@ -5,22 +5,25 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { IVisit } from '@/types/visit'
 import { LogOut, Save } from 'lucide-react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation' // الـ Import الصح هنا
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { completeVisitAction } from '../../../../../../actions/visit/complete-visit'
 import { ClinicalTab } from './clinical-tab'
 import { LabsTab } from './lab-tab'
 import { PrescriptionTab } from './prescription-tab'
+import { IDoctorVisitConfig } from '@/types/doctor' 
 
 export function VisitTerminalClient({
   visit,
   tenantSlug,
   defaultTab,
+  doctorConfig, 
 }: {
   visit: IVisit
   tenantSlug: string
   defaultTab: string
+  doctorConfig?: IDoctorVisitConfig 
 }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -35,19 +38,15 @@ export function VisitTerminalClient({
 
     if (res.success) {
       toast.success('تم إنهاء الزيارة بنجاح')
-      // دي اللي هترمي الدكتور بره وترجعه للطابور!
       router.push(`/${tenantSlug}/dashboard/doctor/queue`)
     } else {
       toast.error(res.message || 'حدث خطأ أثناء إنهاء الزيارة')
     }
   }
 
-  // دالة تغيير التابة وتحديث الـ URL بدون Reload
   const handleTabChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString())
     params.set('tab', value)
-
-    // التحديث الفعلي للـ URL في المتصفح
     router.replace(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
@@ -101,7 +100,8 @@ export function VisitTerminalClient({
         </TabsList>
 
         <TabsContent value='clinical' className='focus-visible:outline-none mt-2'>
-          <ClinicalTab visit={visit} tenantSlug={tenantSlug} />
+          {/* 4. مررنا الإعدادات للتابة عشان تخفي وتظهر براحتها */}
+          <ClinicalTab visit={visit} tenantSlug={tenantSlug} doctorConfig={doctorConfig} />
         </TabsContent>
 
         <TabsContent value='prescription' className='focus-visible:outline-none mt-2'>

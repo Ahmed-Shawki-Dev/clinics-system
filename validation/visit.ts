@@ -5,6 +5,7 @@ export const clinicalSchema = v.object({
   complaint: v.nullish(v.string()),
   diagnosis: v.nullish(v.string()),
   notes: v.nullish(v.string()),
+  followUpDate: v.optional(v.nullable(v.string())),
 
   bloodPressureSystolic: v.nullish(v.number('يجب أن يكون رقماً')),
   bloodPressureDiastolic: v.nullish(v.number('يجب أن يكون رقماً')),

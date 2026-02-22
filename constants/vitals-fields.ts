@@ -1,5 +1,5 @@
-import { DoctorVisitFieldConfig } from "../types/visit"
-import { ClinicalFormInput } from "../validation/visit"
+import { DoctorVisitFieldConfig } from '../types/visit'
+import { ClinicalFormInput } from '../validation/visit'
 
 export const vitalsFields: {
   name: keyof ClinicalFormInput
@@ -39,12 +39,31 @@ export const vitalsFields: {
   },
 ]
 
+
+
 export const notesFields: {
   name: keyof ClinicalFormInput
   label: string
   placeholder: string
+  inputType?: 'textarea' | 'date'
 }[] = [
-  { name: 'complaint', label: 'الشكوى (Complaint)', placeholder: 'اكتب شكوى المريض...' },
-  { name: 'diagnosis', label: 'التشخيص النهائي (Diagnosis)', placeholder: 'اكتب التشخيص هنا...' },
-  { name: 'notes', label: 'ملاحظات إضافية', placeholder: 'أي ملاحظات أخرى...' },
+  {
+    name: 'complaint',
+    label: 'الشكوى (Complaint)',
+    placeholder: 'اكتب شكوى المريض...',
+    inputType: 'textarea',
+  },
+  {
+    name: 'diagnosis',
+    label: 'التشخيص النهائي (Diagnosis)',
+    placeholder: 'اكتب التشخيص هنا...',
+    inputType: 'textarea',
+  },
+  {
+    name: 'notes',
+    label: 'ملاحظات إضافية',
+    placeholder: 'أي ملاحظات أخرى...',
+    inputType: 'textarea',
+  },
+  { name: 'followUpDate', label: 'ميعاد الاستشارة القادم', placeholder: '', inputType: 'date' }, // حددنا النوع هنا
 ]

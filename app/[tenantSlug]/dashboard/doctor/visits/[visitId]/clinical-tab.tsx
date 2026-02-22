@@ -103,9 +103,11 @@ export function ClinicalTab({ tenantSlug, visit, doctorConfig }: ClinicalTabProp
         </div>
 
         {/* قسم التشخيص والشكوى */}
+        {/* قسم التشخيص والشكوى */}
         <div className='bg-card p-6 rounded-xl border shadow-sm'>
           <h3 className='text-lg font-bold mb-4 border-b pb-2'>التشخيص والملاحظات</h3>
-          <div className='space-y-4'>
+          {/* هنا التعديل: قلبناها Grid عمودين في الشاشات الكبيرة */}
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             {notesFields.map((fieldConfig) => (
               <FormField
                 key={fieldConfig.name}
@@ -115,11 +117,29 @@ export function ClinicalTab({ tenantSlug, visit, doctorConfig }: ClinicalTabProp
                   <FormItem>
                     <FormLabel>{fieldConfig.label}</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder={fieldConfig.placeholder}
-                        {...field}
-                        value={field.value ?? ''}
-                      />
+                      {fieldConfig.inputType === 'date' ? (
+                        <Input
+                          type='date'
+                          {...field}
+                          value={
+                            field.value
+                              ? new Date(field.value as string).toISOString().split('T')[0]
+                              : ''
+                          }
+                          onChange={(e) =>
+                            field.onChange(
+                              e.target.value ? new Date(e.target.value).toISOString() : null,
+                            )
+                          }
+                        />
+                      ) : (
+                        <Textarea
+                          placeholder={fieldConfig.placeholder}
+                          className='resize-none' // عشان الدكتور ميبوظش شكل الجريد
+                          {...field}
+                          value={(field.value as string) ?? ''}
+                        />
+                      )}
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -134,7 +154,7 @@ export function ClinicalTab({ tenantSlug, visit, doctorConfig }: ClinicalTabProp
             type='submit'
             size='lg'
             className='bg-emerald-600 hover:bg-emerald-700'
-            disabled={form.formState.isSubmitting} 
+            disabled={form.formState.isSubmitting}
           >
             {form.formState.isSubmitting ? 'جاري الحفظ...' : 'حفظ البيانات السريرية'}
           </Button>

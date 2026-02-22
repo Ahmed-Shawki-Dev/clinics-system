@@ -1,17 +1,10 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { ColumnDef } from '@tanstack/react-table'
-import { Clock, MoreHorizontal, Phone, Stethoscope, User } from 'lucide-react'
+import { Clock, Phone, Stethoscope, User } from 'lucide-react'
 import { IDoctor } from '../../../../types/doctor'
+import { DoctorActionsCell } from './doctor-actions-cell'
+
 
 export const columns: ColumnDef<IDoctor>[] = [
   {
@@ -41,10 +34,7 @@ export const columns: ColumnDef<IDoctor>[] = [
         {row.getValue('specialty')}
       </div>
     ),
-    // ده مهم عشان الفلتر يشتغل صح
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
-    },
+    filterFn: (row, id, value) => value.includes(row.getValue(id)),
   },
   {
     accessorKey: 'phone',
@@ -69,27 +59,7 @@ export const columns: ColumnDef<IDoctor>[] = [
   {
     id: 'actions',
     header: 'الإجراءات',
-    cell: ({ row }) => {
-      const doctor = row.original
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant='ghost' className='h-8 w-8 p-0'>
-              <span className='sr-only'>Open menu</span>
-              <MoreHorizontal className='h-4 w-4' />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='end'>
-            <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(doctor.id)}>
-              نسخ المعرف (ID)
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>تعديل البيانات</DropdownMenuItem>
-            <DropdownMenuItem className='text-destructive'>إيقاف الحساب</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )
-    },
+    // مبقناش محتاجين نمرر الـ tenantSlug هنا
+    cell: ({ row }) => <DoctorActionsCell doctor={row.original} />,
   },
 ]
