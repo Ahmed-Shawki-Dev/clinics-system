@@ -1,11 +1,18 @@
 import * as v from 'valibot'
 
-// --- 1. Open Session Validation ---
+// ==========================================
+// 1. فاليشين فتح عيادة (شفت)
+// ==========================================
 export const OpenSessionSchema = v.object({
-  doctorId: v.pipe(v.string(), v.minLength(1, 'يجب اختيار الطبيب لتفعيل العيادة')),
+  doctorId: v.string('اختر الطبيب'),
   notes: v.optional(v.string()),
 })
 
+export type OpenSessionInput = v.InferOutput<typeof OpenSessionSchema>
+
+// ==========================================
+// 2. فاليديشن قطع تذكرة (عادية أو بدفع)
+// ==========================================
 export const CutTicketSchema = v.object({
   sessionId: v.string('اختر العيادة'),
   patientId: v.string('اختر المريض'),
@@ -19,4 +26,4 @@ export const CutTicketSchema = v.object({
   paymentNotes: v.optional(v.string()),
 })
 
-export type CutTicketInput = v.InferInput<typeof CutTicketSchema>
+export type CutTicketInput = v.InferOutput<typeof CutTicketSchema>
