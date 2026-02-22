@@ -59,3 +59,9 @@ export interface IQueueBoardSession {
 export interface IQueueBoard {
   sessions: IQueueBoardSession[]
 }
+
+
+export interface ICreateTicketResponse {
+  ticket: IQueueTicket; // بنعيد استخدام التايب بتاعك هنا
+  visitId: string;      // الحتة الزيادة اللي الباك بعتها
+}

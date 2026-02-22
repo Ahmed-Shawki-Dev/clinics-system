@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { fetchApi } from '../../lib/fetchApi'
 import { BaseApiResponse } from '../../types/api'
-import { IQueueTicket } from '../../types/queue'
+import { ICreateTicketResponse, IQueueTicket } from '../../types/queue'
 import { CutTicketInput } from '../../validation/queue'
 
 // 1. إنشاء تذكرة (الريسبشن)
@@ -13,7 +13,7 @@ export async function createTicket(
 ): Promise<BaseApiResponse<IQueueTicket>> {
   const response = await fetchApi<IQueueTicket>('/api/clinic/queue/tickets', {
     method: 'POST',
-    tenantSlug, 
+    tenantSlug,
     body: JSON.stringify({
       sessionId: data.sessionId,
       patientId: data.patientId,
@@ -85,11 +85,14 @@ export async function callTicketAction(
 export async function startVisitAction(
   tenantSlug: string,
   ticketId: string,
-): Promise<BaseApiResponse<IQueueTicket>> {
-  const result = await fetchApi<IQueueTicket>(`/api/clinic/queue/tickets/${ticketId}/start-visit`, {
-    method: 'POST',
-    tenantSlug,
-  })
+): Promise<BaseApiResponse<ICreateTicketResponse>> {
+  const result = await fetchApi<ICreateTicketResponse>(
+    `/api/clinic/queue/tickets/${ticketId}/start-visit`,
+    {
+      method: 'POST',
+      tenantSlug,
+    },
+  )
 
   if (result.success) {
     revalidatePath(`/${tenantSlug}/dashboard/queue`)

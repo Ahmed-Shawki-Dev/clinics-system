@@ -1,13 +1,13 @@
 'use client'
 
 import { Card, CardContent } from '@/components/ui/card'
-import { IQueueBoardSession, IQueueTicket } from '@/types/queue'
+import { ICreateTicketResponse, IQueueBoardSession, IQueueTicket } from '@/types/queue'
 import { AlertCircle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
 import { BaseApiResponse } from '../../../../../types/api'
 import { CurrentPatientCard } from './current-patient-card'
 import { WaitingQueueList } from './waiting-queue-list'
-
 
 interface Props {
   initialData: IQueueBoardSession
@@ -15,17 +15,31 @@ interface Props {
 }
 
 export function DoctorTerminalView({ initialData, tenantSlug }: Props) {
+  const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const { currentTicket, waitingTickets, isActive, waitingCount } = initialData
 
   const handleAction = (
-    actionFn: (tenantSlug: string, ticketId: string) => Promise<BaseApiResponse<IQueueTicket>>,
+    actionFn: (
+      tenantSlug: string,
+      ticketId: string,
+    ) => Promise<BaseApiResponse<IQueueTicket | ICreateTicketResponse>>,
     ticketId: string,
   ) => {
     startTransition(async () => {
-      await actionFn(tenantSlug, ticketId)
+      const result = await actionFn(tenantSlug, ticketId)
+
+      if (result.success && result.data) {
+        // بما إننا حددنا النوع فوق، الـ TS دلوقتي فاهم إن Data ممكن يكون فيها visitId
+        if ('visitId' in result.data) {
+          // الـ Type Guard ده كافي جداً دلوقتى
+          const visitId = (result.data as ICreateTicketResponse).visitId
+          router.push(`/${tenantSlug}/dashboard/doctor/visits/${visitId}`)
+        }
+      }
     })
   }
+
 
   if (!isActive) {
     return (

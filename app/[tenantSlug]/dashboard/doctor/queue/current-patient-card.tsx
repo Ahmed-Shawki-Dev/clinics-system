@@ -9,7 +9,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { IQueueTicket } from '@/types/queue'
+import { ICreateTicketResponse, IQueueTicket } from '@/types/queue'
 import { CheckCircle2, FastForward, PlayCircle, Stethoscope, User, UserPlus } from 'lucide-react'
 import { BaseApiResponse } from '../../../../../types/api'
 
@@ -17,16 +17,19 @@ interface Props {
   currentTicket?: IQueueTicket | null
   waitingTickets: IQueueTicket[]
   isPending: boolean
+  // حددنا الأنواع المسموحة بدقة بالغة
   onAction: (
-    actionFn: (tenantSlug: string, ticketId: string) => Promise<BaseApiResponse<IQueueTicket>>,
+    actionFn: (
+      tenantSlug: string,
+      ticketId: string,
+    ) => Promise<BaseApiResponse<IQueueTicket | ICreateTicketResponse>>,
     ticketId: string,
   ) => void
 }
 
 export function CurrentPatientCard({ currentTicket, waitingTickets, isPending, onAction }: Props) {
   return (
-    <Card >
-
+    <Card>
       <CardContent className='p-8'>
         {currentTicket ? (
           <div className='flex flex-col xl:flex-row items-start xl:items-center justify-between gap-8'>
