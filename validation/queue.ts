@@ -6,18 +6,17 @@ export const OpenSessionSchema = v.object({
   notes: v.optional(v.string()),
 })
 
-export type OpenSessionInput = v.InferInput<typeof OpenSessionSchema>
-
 export const CutTicketSchema = v.object({
-  sessionId: v.pipe(v.string(), v.minLength(1, 'يجب اختيار العيادة')),
-  patientId: v.pipe(v.string(), v.minLength(1, 'يجب اختيار المريض')),
-  doctorId: v.pipe(v.string(), v.minLength(1, 'يجب اختيار الطبيب')),
-
-  // الخدمة اختيارية عشان لو مش عايز يحددها دلوقتي
+  sessionId: v.string('اختر العيادة'),
+  patientId: v.string('اختر المريض'),
+  doctorId: v.string('الطبيب مطلوب'),
   doctorServiceId: v.optional(v.string()),
-
-  isUrgent: v.boolean(),
+  isUrgent: v.optional(v.boolean()),
   notes: v.optional(v.string()),
+  paymentAmount: v.optional(v.number()),
+  paymentMethod: v.optional(v.string()),
+  paymentReference: v.optional(v.string()),
+  paymentNotes: v.optional(v.string()),
 })
 
 export type CutTicketInput = v.InferInput<typeof CutTicketSchema>

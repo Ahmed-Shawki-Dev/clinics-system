@@ -7,27 +7,43 @@ import { ICreateTicketResponse, IQueueTicket } from '../../types/queue'
 import { CutTicketInput } from '../../validation/queue'
 
 // 1. إنشاء تذكرة (الريسبشن)
-export async function createTicket(
-  tenantSlug: string,
-  data: Partial<CutTicketInput>,
-): Promise<BaseApiResponse<IQueueTicket>> {
-  const response = await fetchApi<IQueueTicket>('/api/clinic/queue/tickets', {
+export async function createTicket(tenantSlug: string, data: CutTicketInput) {
+  // 1. ضفنا <IQueueTicket> هنا
+  if (data.doctorServiceId) {
+    const res = await fetchApi<IQueueTicket>(`/api/clinic/queue/tickets/with-payment`, {
+      method: 'POST',
+      headers: { 'X-Tenant': tenantSlug },
+      body: JSON.stringify({
+        sessionId: data.sessionId,
+        patientId: data.patientId,
+        doctorId: data.doctorId,
+        doctorServiceId: data.doctorServiceId,
+        notes: data.notes || '',
+        paymentAmount: data.paymentAmount || 0,
+        paymentMethod: data.paymentMethod || 'Cash',
+        paymentReference: data.paymentReference || '',
+        paymentNotes: data.paymentNotes || '',
+      }),
+    })
+
+    if (res.success) revalidatePath(`/${tenantSlug}/dashboard/queue`)
+    return res
+  }
+
+  // 2. وضفنا <IQueueTicket> هنا
+  const res = await fetchApi<IQueueTicket>(`/api/clinic/queue/tickets`, {
     method: 'POST',
-    tenantSlug,
+    headers: { 'X-Tenant': tenantSlug },
     body: JSON.stringify({
       sessionId: data.sessionId,
       patientId: data.patientId,
       doctorId: data.doctorId,
-      doctorServiceId: data.doctorServiceId,
-      notes: data.notes,
+      notes: data.notes || '',
     }),
   })
 
-  if (response.success) {
-    revalidatePath(`/${tenantSlug}/dashboard/queue`)
-    revalidatePath(`/${tenantSlug}/dashboard/doctor/queue`)
-  }
-  return response
+  if (res.success) revalidatePath(`/${tenantSlug}/dashboard/queue`)
+  return res
 }
 
 // 2. تعليم كحالة طارئة

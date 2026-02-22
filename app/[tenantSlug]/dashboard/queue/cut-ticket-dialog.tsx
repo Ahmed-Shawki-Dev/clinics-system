@@ -18,6 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Input } from '@/components/ui/input' // ضفنا الـ Input
 import {
   Select,
   SelectContent,
@@ -31,7 +32,7 @@ import { IPatient } from '@/types/patient'
 import { IQueueBoardSession } from '@/types/queue'
 import { CutTicketSchema, type CutTicketInput } from '@/validation/queue'
 import { valibotResolver } from '@hookform/resolvers/valibot'
-import { Loader2, Ticket } from 'lucide-react'
+import { Banknote, CreditCard, Loader2, Ticket } from 'lucide-react'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -59,17 +60,30 @@ export function CutTicketDialog({
     defaultValues: {
       isUrgent: false,
       notes: '',
-      // هام: شيلنا أي قيم افتراضية للفلوس عشان متبوظش الدنيا
+      paymentMethod: 'Cash', // قيمة افتراضية عشان ميضربش إيرور
     },
   })
 
+  // بنراقب العيادة والخدمة عشان نظهر ونخفي حقول الدفع
   const selectedSessionId = form.watch('sessionId')
+  const selectedServiceId = form.watch('doctorServiceId')
 
   const selectedDoctor = React.useMemo(() => {
     const session = activeSessions.find((s) => s.sessionId === selectedSessionId)
     if (!session) return null
     return doctors.find((d) => d.id === session.doctorId)
   }, [selectedSessionId, activeSessions, doctors])
+
+  // الدالة دي بتسحب سعر الخدمة تلقائي وتحطه في حقل المبلغ
+  const handleServiceChange = (serviceId: string) => {
+    form.setValue('doctorServiceId', serviceId)
+    const service = selectedDoctor?.services?.find((s) => s.id === serviceId)
+    if (service && service.price) {
+      form.setValue('paymentAmount', Number(service.price))
+    } else {
+      form.setValue('paymentAmount', 0)
+    }
+  }
 
   async function onSubmit(values: CutTicketInput) {
     setIsSubmitting(true)
@@ -95,7 +109,13 @@ export function CutTicketDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen)
+        if (!isOpen) form.reset() // ننضف الفورمة لما تتقفل
+      }}
+    >
       <DialogTrigger asChild>
         <Button className='gap-2 shadow-md'>
           <Ticket className='h-5 w-5' />
@@ -123,8 +143,11 @@ export function CutTicketDialog({
                     onValueChange={(val) => {
                       field.onChange(val)
                       const docId = activeSessions.find((s) => s.sessionId === val)?.doctorId
-                      // تأكد إن السطر ده شغال عشان الـ Validation
                       if (docId) form.setValue('doctorId', docId)
+
+                      // تصفير الخدمة والمبلغ لو غير العيادة عشان منبعتش داتا غلط
+                      form.setValue('doctorServiceId', undefined)
+                      form.setValue('paymentAmount', undefined)
                     }}
                     defaultValue={field.value}
                   >
@@ -176,16 +199,16 @@ export function CutTicketDialog({
                 name='doctorServiceId'
                 render={({ field }) => (
                   <FormItem className='md:col-span-1'>
-                    <FormLabel>الخدمة</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormLabel>الخدمة المطلوبة (اختياري)</FormLabel>
+                    <Select onValueChange={handleServiceChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className='h-11' disabled={!selectedDoctor}>
-                          <SelectValue placeholder='اختر...' />
+                          <SelectValue placeholder='بدون خدمة' />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {selectedDoctor?.services
-                          .filter((s) => s.isActive)
+                          ?.filter((s) => s.isActive)
                           .map((service) => (
                             <SelectItem key={service.id} value={service.id!}>
                               {service.serviceName}
@@ -221,13 +244,69 @@ export function CutTicketDialog({
               />
             </div>
 
+            {/* قسم الدفع: بيظهر فقط لو تم اختيار خدمة */}
+            {selectedServiceId && (
+              <div className='grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-xl border border-muted'>
+                <FormField
+                  control={form.control}
+                  name='paymentAmount'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>المبلغ المدفوع (جنيه)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          className='h-11 font-bold'
+                          value={field.value ?? ''}
+                          onChange={(e) =>
+                            field.onChange(e.target.value ? Number(e.target.value) : undefined)
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='paymentMethod'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>طريقة الدفع</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className='h-11'>
+                            <SelectValue placeholder='اختر...' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value='Cash'>
+                            <span className='flex items-center gap-2'>
+                              <Banknote className='w-4 h-4' /> كاش
+                            </span>
+                          </SelectItem>
+                          <SelectItem value='Card'>
+                            <span className='flex items-center gap-2'>
+                              <CreditCard className='w-4 h-4' /> فيزا / بطاقة
+                            </span>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
+
             {/* الملاحظات */}
             <FormField
               control={form.control}
               name='notes'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>ملاحظات</FormLabel>
+                  <FormLabel>ملاحظات الاستقبال</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder='أي تفاصيل إضافية...'
@@ -241,7 +320,7 @@ export function CutTicketDialog({
             />
 
             <Button type='submit' className='w-full h-12 text-lg font-bold' disabled={isSubmitting}>
-              {isSubmitting ? <Loader2 className='animate-spin' /> : 'حجز وقطع التذكرة'}
+              {isSubmitting ? <Loader2 className='animate-spin' /> : 'إصدار التذكرة'}
             </Button>
           </form>
         </Form>
