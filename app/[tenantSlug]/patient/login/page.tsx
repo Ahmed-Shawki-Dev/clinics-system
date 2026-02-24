@@ -19,7 +19,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { usePatientAuthStore } from '@/store/usePatientAuthStore'
 import { LoginInput, LoginSchema } from '@/validation/login'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { patientLoginAction } from '../../../../actions/auth/patientLogin'
 
 export default function PatientLoginPage() {
@@ -38,9 +38,11 @@ export default function PatientLoginPage() {
       if (!result.success || !result.data) throw new Error(result.message)
 
       usePatientAuthStore.getState().setPatientAuth(result.data)
+
+      document.cookie = `patient_token=${result.data.token}; path=/; max-age=31536000; SameSite=Lax`
+
       toast.success('تم تسجيل الدخول بنجاح')
 
-      // الحل السحري: Hard Navigation عشان نفرمت الكاش والميدلوير يشتغل صح
       window.location.href = `/${tenantSlug}/patient`
     } catch (error) {
       if (error instanceof Error) toast.error(error.message || 'خطأ في الدخول')

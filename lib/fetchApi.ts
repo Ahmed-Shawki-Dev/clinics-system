@@ -1,9 +1,10 @@
 import { getToken } from '../actions/auth/getToken' // تأكد من مسارك صح
 import { BaseApiResponse } from '../types/api'
 
-// بنوسع الـ RequestInit العادي عشان نقبل الـ tenantSlug
+// بنوسع الـ RequestInit العادي عشان نقبل الـ tenantSlug و authType
 interface FetchOptions extends RequestInit {
   tenantSlug?: string
+  authType?: 'staff' | 'patient'
 }
 
 const FETCH_TIMEOUT_MS = 15000 // 15 seconds
@@ -12,10 +13,17 @@ export async function fetchApi<T>(
   endpoint: string,
   options: FetchOptions = {},
 ): Promise<BaseApiResponse<T>> {
-  // فصلنا الـ tenantSlug عن باقي خيارات الـ fetch
-  const { tenantSlug, headers: customHeaders, signal: externalSignal, ...restOptions } = options
+  // فصلنا الداتا الخاصة بينا عن خيارات الـ fetch، والديفولت staff
+  const {
+    tenantSlug,
+    authType = 'staff',
+    headers: customHeaders,
+    signal: externalSignal,
+    ...restOptions
+  } = options
 
-  const token = await getToken()
+  // بنبعت الـ authType عشان getToken تجيب التوكن بتاع الـ Role ده بس
+  const token = await getToken(authType)
   const headers = new Headers(customHeaders)
 
   // الـ Headers الأساسية
@@ -85,9 +93,16 @@ export async function fetchApi<T>(
     // معالجة السقوط الكامل للشبكة (Network/CORS/Timeout) بنفس الـ Interface
     return {
       success: false,
-      message: isTimeout ? 'انتهت مهلة الاتصال بالخادم، يرجى المحاولة مرة أخرى' : 'فشل في الاتصال بالخادم',
+      message: isTimeout
+        ? 'انتهت مهلة الاتصال بالخادم، يرجى المحاولة مرة أخرى'
+        : 'فشل في الاتصال بالخادم',
       data: null,
-      errors: [{ field: 'server', message: isTimeout ? 'Request timeout' : 'Network error or server down' }],
+      errors: [
+        {
+          field: 'server',
+          message: isTimeout ? 'Request timeout' : 'Network error or server down',
+        },
+      ],
       meta: { timestamp: new Date().toISOString(), requestId: '' },
     }
   }
