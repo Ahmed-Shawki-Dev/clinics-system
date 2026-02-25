@@ -10,7 +10,10 @@ export interface IBooking {
   bookingDate: string // ISO String
   bookingTime: string // HH:mm
   status: 'Confirmed' | 'Cancelled' | 'Rescheduled' | 'Completed'
-  notes?: string
+  notes?: string | null
+  queueTicketId?: string | null // 👈 عشان لو الحجز اتربط بتذكرة في الطابور
+  cancelledAt?: string | null // 👈 تاريخ ووقت الإلغاء
+  cancellationReason?: string | null // 👈 سبب الإلغاء
   createdAt: string
 }
 

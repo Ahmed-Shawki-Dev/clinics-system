@@ -24,7 +24,7 @@ type NavItem = {
 export const NAV_ITEMS: NavItem[] = [
   {
     title: 'لوحة التحكم',
-    href: '/', 
+    href: '/',
     icon: LayoutDashboard,
     roles: ['SuperAdmin', 'ClinicOwner', 'ClinicManager', 'Receptionist'],
   },
@@ -54,7 +54,7 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     title: 'الفواتير والمدفوعات',
-    href: '/billing',
+    href: '/invoices',
     icon: Receipt,
     roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
   },
