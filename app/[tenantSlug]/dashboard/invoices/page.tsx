@@ -1,7 +1,7 @@
 import { getInvoicesAction } from '@/actions/finance/invoices'
 import { DashboardHeader, DashboardShell } from '../../../../components/shell'
 import { InvoicesClient } from './invoices-client'
-import { PeriodFilter } from './period-filter'
+import { PeriodFilter } from '../../../../components/shared/period-filter'
 // import { StatusFilter } from './status-filter' // لو عملتها زي ما اتفقنا فك الكومنت
 
 export default async function InvoicesPage({
