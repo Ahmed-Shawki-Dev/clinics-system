@@ -29,6 +29,8 @@ interface SettingsFormProps {
 }
 
 export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
+  const defaultDays = Object.keys(DAYS_AR) as UpdateSettingsInput['workingHours'][0]['dayOfWeek'][]
+
   const form = useForm<UpdateSettingsInput>({
     resolver: valibotResolver(UpdateSettingsSchema),
     defaultValues: {
@@ -42,13 +44,30 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
       logoUrl: initialData.logoUrl || '',
       bookingEnabled: initialData.bookingEnabled,
       cancellationWindowHours: initialData.cancellationWindowHours,
-      workingHours: initialData.workingHours.map((wh) => ({
-        dayOfWeek: wh.dayOfWeek as UpdateSettingsInput['workingHours'][0]['dayOfWeek'],
-        // برمجة دفاعية: لو الباك إند بعت null مش هيضرب
-        startTime: wh.startTime?.split('.')[0] || '00:00:00', 
-        endTime: wh.endTime?.split('.')[0] || '00:00:00',
-        isActive: wh.isActive,
-      })),
+
+      // 2. اللوجيك الهندسي: دمج الداتا (Merge)
+      workingHours: defaultDays.map((dayName) => {
+        // بندور: هل الباك إند بعت داتا لليوم ده بالذات؟
+        const backendDay = initialData.workingHours?.find((wh) => wh.dayOfWeek === dayName)
+
+        if (backendDay) {
+          // لو الباك إند بعته، نستخدم بياناته مع تنظيف صيغة الوقت
+          return {
+            dayOfWeek: dayName,
+            startTime: backendDay.startTime?.split('.')[0] || '09:00:00',
+            endTime: backendDay.endTime?.split('.')[0] || '17:00:00',
+            isActive: backendDay.isActive,
+          }
+        } else {
+          // لو الباك إند مبعتوش (أو بعت مصفوفة فاضية)، نفرش إحنا اليوم مقفول
+          return {
+            dayOfWeek: dayName,
+            startTime: '09:00:00',
+            endTime: '17:00:00',
+            isActive: false,
+          }
+        }
+      }),
     },
   })
 
