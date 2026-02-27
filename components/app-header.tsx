@@ -1,6 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { useAuthStore } from '../store/useAuthStore'
 import { LogoutButton } from './auth/LogoutButton'
 import { ModeToggle } from './ModeToggle'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
@@ -14,7 +15,6 @@ import {
 } from './ui/dropdown-menu'
 import { Separator } from './ui/separator'
 import { SidebarTrigger } from './ui/sidebar'
-import { useAuthStore } from '../store/useAuthStore'
 
 export function AppHeader() {
   const pathname = usePathname()
@@ -56,9 +56,11 @@ export function AppHeader() {
         <ModeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Avatar className='h-9 w-9 cursor-pointer border border-primary/20'>
-              <AvatarImage src='https://github.com/shadcn.png' />
-              <AvatarFallback>{user?.displayName?.charAt(0) || 'U'}</AvatarFallback>
+            <Avatar className='h-9 w-9 cursor-pointer border border-primary/20 hover:ring-2 hover:ring-primary/50 transition-all'>
+              <AvatarImage src='' />
+              <AvatarFallback className='bg-primary/10 text-primary font-bold'>
+                {user?.displayName?.charAt(0) || 'D'}
+              </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end' className='w-56'>

@@ -11,8 +11,8 @@ import {
 import { Edit, MoreHorizontal } from 'lucide-react'
 import { useParams } from 'next/navigation' // عشان نجيب الـ tenantSlug
 import { useState } from 'react'
-import { UpdateStaffDialog } from '../../app/[tenantSlug]/dashboard/staff/update-staff-dialog'
 import { IStaff } from '../../types/staff'
+import { UpdateStaffDialog } from '../../app/[tenantSlug]/dashboard/(management)/staff/update-staff-dialog'
 
 export function StaffActionsCell({ staff }: { staff: IStaff }) {
   const [openUpdate, setOpenUpdate] = useState(false)
