@@ -1,6 +1,7 @@
 import { IPublicClinic } from '@/types/public' // استورد التايب بتاعك
 import { notFound, redirect } from 'next/navigation'
 import { TenantInitializer } from '../../components/TenantInitializer'
+import { BaseApiResponse } from '../../types/api'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -8,10 +9,6 @@ interface LayoutProps {
 }
 
 // ضيفنا التايب عشان TypeScript ميعيطش ويقولك any
-interface ApiResponse {
-  data?: IPublicClinic
-  status?: number
-}
 
 export default async function RootLayout({ children, params }: LayoutProps) {
   const { tenantSlug } = await params
@@ -25,7 +22,7 @@ export default async function RootLayout({ children, params }: LayoutProps) {
     notFound()
   }
 
-  const result = (await response.json()) as ApiResponse
+  const result = (await response.json()) as BaseApiResponse<IPublicClinic>
 
   if (!result.data?.isActive) {
     redirect(`/${tenantSlug}/suspended`)
