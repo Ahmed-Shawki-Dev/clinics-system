@@ -16,6 +16,31 @@ export async function superAdminLoginAction(data: LoginInput): Promise<BaseApiRe
     return res
   }
 
+  // 🔴 منطقة الحماية: فك التوكن بدون مكاتب خارجية
+  try {
+    const token = res.data.token
+    const payloadBase64 = token.split('.')[1]
+    // Next.js Server Actions شغالة في بيئة Node.js، فاستخدام Buffer متاح وسريع
+    const payload = JSON.parse(Buffer.from(payloadBase64, 'base64').toString())
+
+    // تأكد من اسم الـ claim عندك لو مختلف
+    const role =
+      payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || payload.role
+
+    if (role !== 'SuperAdmin') {
+      return {
+        success: false,
+        message: 'غير مصرح لك بالدخول كمدير نظام',
+        data: null,
+        errors: [{ field: 'auth', message: 'Unauthorized Role' }],
+        meta: res.meta,
+      }
+    }
+  } catch (error) {
+    return { success: false, message: 'توكن غير صالح', data: null, errors: [], meta: res.meta }
+  }
+
+  // ✅ لو وصلنا هنا يبقى هو فعلا SuperAdmin
   const cookieStore = await cookies()
   cookieStore.set('token', res.data.token, {
     httpOnly: true,
@@ -24,6 +49,5 @@ export async function superAdminLoginAction(data: LoginInput): Promise<BaseApiRe
     path: '/',
   })
 
-  // شيلنا الـ redirect من هنا ورجعنا الاستجابة كاملة للكلاينت
   return res
 }
