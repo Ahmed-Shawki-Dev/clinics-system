@@ -21,77 +21,102 @@ type NavItem = {
   roles: UserRole[]
 }
 
-export const NAV_ITEMS: NavItem[] = [
+export type NavCategory = {
+  label: string
+  items: NavItem[]
+}
+
+export const SIDEBAR_NAVIGATION: NavCategory[] = [
   {
-    title: 'لوحة التحكم',
-    href: '/',
-    icon: LayoutDashboard,
-    roles: ['SuperAdmin', 'ClinicOwner', 'ClinicManager', 'Receptionist'],
+    label: 'الرئيسية',
+    items: [
+      {
+        title: 'لوحة التحكم',
+        href: '/',
+        icon: LayoutDashboard,
+        roles: ['SuperAdmin', 'ClinicOwner', 'ClinicManager', 'Receptionist', 'Doctor'],
+      },
+      {
+        title: 'طابور الطبيب',
+        href: '/doctor/queue',
+        icon: Activity,
+        roles: ['Doctor', 'SuperAdmin'],
+      },
+    ],
   },
   {
-    title: 'الطابور والاستقبال',
-    href: '/queue',
-    icon: Clock,
-    roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
+    label: 'العيادة والاستقبال',
+    items: [
+      {
+        title: 'الطابور والاستقبال',
+        href: '/queue',
+        icon: Clock,
+        roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
+      },
+      {
+        title: 'المواعيد والحجوزات',
+        href: '/appointments',
+        icon: CalendarDays,
+        roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'Doctor', 'SuperAdmin'],
+      },
+      {
+        title: 'المرضى',
+        href: '/patients',
+        icon: Users,
+        roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'Doctor', 'SuperAdmin'],
+      },
+    ],
   },
   {
-    title: 'طابور الطبيب',
-    href: '/doctor/queue',
-    icon: Activity,
-    roles: ['Doctor', 'SuperAdmin'],
+    label: 'الماليات',
+    items: [
+      {
+        title: 'الفواتير والمدفوعات',
+        href: '/invoices',
+        icon: Receipt,
+        roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
+      },
+      {
+        title: 'المصروفات',
+        href: '/expenses',
+        icon: Banknote,
+        roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
+      },
+      {
+        title: 'التقارير المالية',
+        href: '/reports',
+        icon: PieChart,
+        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
+      },
+    ],
   },
   {
-    title: 'المواعيد والحجوزات',
-    href: '/appointments',
-    icon: CalendarDays,
-    roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'Doctor', 'SuperAdmin'],
-  },
-  {
-    title: 'المرضى',
-    href: '/patients',
-    icon: Users,
-    roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'Doctor', 'SuperAdmin'],
-  },
-  {
-    title: 'الفواتير والمدفوعات',
-    href: '/invoices',
-    icon: Receipt,
-    roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
-  },
-  {
-    title: 'المصروفات',
-    href: '/expenses',
-    icon: Banknote,
-    roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
-  },
-  {
-    title: 'التقارير المالية',
-    href: '/reports',
-    icon: PieChart,
-    roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
-  },
-  {
-    title: 'الأطباء',
-    href: '/doctors',
-    icon: Stethoscope,
-    roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'], // الدكتور ملوش إنه يشوف قايمة الدكاترة زمايله ويديرهم
-  },
-  {
-    title: 'الموظفين',
-    href: '/staff',
-    icon: ClipboardList,
-    roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
-  },
-  {
-    title: 'الخدمات والأسعار',
-    href: '/services',
-    icon: Banknote,
-    roles: ['ClinicOwner', 'SuperAdmin'], // المالك بس اللي بيسعر
-  },
-  {
-    title: 'إعدادات العيادة',
-    href: '/settings',
-    icon: Settings,
-    roles: ['ClinicOwner', 'SuperAdmin'],
+    label: 'الإدارة والإعدادات',
+    items: [
+      {
+        title: 'الأطباء',
+        href: '/doctors',
+        icon: Stethoscope,
+        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
+      },
+      {
+        title: 'الموظفين',
+        href: '/staff',
+        icon: ClipboardList,
+        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
+      },
+      {
+        title: 'الخدمات والأسعار',
+        href: '/services',
+        icon: Banknote,
+        roles: ['ClinicOwner', 'SuperAdmin'],
+      },
+      {
+        title: 'إعدادات العيادة',
+        href: '/settings',
+        icon: Settings,
+        roles: ['ClinicOwner', 'SuperAdmin'],
+      },
+    ],
   },
 ]
