@@ -6,7 +6,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'files.edgestore.dev',
-        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
         pathname: '/**',
       },
     ],

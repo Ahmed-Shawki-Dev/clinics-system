@@ -1,11 +1,13 @@
-import { notFound } from 'next/navigation'
 import { IPublicClinic, IPublicDoctor, IPublicWorkingHour } from '@/types/public'
+import { notFound } from 'next/navigation'
+import AboutClinicSection from '../../components/clinic-landing-page-template/AboutClinicSection'
+import AboutDoctorSection from '../../components/clinic-landing-page-template/AboutDoctorSection'
 import DoctorsSection from '../../components/clinic-landing-page-template/DoctorsSection'
 import Footer from '../../components/clinic-landing-page-template/Footer'
+import Hero from '../../components/clinic-landing-page-template/Hero'
 import { Navbar } from '../../components/clinic-landing-page-template/navbar'
 import WorkingHoursSection from '../../components/clinic-landing-page-template/WorkingHoursSection'
 import { fetchApi } from '../../lib/fetchApi'
-import Hero from '../../components/clinic-landing-page-template/Hero'
 
 interface PageProps {
   params: Promise<{ tenantSlug: string }>
@@ -14,32 +16,36 @@ interface PageProps {
 export default async function Page({ params }: PageProps) {
   const { tenantSlug } = await params
 
-  // الريكويست بتاع clinic ده هيجي من الكاش فوراً لأن اللايوت لسه جايبه
   const [clinicRes, doctorsRes, workingHoursRes] = await Promise.all([
     fetchApi<IPublicClinic>(`/api/public/${tenantSlug}/clinic`),
     fetchApi<IPublicDoctor[]>(`/api/public/${tenantSlug}/doctors`),
     fetchApi<IPublicWorkingHour[]>(`/api/public/${tenantSlug}/working-hours`),
   ])
 
-  // الحماية الصارمة: لو مفيش عيادة، ارميه 404 فوراً وماتكملش
   if (!clinicRes.success || !clinicRes.data) {
     return notFound()
   }
 
   const clinic = clinicRes.data
 
-  // حماية المصفوفات من الـ undefined لو الـ API فشل
   const enabledDoctors = doctorsRes.data?.filter((d) => d.isEnabled) || []
   const activeWorkingHours = workingHoursRes.data?.filter((w) => w.isActive) || []
 
   return (
-    <main className='flex min-h-screen w-full flex-col'>
-      {/* دلوقتي التايب سكريبت مطمن، ومفيش ولا علامة ! واحدة */}
-      <Navbar clinic={clinic} />
-      <Hero clinic={clinic} />
+    <main className='relative flex min-h-screen w-full flex-col'>
 
-      {/* ماترسمش السكاشن لو مفيش داتا جواها */}
-      {enabledDoctors.length > 0 && <DoctorsSection doctors={enabledDoctors} />}
+
+      <Navbar clinic={clinic} />
+      <Hero clinic={clinic} tenantSlug={tenantSlug} />
+      <AboutClinicSection clinic={clinic} />
+
+      {/* اللوجيك الهندسي المظبوط */}
+      {enabledDoctors.length === 1 ? (
+        <AboutDoctorSection doctor={enabledDoctors[0]} />
+      ) : enabledDoctors.length > 1 ? (
+        <DoctorsSection doctors={enabledDoctors} />
+      ) : null}
+
       {activeWorkingHours.length > 0 && <WorkingHoursSection workingHours={activeWorkingHours} />}
 
       <Footer clinic={clinic} />
