@@ -64,7 +64,7 @@ export async function fetchApi<T>(
     if (response.status === 401) {
       return {
         success: false,
-        message: 'انتهت صلاحية الجلسة، يرجى تسجيل الدخول مرة أخرى',
+        message: 'حدث خطأ ما',
         data: null,
         errors: [{ field: 'auth', message: 'Unauthorized' }],
         meta: { timestamp: new Date().toISOString(), requestId: '' },

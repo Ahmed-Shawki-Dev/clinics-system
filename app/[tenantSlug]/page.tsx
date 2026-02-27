@@ -1,3 +1,4 @@
+import { notFound } from 'next/navigation'
 import { IPublicClinic, IPublicDoctor, IPublicWorkingHour } from '@/types/public'
 import DoctorsSection from '../../components/clinic-landing-page-template/DoctorsSection'
 import Footer from '../../components/clinic-landing-page-template/Footer'
@@ -13,22 +14,35 @@ interface PageProps {
 export default async function Page({ params }: PageProps) {
   const { tenantSlug } = await params
 
-  const [clinic, doctors, workingHours] = await Promise.all([
+  // الريكويست بتاع clinic ده هيجي من الكاش فوراً لأن اللايوت لسه جايبه
+  const [clinicRes, doctorsRes, workingHoursRes] = await Promise.all([
     fetchApi<IPublicClinic>(`/api/public/${tenantSlug}/clinic`),
     fetchApi<IPublicDoctor[]>(`/api/public/${tenantSlug}/doctors`),
     fetchApi<IPublicWorkingHour[]>(`/api/public/${tenantSlug}/working-hours`),
   ])
 
-  const enabledDoctors = doctors.data?.filter((d) => d.isEnabled)
-  const activeWorkingHours = workingHours.data?.filter((w) => w.isActive)
+  // الحماية الصارمة: لو مفيش عيادة، ارميه 404 فوراً وماتكملش
+  if (!clinicRes.success || !clinicRes.data) {
+    return notFound()
+  }
+
+  const clinic = clinicRes.data
+
+  // حماية المصفوفات من الـ undefined لو الـ API فشل
+  const enabledDoctors = doctorsRes.data?.filter((d) => d.isEnabled) || []
+  const activeWorkingHours = workingHoursRes.data?.filter((w) => w.isActive) || []
 
   return (
-    <main className='w-full flex flex-col min-h-screen'>
-      <Navbar clinic={clinic.data!} />
-      <Hero clinic={clinic.data!} />
-      <DoctorsSection doctors={enabledDoctors!} />
-      <WorkingHoursSection workingHours={activeWorkingHours!} />
-      <Footer clinic={clinic.data!} />
+    <main className='flex min-h-screen w-full flex-col'>
+      {/* دلوقتي التايب سكريبت مطمن، ومفيش ولا علامة ! واحدة */}
+      <Navbar clinic={clinic} />
+      <Hero clinic={clinic} />
+
+      {/* ماترسمش السكاشن لو مفيش داتا جواها */}
+      {enabledDoctors.length > 0 && <DoctorsSection doctors={enabledDoctors} />}
+      {activeWorkingHours.length > 0 && <WorkingHoursSection workingHours={activeWorkingHours} />}
+
+      <Footer clinic={clinic} />
     </main>
   )
 }

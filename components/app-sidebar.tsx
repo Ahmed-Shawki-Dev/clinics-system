@@ -18,36 +18,60 @@ import {
 
 import { SIDEBAR_NAVIGATION } from '@/config/navigation'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useTenantStore } from '@/store/useTenantStore' // 1. استيراد الـ Store
+import Image from 'next/image'
+import { Skeleton } from './ui/skeleton'
 
 export function AppSidebar() {
   const pathname = usePathname()
   const params = useParams()
   const tenantSlug = params.tenantSlug as string
+
   const user = useAuthStore((state) => state.user)
+  const tenantConfig = useTenantStore((state) => state.config) // 2. قراءة بيانات العيادة
 
   const getFullUrl = (href: string) => `/${tenantSlug}/dashboard${href === '/' ? '' : href}`
 
-  // 🔴 فكر كمهندس: بنفلتر الـ Categories والـ Items في خطوة واحدة
   const filteredConfig = SIDEBAR_NAVIGATION.map((category) => ({
     ...category,
     items: category.items.filter((item) => user && item.roles.includes(user.role)),
-  })).filter((category) => category.items.length > 0) // لو الكاتيجوري فاضي لليوزر ده ميرسموش
+  })).filter((category) => category.items.length > 0)
 
   return (
     <Sidebar collapsible='icon' side='right'>
+      {/* 3. الهيدر الديناميكي */}
       <SidebarHeader className='flex h-16 shrink-0 flex-row items-center gap-2 border-b px-4 text-xl font-bold text-primary'>
-        <div className='flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground'>
-          <Stethoscope className='h-5 w-5' />
-        </div>
-        <span className='truncate font-extrabold group-data-[collapsible=icon]:hidden'>
-          Elite Clinic
-        </span>
+        {tenantConfig ? (
+          // الداتا وصلت، ارسم العيادة
+          <>
+            <div className='relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-md bg-primary/10 text-primary'>
+              {tenantConfig.logoUrl ? (
+                <Image
+                  src={tenantConfig.logoUrl}
+                  alt={tenantConfig.name || 'Logo'}
+                  fill
+                  className='object-cover'
+                />
+              ) : (
+                <Stethoscope className='h-5 w-5' />
+              )}
+            </div>
+            <span className='truncate font-extrabold group-data-[collapsible=icon]:hidden'>
+              {tenantConfig.name}
+            </span>
+          </>
+        ) : (
+          // الداتا لسه بتيجي، ارسم السكيلتون (حجز مكان احترافي)
+          <>
+            <Skeleton className='h-8 w-8 rounded-md' />
+            <Skeleton className='h-5 w-24 group-data-[collapsible=icon]:hidden' />
+          </>
+        )}
       </SidebarHeader>
 
       <SidebarContent>
         {filteredConfig.map((category) => (
           <SidebarGroup key={category.label}>
-            {/* عنوان الكاتيجوري */}
             <SidebarGroupLabel className='text-xs font-bold text-muted-foreground/70 uppercase tracking-widest'>
               {category.label}
             </SidebarGroupLabel>
