@@ -33,6 +33,7 @@ import {
 
 import { createDoctorAction } from '@/actions/doctor/create-doctor'
 import { CreateDoctorInput, CreateDoctorSchema } from '@/validation/doctor'
+import { Textarea } from '../../../../../components/ui/textarea'
 import { MEDICAL_SPECIALTIES } from '../../../../../constants/specialties'
 
 export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
@@ -41,13 +42,14 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
   const form = useForm<CreateDoctorInput>({
     resolver: valibotResolver(CreateDoctorSchema),
     defaultValues: {
-      name: '', 
+      name: '',
       username: '',
       password: '',
       phone: '',
       specialty: '',
       urgentCaseMode: 0,
       avgVisitDurationMinutes: 15,
+      bio: '',
     },
   })
 
@@ -61,6 +63,8 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
       toast.error(res.message)
     }
   }
+
+  const selectedSpecialty = form.watch('specialty')
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -76,7 +80,11 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4 py-2'>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className='space-y-4 py-2'
+            autoComplete='off'
+          >
             <div className='grid grid-cols-2 gap-4'>
               <FormField
                 control={form.control}
@@ -98,7 +106,7 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
                   <FormItem>
                     <FormLabel>رقم الهاتف</FormLabel>
                     <FormControl>
-                      <Input placeholder='01xxxxxxxxx' {...field} />
+                      <Input {...field} placeholder='01xxxxxxxxx' />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -114,7 +122,7 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
                   <FormItem>
                     <FormLabel>اسم المستخدم</FormLabel>
                     <FormControl>
-                      <Input placeholder='dr_mohamed' {...field} />
+                      <Input placeholder='dr_mohamed' {...field} autoComplete='one-time-code' />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -127,7 +135,12 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
                   <FormItem>
                     <FormLabel>كلمة المرور</FormLabel>
                     <FormControl>
-                      <Input type='password' placeholder='******' {...field} />
+                      <Input
+                        type='password'
+                        placeholder='******'
+                        {...field}
+                        autoComplete='new-password'
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -135,34 +148,80 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
               />
             </div>
 
+            <div className='space-y-4'>
+              <FormField
+                control={form.control}
+                name='specialty'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>التخصص</FormLabel>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value)
+                      }}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder='اختر التخصص الطبي' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className='max-h-50'>
+                        {MEDICAL_SPECIALTIES.map((spec) => (
+                          <SelectItem key={spec} value={spec}>
+                            {spec}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* 3. الـ Input الإضافي يظهر فقط عند اختيار "أخرى" */}
+              {selectedSpecialty === 'أخرى' && (
+                <FormField
+                  control={form.control}
+                  name='specialty' // بنربطه بنفس الاسم عشان يعمل Override للقيمة
+                  render={({ field }) => (
+                    <FormItem className='animate-in fade-in slide-in-from-top-2'>
+                      <FormLabel>اكتب التخصص المخصص</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder='مثلاً: طب وجراحة الفم'
+                          {...field}
+                          // عشان لما يكتب يمسح كلمة "أخرى" ويحط القيمة الجديدة
+                          onChange={(e) => field.onChange(e.target.value)}
+                          value={field.value === 'أخرى' ? '' : field.value}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+
             <FormField
               control={form.control}
-              name='specialty'
+              name='bio'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>التخصص</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder='اختر التخصص الطبي' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className='max-h-50'>
-                      {' '}
-                      {/* max-h عشان السكرول */}
-                      {MEDICAL_SPECIALTIES.map((spec) => (
-                        <SelectItem key={spec} value={spec}>
-                          {spec}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>النبذة التعريفية (Bio)</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder='اكتب نبذة قصيرة عن خبرات الطبيب...'
+                      className='resize-none'
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <div className='grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg border'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg border'>
               <FormField
                 control={form.control}
                 name='avgVisitDurationMinutes'
@@ -188,12 +247,12 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
                 name='urgentCaseMode'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='flex items-center gap-2'>
+                    <FormLabel className='flex items-center  gap-2'>
                       <AlertCircle className='w-4 h-4' /> نظام الطوارئ
                     </FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className='w-full'>
                           <SelectValue placeholder='اختر النظام' />
                         </SelectTrigger>
                       </FormControl>

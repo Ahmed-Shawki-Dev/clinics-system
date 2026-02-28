@@ -29,6 +29,7 @@ export const CreateDoctorSchema = v.object({
     v.minValue(1),
     v.maxValue(120),
   ),
+  bio: v.optional(v.string()),
 })
 
 export type CreateDoctorInput = v.InferInput<typeof CreateDoctorSchema>
