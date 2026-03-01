@@ -38,7 +38,7 @@ export function QueueView({ tenantSlug, activeSessions, doctors }: QueueViewProp
       {activeSessions.length > 0 ? (
         <div className='flex flex-col md:flex-row flex-1 gap-4 md:gap-6 overflow-hidden'>
           {/* Sidebar List (Fixed for Mobile & Desktop) */}
-          <Card className='w-full md:w-72 shrink-0 flex flex-col overflow-hidden border bg-muted/20'>
+          <Card className='w-full md:w-72 shrink-0 flex flex-col overflow-hidden border bg-muted/20 p-0'>
             <div className='p-3 border-b bg-background/50 flex items-center justify-between'>
               <h3 className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
                 قائمة العيادات

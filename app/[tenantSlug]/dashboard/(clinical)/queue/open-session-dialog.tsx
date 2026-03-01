@@ -53,7 +53,7 @@ export function OpenSessionDialog({ tenantSlug, doctors, activeSessions }: OpenS
 
   const availableDoctors = React.useMemo(() => {
     const activeDoctorIds = new Set(activeSessions.map((s) => s.doctorId))
-    return doctors.filter((doc) => !activeDoctorIds.has(doc.id))
+    return doctors.filter((doc) => doc.isEnabled && !activeDoctorIds.has(doc.id))
   }, [doctors, activeSessions])
 
   async function onSubmit(values: OpenSessionInput) {
@@ -73,9 +73,7 @@ export function OpenSessionDialog({ tenantSlug, doctors, activeSessions }: OpenS
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant='outline'
-        >
+        <Button variant='outline'>
           <PlayCircle className='h-5 w-5' />
           فتح شفت
         </Button>
@@ -134,7 +132,7 @@ export function OpenSessionDialog({ tenantSlug, doctors, activeSessions }: OpenS
 
             <Button
               type='submit'
-              className='w-full h-12'
+              className='w-full'
               disabled={isSubmitting || availableDoctors.length === 0}
             >
               {isSubmitting ? <Loader2 className='animate-spin' /> : 'بدء الشفت الآن'}

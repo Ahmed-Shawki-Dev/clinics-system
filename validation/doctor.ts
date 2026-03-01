@@ -33,3 +33,15 @@ export const CreateDoctorSchema = v.object({
 })
 
 export type CreateDoctorInput = v.InferInput<typeof CreateDoctorSchema>
+
+export const UpdateDoctorSchema = v.object({
+  name: v.optional(v.string()),
+  phone: v.optional(v.string()),
+  specialty: v.optional(v.string()),
+  bio: v.optional(v.string()),
+  photoUrl: v.optional(v.string()),
+  urgentCaseMode: v.optional(v.number()),
+  avgVisitDurationMinutes: v.optional(v.number()),
+})
+
+export type UpdateDoctorInput = v.InferInput<typeof UpdateDoctorSchema>

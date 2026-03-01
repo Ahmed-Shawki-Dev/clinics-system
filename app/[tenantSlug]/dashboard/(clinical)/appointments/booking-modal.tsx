@@ -61,7 +61,7 @@ export function BookingModal({ patients = [], doctors = [] }: Props) {
   const [patientPopoverOpen, setPatientPopoverOpen] = useState(false)
   const { tenantSlug } = useParams()
 
-  const safeDoctors = doctors || []
+  const safeDoctors = doctors.filter((doctor) => doctor.isEnabled) || []
   const safePatients = patients || []
 
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null)
@@ -298,7 +298,21 @@ export function BookingModal({ patients = [], doctors = [] }: Props) {
                   <FormItem>
                     <FormLabel>الساعة</FormLabel>
                     <FormControl>
-                      <Input type='time' {...field} className='text-right font-mono' />
+                      <Input
+                        type='time'
+                        {...field}
+                        className='text-right cursor-pointer' // ضفنا cursor-pointer عشان يبان إنه كليكابل
+                        onClick={(e) => {
+                          try {
+                            // بنشيك لو المتصفح بيدعم الـ API ده الأول
+                            if (typeof e.currentTarget.showPicker === 'function') {
+                              e.currentTarget.showPicker()
+                            }
+                          } catch (error) {
+                            // لو المتصفح قديم، هيعمل Focus عادي واليوزر يكتب بإيده
+                          }
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

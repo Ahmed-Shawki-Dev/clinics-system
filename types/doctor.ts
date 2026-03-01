@@ -33,6 +33,7 @@ export interface IDoctor {
   phone: string
   photoUrl: string | null
   isEnabled: boolean
+  bio?:string
   urgentCaseMode: UrgentCaseMode
   avgVisitDurationMinutes: number
   services: IDoctorService[]

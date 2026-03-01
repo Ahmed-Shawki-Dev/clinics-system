@@ -51,8 +51,8 @@ export function ServicesManager({ services, onAdd, onRemove }: Props) {
 
   return (
     <div className='pt-6 space-y-6'>
-      <div className='flex items-start gap-3 p-4 bg-secondary/10 rounded-lg border border-dashed'>
-        <div className='grid gap-2 flex-1'>
+      <div className='flex items-center gap-3 p-4 bg-secondary/10 rounded-lg border border-dashed'>
+        <div className='grid gap-2 flex-1 '>
           <Label className={getError('serviceName') ? 'text-destructive' : ''}>اسم الخدمة</Label>
           <Input
             placeholder='مثال: حشو عصب'
@@ -69,7 +69,7 @@ export function ServicesManager({ services, onAdd, onRemove }: Props) {
         </div>
 
         {/* حقل السعر */}
-        <div className='grid gap-2 w-32'>
+        <div className='grid gap-2 w-32 '>
           <Label className={getError('price') ? 'text-destructive' : ''}>السعر (ج.م)</Label>
           <Input
             type='number'
@@ -86,7 +86,7 @@ export function ServicesManager({ services, onAdd, onRemove }: Props) {
           )}
         </div>
 
-        <div className='pt-8'>
+        <div className='pt-4'>
           <Button onClick={handleAdd} size='icon' variant='secondary'>
             <Plus className='h-4 w-4' />
           </Button>

@@ -64,7 +64,7 @@ export async function fetchApi<T>(
     if (response.status === 401) {
       return {
         success: false,
-        message: 'حدث خطأ ما',
+        message: 'غير مسموح لك بالدخول',
         data: null,
         errors: [{ field: 'auth', message: 'Unauthorized' }],
         meta: { timestamp: new Date().toISOString(), requestId: '' },

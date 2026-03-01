@@ -1,13 +1,8 @@
 'use client'
 
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 
 export interface GenericPaginationProps {
   currentPage: number
@@ -24,6 +19,7 @@ export function GenericPagination({
 }: GenericPaginationProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { replace } = useRouter()
 
   const createPageURL = (pageNumber: number) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -33,31 +29,30 @@ export function GenericPagination({
 
   if (totalPages <= 1) return null
 
+  // ضفتلك mt-6 mb-2 هنا عشان تحافظ على نفس المسافات القديمة اللي كانت في الكومبوننت بتاعك
   return (
-    <Pagination className='mt-6 mb-2 justify-end'>
-      <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious
-            href={hasPreviousPage ? createPageURL(currentPage - 1) : '#'}
-            className={!hasPreviousPage ? 'pointer-events-none opacity-50' : ''}
-            title='السابق'
-          />
-        </PaginationItem>
+    <div className='flex items-center justify-end gap-2 mt-6 mb-2'>
+      <div className='text-sm text-muted-foreground ml-4'>
+        صفحة {currentPage} من {totalPages}
+      </div>
 
-        <PaginationItem>
-          <span className='text-sm font-medium text-muted-foreground px-4'>
-            صفحة {currentPage} من {totalPages}
-          </span>
-        </PaginationItem>
+      <Button
+        variant='outline'
+        size='icon'
+        disabled={!hasPreviousPage}
+        onClick={() => replace(createPageURL(currentPage - 1))}
+      >
+        <ChevronRight className='h-4 w-4' />
+      </Button>
 
-        <PaginationItem>
-          <PaginationNext
-            href={hasNextPage ? createPageURL(currentPage + 1) : '#'}
-            className={!hasNextPage ? 'pointer-events-none opacity-50' : ''}
-            title='التالي'
-          />
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
+      <Button
+        variant='outline'
+        size='icon'
+        disabled={!hasNextPage}
+        onClick={() => replace(createPageURL(currentPage + 1))}
+      >
+        <ChevronLeft className='h-4 w-4' />
+      </Button>
+    </div>
   )
 }

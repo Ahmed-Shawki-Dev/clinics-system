@@ -1,15 +1,15 @@
 'use client'
 
-import { useMemo, useCallback, useEffect, useState } from 'react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { toast } from 'sonner'
 import { Loader2, Save } from 'lucide-react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
+import { updateDoctorServicesAction } from '@/actions/service/update-doctor-services'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { IDoctor, IDoctorService } from '@/types/doctor'
 import { IServiceItem } from '@/types/services'
-import { updateDoctorServicesAction } from '@/actions/service/update-doctor-services'
 
 import { DoctorSelect } from './doctor-select'
 import { ServicesManager } from './services-manager'
@@ -24,13 +24,14 @@ export function ServicesView({ doctors: rawData, tenantSlug }: Props) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-
-  // استخراج المصفوفة بأمان تام من الأوبجيكت
-  const doctors = useMemo(() => {
-    return rawData?.items || []
-  }, [rawData])
-
   const doctorIdParam = searchParams.get('doctorId')
+  // استخراج المصفوفة بأمان تام من الأوبجيكت
+
+  const doctors = useMemo(() => {
+    const allDoctors = rawData?.items || []
+
+    return allDoctors.filter((doc) => doc.isEnabled || doc.id === doctorIdParam)
+  }, [rawData, doctorIdParam])
 
   const selectedDoctorId = useMemo(() => {
     const found = doctorIdParam && doctors.find((d) => d.id === doctorIdParam)
