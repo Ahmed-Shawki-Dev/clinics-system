@@ -1,41 +1,27 @@
 'use server'
 
+import { fetchApi } from '@/lib/fetchApi'
+import { BaseApiResponse } from '@/types/api'
 import { revalidatePath } from 'next/cache'
-import { getToken } from '../auth/getToken'
 
+// التايب هنا <null> أو <any> لأن الـ Toggle غالباً مابيرجعش داتا، بيرجع رسالة نجاح بس
 export async function toggleStaffStatusAction(
   staffId: string,
   isEnabled: boolean,
   tenantSlug: string,
-) {
-  const token = await getToken()
-  if (!token) return { success: false, message: 'Unauthorized' }
+): Promise<BaseApiResponse<null>> {
+  // بنحدد الـ Endpoint زي ما كنت عامل
+  const action = isEnabled ? 'enable' : 'disable'
 
-  //
-  // بنحدد الـ Endpoint بناءً على القيمة المطلوبة (enable أو disable)
-  const endpoint = isEnabled ? 'enable' : 'disable'
+  const res = await fetchApi<null>(`/api/clinic/staff/${staffId}/${action}`, {
+    method: 'POST',
+    tenantSlug,
+  })
 
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/clinic/staff/${staffId}/${endpoint}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-          'X-Tenant': tenantSlug,
-        },
-        body: JSON.stringify({}),
-      },
-    )
-
-    if (!res.ok) {
-      return { success: false, message: 'فشل تغيير حالة الموظف' }
-    }
-
+  if (res.success) {
     revalidatePath(`/${tenantSlug}/dashboard/staff`)
-    return { success: true, message: isEnabled ? 'تم تفعيل الموظف' : 'تم تعطيل الموظف' }
-  } catch (error) {
-    return { success: false, message: 'خطأ في السيرفر' }
+    res.message = isEnabled ? 'تم تفعيل حساب الموظف بنجاح' : 'تم إيقاف حساب الموظف'
   }
+
+  return res
 }

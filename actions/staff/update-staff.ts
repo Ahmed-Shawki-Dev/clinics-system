@@ -1,43 +1,32 @@
 'use server'
 
+import { fetchApi } from '@/lib/fetchApi'
+import { BaseApiResponse } from '@/types/api'
+import { IStaff } from '@/types/staff'
 import { revalidatePath } from 'next/cache'
-import * as v from 'valibot'
-import { UpdateStaffInput, updateStaffSchema } from '../../validation/staff'
-import { getToken } from '../auth/getToken'
+import { UpdateStaffInput } from '../../validation/staff'
 
-export async function updateStaffAction(data: UpdateStaffInput, tenantSlug: string) {
-  // 1. Validation
-  const validationResult = v.safeParse(updateStaffSchema, data)
-  if (!validationResult.success) {
-    return { success: false, message: 'بيانات غير صحيحة' }
+export async function updateStaffAction(
+  data: UpdateStaffInput,
+  tenantSlug: string,
+): Promise<BaseApiResponse<IStaff>> {
+  // الـ Payload اللي هيتبعت للباك إند بدون الـ id وبدون الداتا اللي مش هتتعدل
+  const payload = {
+    name: data.name,
+    phone: data.phone,
+    salary: data.salary,
   }
 
-  const token = await getToken()
+  // الـ id بيتبعت في الـ URL هنا
+  const res = await fetchApi<IStaff>(`/api/clinic/staff/${data.id}`, {
+    method: 'PUT',
+    body: JSON.stringify(payload),
+    tenantSlug,
+  })
 
-  if (!token) return { success: false, message: 'Unauthorized' }
-
-  const payload = { ...data }
-  if (!payload.password) delete payload.password
-
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/clinic/staff/${data.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-        'X-Tenant': tenantSlug,
-      },
-      body: JSON.stringify(payload),
-    })
-
-    if (!res.ok) {
-      const errorData = await res.json()
-      return { success: false, message: errorData.message || 'فشل التعديل' }
-    }
-
+  if (res.success) {
     revalidatePath(`/${tenantSlug}/dashboard/staff`)
-    return { success: true, message: 'تم تحديث البيانات بنجاح' }
-  } catch (error) {
-    return { success: false, message: 'خطأ في السيرفر' }
   }
+
+  return res
 }

@@ -10,7 +10,7 @@ export const createStaffSchema = v.object({
   role: v.pipe(v.string('الوظيفة مطلوبة'), v.minLength(1, 'يرجى اختيار وظيفة')),
   phone: v.pipe(
     v.string('رقم الهاتف مطلوب'),
-    v.regex(/^01[0125][0-9]{8}$/, 'رقم الهاتف غير صحيح (يجب أن يكون رقم مصري)'),
+    v.regex(/^01[0125][0-9]{8}$/, 'رقم الهاتف غير صحيح'),
   ),
   salary: v.pipe(v.number('الراتب مطلوب'), v.minValue(1, 'الراتب لا يمكن أن يكون صفر أو سالب')),
   hireDate: v.pipe(v.string('تاريخ التعيين مطلوب'), v.isoDate('صيغة التاريخ غير صحيحة')),
@@ -22,11 +22,8 @@ export type CreateStaffInput = v.InferInput<typeof createStaffSchema>
 export const updateStaffSchema = v.object({
   id: v.string(),
   name: v.pipe(v.string(), v.minLength(2, 'الاسم قصير')),
-  username: v.pipe(v.string(), v.minLength(3, 'اسم المستخدم قصير')),
-  role: v.string(),
   phone: v.pipe(v.string(), v.minLength(10, 'رقم الهاتف غير صحيح')),
-
-  password: v.optional(v.string()),
+  salary: v.pipe(v.number('يجب إدخال رقم'), v.minValue(0, 'الراتب لا يمكن أن يكون سالباً')),
   isEnabled: v.boolean(),
 })
 

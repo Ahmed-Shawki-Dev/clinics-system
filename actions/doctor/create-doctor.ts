@@ -1,42 +1,44 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { fetchApi } from '@/lib/fetchApi'
 import { BaseApiResponse } from '@/types/api'
 import { IDoctor } from '@/types/doctor'
-import { CreateDoctorInput } from '../../validation/doctor'
-import { getToken } from '../auth/getToken'
+import { revalidatePath } from 'next/cache'
+import * as v from 'valibot'
+import { CreateDoctorInput, CreateDoctorSchema } from '../../validation/doctor' // ضفنا السكيما هنا
 
 export async function createDoctorAction(
   data: CreateDoctorInput,
   tenantSlug: string,
 ): Promise<BaseApiResponse<IDoctor>> {
-  const token = await getToken()
-
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/clinic/doctors`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'X-Tenant': tenantSlug,
-      },
-      body: JSON.stringify(data),
-    })
-
-    const result = await res.json()
-
-    if (result.success) {
-      revalidatePath(`/${tenantSlug}/dashboard/doctors`)
-    }
-
-    return result as BaseApiResponse<IDoctor>
-  } catch (error) {
+  // 1. Validation (خط الدفاع الأول في السيرفر)
+  const validationResult = v.safeParse(CreateDoctorSchema, data)
+  if (!validationResult.success) {
     return {
       success: false,
-      message: 'خطأ في الاتصال بالسيرفر',
-      data: {} as IDoctor,
-      errors: [],
-      meta: { timestamp: new Date().toISOString(), requestId: '' },
+      message: 'بيانات غير صحيحة، يرجى المراجعة',
+      data: null,
+      errors: validationResult.issues.map((i) => ({
+        field: i.path?.[0]?.key?.toString() || 'general',
+        message: i.message,
+      })),
+      meta: {
+        timestamp: new Date().toISOString(),
+        requestId: '',
+      },
     }
   }
+
+  const res = await fetchApi<IDoctor>('/api/clinic/doctors', {
+    method: 'POST',
+    body: JSON.stringify(data),
+    tenantSlug,
+  })
+
+  // 3. تحديث الكاش لو نجحنا
+  if (res.success) {
+    revalidatePath(`/${tenantSlug}/dashboard/doctors`)
+  }
+
+  return res
 }

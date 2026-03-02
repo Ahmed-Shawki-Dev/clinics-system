@@ -11,15 +11,8 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch' // عشان الحالة
-import { ROLE_CONFIG, ROLES } from '@/config/roles'
+import { Switch } from '@/components/ui/switch'
+import { ROLE_CONFIG } from '@/config/roles'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
@@ -29,7 +22,6 @@ import { IStaff } from '../../../../../types/staff'
 import { UpdateStaffInput, updateStaffSchema } from '../../../../../validation/staff'
 import { updateStaffAction } from '../../../../../actions/staff/update-staff'
 import { toggleStaffStatusAction } from '../../../../../actions/staff/toggle-staff-status'
-
 
 interface Props {
   staff: IStaff
@@ -46,11 +38,9 @@ export function UpdateStaffDialog({ staff, tenantSlug, open, onOpenChange }: Pro
     defaultValues: {
       id: staff.id,
       name: staff.name,
-      username: staff.username,
       phone: staff.phone || '',
-      role: staff.role,
+      salary: staff.salary || 0,
       isEnabled: staff.isEnabled,
-      password: '',
     },
   })
 
@@ -95,78 +85,67 @@ export function UpdateStaffDialog({ staff, tenantSlug, open, onOpenChange }: Pro
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            {/* الاسم */}
-            <FormField
-              control={form.control}
-              name='name'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الاسم</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* الوظيفة */}
-            <FormField
-              control={form.control}
-              name='role'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الوظيفة</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <div className='grid grid-cols-2 gap-4'>
+              <FormField
+                control={form.control}
+                name='name'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الاسم</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
+                      <Input {...field} />
                     </FormControl>
-                    <SelectContent>
-                      {[ROLES.CLINIC_MANAGER, ROLES.RECEPTIONIST].map((r) => (
-                        <SelectItem key={r} value={r}>
-                          {ROLE_CONFIG[r].label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* الهاتف */}
-            <FormField
-              control={form.control}
-              name='phone'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>الهاتف</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name='phone'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الهاتف</FormLabel>
+                    <FormControl>
+                      <Input {...field} dir='ltr' className='text-right' />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-            {/* الباسورد (اختياري) */}
-            <FormField
-              control={form.control}
-              name='password'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>كلمة المرور الجديدة (اختياري)</FormLabel>
-                  <FormControl>
-                    <Input type='password' placeholder='اتركه فارغاً للاحتفاظ بالقديم' {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className='grid grid-cols-2 gap-4'>
+              <FormItem>
+                <FormLabel>الوظيفة</FormLabel>
+                <FormControl>
+                  <Input
+                    value={ROLE_CONFIG[staff.role as keyof typeof ROLE_CONFIG]?.label || staff.role}
+                    disabled
+                    className='bg-muted'
+                  />
+                </FormControl>
+              </FormItem>
 
-            {/* التفعيل */}
+              <FormField
+                control={form.control}
+                name='salary'
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>الراتب (ج.م)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type='number'
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
               name='isEnabled'

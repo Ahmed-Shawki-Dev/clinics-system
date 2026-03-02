@@ -88,7 +88,7 @@ export function CreateStaffForm({ tenantSlug, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>اسم المستخدم</FormLabel>
                 <FormControl>
-                  <Input placeholder='username' {...field} />
+                  <Input placeholder='username' {...field} autoComplete='one-time-code' />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -104,7 +104,7 @@ export function CreateStaffForm({ tenantSlug, onSuccess }: Props) {
               <FormItem>
                 <FormLabel>كلمة المرور</FormLabel>
                 <FormControl>
-                  <Input type='password' {...field} />
+                  <Input type='password' {...field} autoComplete='new-password'/>
                 </FormControl>
                 <FormMessage />
               </FormItem>

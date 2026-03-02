@@ -2,10 +2,8 @@
 
 import { ColumnDef } from '@tanstack/react-table'
 import { Clock, Phone, Stethoscope, User } from 'lucide-react'
-import { DoctorActionsCell } from './doctor-actions-cell'
 import { IDoctor } from '../../../../../types/doctor'
-import { Badge } from '@/components/ui/badge' // تأكد إن المكون ده عندك أو استخدم div مكانه
-import { cn } from '../../../../../lib/utils'
+import { DoctorActionsCell } from './doctor-actions-cell'
 
 export const columns: ColumnDef<IDoctor>[] = [
   {
@@ -63,12 +61,14 @@ export const columns: ColumnDef<IDoctor>[] = [
   {
     accessorKey: 'isEnabled',
     header: 'الحالة',
-    cell: ({ row }) => {
-      const isEnabled = row.original.isEnabled
-      return (
-        <Badge variant={isEnabled ? 'default' : 'destructive'} className={cn(isEnabled?'bg-green-400 text-white' : 'bg-destructive')}>{isEnabled ? 'نشط' : 'موقوف'}</Badge>
-      )
-    },
+    cell: (info) => (
+      <div className='flex items-center gap-2'>
+        <span
+          className={`h-2 w-2 rounded-full ${info.getValue() ? 'bg-emerald-500' : 'bg-destructive'}`}
+        />
+        <span className='text-sm text-muted-foreground'>{info.getValue() ? 'نشط' : 'معطل'}</span>
+      </div>
+    ),
   },
   {
     id: 'actions',
