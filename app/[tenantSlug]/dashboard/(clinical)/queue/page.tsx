@@ -18,7 +18,7 @@ export default async function QueuePage({ params }: { params: Promise<{ tenantSl
   // 2. تجهيز الداتا
   const activeSessions = (boardRes.data?.sessions || []).filter((s) => s.isActive)
   const patients = patientsRes.data?.items || []
-  const doctors = doctorsRes.data?.items || []
+  const doctors = doctorsRes?.doctors || []
 
   return (
     <DashboardShell>

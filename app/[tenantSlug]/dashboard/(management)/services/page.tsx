@@ -20,7 +20,7 @@ export default async function ServicesPage({ params }: Props) {
       />
 
       {/* بنباصي الـ data (الأوبجيكت) مباشرة للـ View */}
-      <ServicesView doctors={response.data} tenantSlug={tenantSlug} />
+      <ServicesView doctors={response.doctors} tenantSlug={tenantSlug} />
     </DashboardShell>
   )
 }

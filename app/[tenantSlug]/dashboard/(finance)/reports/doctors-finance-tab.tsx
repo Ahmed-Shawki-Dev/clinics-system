@@ -31,9 +31,9 @@ export async function DoctorsFinanceTab({
         </div>
       </div>
 
-      <div className='overflow-hidden border rounded-xl bg-card'>
+      <div className='overflow-hidden border rounded-md'>
         <Table dir='rtl'>
-          <TableHeader className='bg-muted/50'>
+          <TableHeader className='bg-muted/50 h-12'>
             <TableRow>
               <TableHead className='font-bold text-right'>اسم الطبيب</TableHead>
               <TableHead className='font-bold text-right'>عدد الكشوفات</TableHead>

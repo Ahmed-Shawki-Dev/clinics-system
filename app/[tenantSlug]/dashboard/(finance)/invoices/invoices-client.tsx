@@ -54,9 +54,9 @@ export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: Invo
 
   return (
     <div className='space-y-4'>
-      <div className='border rounded-xl bg-card overflow-hidden'>
+      <div className='border rounded-md  overflow-hidden'>
         <Table dir='rtl'>
-          <TableHeader className='bg-muted/50'>
+          <TableHeader className='bg-muted/50 h-12'>
             <TableRow>
               <TableHead className='font-bold text-right'>رقم الفاتورة</TableHead>
               <TableHead className='font-bold text-right'>المريض</TableHead>

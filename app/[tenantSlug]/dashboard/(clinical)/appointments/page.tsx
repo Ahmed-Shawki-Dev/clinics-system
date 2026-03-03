@@ -20,7 +20,7 @@ export default async function AppointmentsPage({ params }: PageProps) {
     getBookingsAction(tenantSlug),
   ])
 
-  const doctorsList = doctorsData?.data?.items || []
+  const doctorsList = doctorsData.doctors || []
   const patientsList = patientsData?.data?.items || [] // ضيفنا .data هنا
   const bookingsList = bookingsData?.data?.items || [] // ضيفنا .data هنا
 

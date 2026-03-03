@@ -67,9 +67,9 @@ export async function YearlyFinanceTab({
       </div>
 
       <h3 className='text-lg font-black tracking-tight mt-8'>تفصيل الشهور</h3>
-      <div className='overflow-hidden border rounded-xl bg-card'>
+      <div className='overflow-hidden border rounded-md'>
         <Table dir='rtl'>
-          <TableHeader className='bg-muted/50'>
+          <TableHeader className='bg-muted/50 h-12'>
             <TableRow>
               <TableHead className='font-bold text-right'>الشهر</TableHead>
               <TableHead className='font-bold text-right'>عدد الفواتير</TableHead>

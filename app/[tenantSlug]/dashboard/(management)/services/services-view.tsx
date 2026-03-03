@@ -16,7 +16,7 @@ import { ServicesManager } from './services-manager'
 
 interface Props {
   // التعديل هنا: الـ Type يطابق شكل الداتا اللي جاية من الأكشن
-  doctors: { items: IDoctor[]; totalCount: number } | null
+  doctors: IDoctor[] | null
   tenantSlug: string
 }
 
@@ -28,7 +28,7 @@ export function ServicesView({ doctors: rawData, tenantSlug }: Props) {
   // استخراج المصفوفة بأمان تام من الأوبجيكت
 
   const doctors = useMemo(() => {
-    const allDoctors = rawData?.items || []
+    const allDoctors = rawData || []
 
     return allDoctors.filter((doc) => doc.isEnabled || doc.id === doctorIdParam)
   }, [rawData, doctorIdParam])

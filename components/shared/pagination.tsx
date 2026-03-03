@@ -27,7 +27,7 @@ export function GenericPagination({
     return `${pathname}?${params.toString()}`
   }
 
-  if (totalPages <= 1) return null
+  if (totalPages <= 0) return null
 
   // ضفتلك mt-6 mb-2 هنا عشان تحافظ على نفس المسافات القديمة اللي كانت في الكومبوننت بتاعك
   return (

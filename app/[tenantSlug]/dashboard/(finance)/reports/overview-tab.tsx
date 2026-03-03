@@ -9,8 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { ArrowDownIcon, ArrowUpIcon, WalletIcon, ReceiptIcon, ActivityIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { ActivityIcon, ArrowDownIcon, ArrowUpIcon, ReceiptIcon, WalletIcon } from 'lucide-react'
 
 export async function OverviewTab({
   tenantSlug,
@@ -116,9 +116,9 @@ export async function OverviewTab({
       {/* 2. أداء الدكاترة (عشان صاحب العيادة يعرف مين بيدخله فلوس ومين مريح) */}
       <div className='space-y-4'>
         <h3 className='text-lg font-black tracking-tight'>مساهمة الأطباء في الإيرادات</h3>
-        <div className='overflow-hidden border rounded-xl bg-card'>
+        <div className='overflow-hidden border rounded-md'>
           <Table dir='rtl'>
-            <TableHeader className='bg-muted/50'>
+            <TableHeader className='bg-muted/50 h-12'>
               <TableRow>
                 <TableHead className='font-bold text-right'>اسم الطبيب</TableHead>
                 <TableHead className='font-bold text-right'>عدد الكشوفات</TableHead>

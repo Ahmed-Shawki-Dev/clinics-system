@@ -31,9 +31,9 @@ export function ExpensesClient({ initialExpenses, tenantSlug, pagination }: Expe
         <AddExpenseDialog tenantSlug={tenantSlug} />
       </div>
 
-      <div className='border rounded-xl bg-card overflow-hidden'>
+      <div className='border rounded-md overflow-hidden'>
         <Table dir='rtl'>
-          <TableHeader className='bg-muted/50'>
+          <TableHeader className='bg-muted/50 h-12'>
             <TableRow>
               <TableHead className='font-bold text-right'>التاريخ</TableHead>
               <TableHead className='font-bold text-right'>البند</TableHead>
