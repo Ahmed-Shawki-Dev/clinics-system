@@ -54,7 +54,7 @@ export default async function Page({ params }: PageProps) {
       {activeWorkingHours.length > 0 && <WorkingHoursSection workingHours={activeWorkingHours} />}
 
       {/* الكول تو أكشن الختامي قبل الفوتر مباشرة */}
-      <FinalCtaSection tenantSlug={tenantSlug} />
+      {/* <FinalCtaSection tenantSlug={tenantSlug} /> */}
 
       <Footer clinic={clinic} tenantSlug={tenantSlug}/>
     </main>
