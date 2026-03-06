@@ -16,7 +16,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Calendar, MoreHorizontalIcon, Phone, User } from 'lucide-react'
+import { Calendar, MoreHorizontalIcon, Phone, User, Eye } from 'lucide-react'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
 
 import { DeletePatientDialog } from './delete-patient-dialog'
 import { EditPatientModal } from './edit-patient-modal'
@@ -29,8 +31,10 @@ interface PatientsListProps {
 }
 
 export function PatientsList({ data }: PatientsListProps) {
+  const { tenantSlug } = useParams()
+
   return (
-    <div className='rounded-md border '>
+    <div className='rounded-md border'>
       <Table>
         <TableHeader className='h-12 bg-muted/50'>
           <TableRow>
@@ -53,7 +57,7 @@ export function PatientsList({ data }: PatientsListProps) {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className='flex items-center gap-2 '>
+                  <div className='flex items-center gap-2'>
                     <Phone className='h-4 w-4 text-primary' />
                     {patient.phone}
                   </div>
@@ -79,17 +83,28 @@ export function PatientsList({ data }: PatientsListProps) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end'>
+                      {/* زر عرض البروفايل - متاح للجميع */}
+                      <Link href={`/${tenantSlug}/dashboard/patients/${patient.id}`}>
+                        <DropdownMenuItem>
+                          <Eye className='ml-2 h-4 w-4' />
+                          عرض البروفايل
+                        </DropdownMenuItem>
+                      </Link>
+
                       <DropdownMenuItem
                         onClick={() => navigator.clipboard.writeText(patient.phone)}
                       >
                         نسخ الرقم
                       </DropdownMenuItem>
+
                       <PermissionGate
                         allowedRoles={[ROLES.CLINIC_OWNER, ROLES.CLINIC_MANAGER, ROLES.SUPER_ADMIN]}
                       >
                         <EditPatientModal patient={patient} />
                       </PermissionGate>
+
                       <DropdownMenuSeparator />
+
                       <PermissionGate allowedRoles={[ROLES.CLINIC_OWNER, ROLES.SUPER_ADMIN]}>
                         <DeletePatientDialog patientId={patient.id} patientName={patient.name} />
                       </PermissionGate>
@@ -100,7 +115,7 @@ export function PatientsList({ data }: PatientsListProps) {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={5} className='h-32 text-center text-muted-foreground'>
+              <TableCell colSpan={4} className='h-32 text-center text-muted-foreground'>
                 <div className='flex flex-col items-center justify-center gap-2'>
                   <User className='h-8 w-8 opacity-50' />
                   <p>لا يوجد مرضى مسجلين حتى الآن</p>
