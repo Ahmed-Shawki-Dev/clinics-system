@@ -19,7 +19,6 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
   const payload = JSON.parse(Buffer.from(payloadBase64, 'base64').toString('utf-8'))
   const role = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
-  const displayName = payload['displayName']
 
   if (role === 'Doctor') {
     redirect(`/${tenantSlug}/dashboard/doctor/queue`)
@@ -32,7 +31,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   switch (role) {
     case 'ClinicOwner':
     case 'ClinicManager':
-      return <OwnerDashboard tenantSlug={tenantSlug} displayName={displayName} />
+      return <OwnerDashboard tenantSlug={tenantSlug}  />
 
     case 'Receptionist':
       return <div className='p-4 font-bold'>داشبورد الاستقبال (قيد الإنشاء)</div>
