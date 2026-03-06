@@ -44,13 +44,25 @@ export async function loginAction(values: LoginInput, tenantSlug: string) {
   // تنظيف أي جلسة مريض سابقة لمنع التضارب
   cookieStore.delete('patient_token')
 
-  cookieStore.set('token', result.data.token, {
+cookieStore.set('token', result.data.token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  path: `/`,
+  maxAge: 30 * 24 * 60 * 60,
+})
+
+
+if (result.data.refreshToken) {
+  cookieStore.set('refreshToken', result.data.refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    path: `/`, // عزل الكوكي لمسار العيادة
-    maxAge: 30 * 24 * 60 * 60, // 30 يوم
+    path: `/`,
+    maxAge: 30 * 24 * 60 * 60, // خليه يعيش نفس المدة أو أكتر
   })
+}
+
 
   return { success: true, data: result.data }
 }

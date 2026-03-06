@@ -1,7 +1,7 @@
-import { getToken } from '../actions/auth/getToken' // تأكد من مسارك صح
+import { getToken } from '../actions/auth/getToken'
+import { refreshAccessToken } from '../actions/auth/refresh-token'
 import { BaseApiResponse } from '../types/api'
 
-// بنوسع الـ RequestInit العادي عشان نقبل الـ tenantSlug و authType
 interface FetchOptions extends RequestInit {
   tenantSlug?: string
   authType?: 'staff' | 'patient'
@@ -13,7 +13,6 @@ export async function fetchApi<T>(
   endpoint: string,
   options: FetchOptions = {},
 ): Promise<BaseApiResponse<T>> {
-  // فصلنا الداتا الخاصة بينا عن خيارات الـ fetch، والديفولت staff
   const {
     tenantSlug,
     authType = 'staff',
@@ -22,19 +21,15 @@ export async function fetchApi<T>(
     ...restOptions
   } = options
 
-  // بنبعت الـ authType عشان getToken تجيب التوكن بتاع الـ Role ده بس
   const token = await getToken(authType)
   const headers = new Headers(customHeaders)
 
-  // الـ Headers الأساسية
   headers.set('Content-Type', 'application/json')
 
-  // حقن التوكن لو متاح
   if (token) {
     headers.set('Authorization', `Bearer ${token}`)
   }
 
-  // حقن الـ Tenant لو متاح للـ Clinic Routes
   if (tenantSlug) {
     headers.set('X-Tenant', tenantSlug)
   }
@@ -44,28 +39,47 @@ export async function fetchApi<T>(
   const controller = new AbortController()
   const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
 
-  // دعم أي signal خارجي بجانب timeout الداخلي
   const onExternalAbort = () => controller.abort()
   if (externalSignal) {
     externalSignal.addEventListener('abort', onExternalAbort)
   }
 
   try {
-    const response = await fetch(url, {
+    // 🔥 الريكويست الأول (الأصلي)
+    let response = await fetch(url, {
       headers,
       signal: controller.signal,
       ...restOptions,
     })
 
+    // 🔴 منطقة الـ Interceptor: لو التوكن خلص وهو ستاف مش مريض
+    if (response.status === 401 && authType === 'staff') {
+      const newToken = await refreshAccessToken(tenantSlug)
+
+      // لو قدرنا نجيب توكن جديد من الباك إند
+      if (newToken) {
+        // نحدث الهيدر بالتوكن الجديد
+        headers.set('Authorization', `Bearer ${newToken}`)
+
+        // 🔥 نعيد الريكويست مرة كمان بالتوكن الجديد (صاحب العيادة مش هيحس بحاجة)
+        response = await fetch(url, {
+          headers,
+          signal: controller.signal,
+          ...restOptions,
+        })
+      }
+    }
+
     clearTimeout(timeoutId)
     externalSignal?.removeEventListener('abort', onExternalAbort)
 
-    // لو الباك إند رجع 401، نرجع استجابة موحدة تدل على انتهاء الجلسة
+    // بعد ما الريكويست خلص (سواء الأولاني نجح، أو التاني بعد الريفرش)
+    // لو لسه 401 يبقى الريفرش فشل واليوزر لازم يعمل لوجين تاني
     if (response.status === 401) {
       return {
         success: false,
-        message: 'غير مسموح لك بالدخول',
-        data: null,
+        message: 'حدث خطأ ما',
+        data: null as unknown as T,
         errors: [{ field: 'auth', message: 'Unauthorized' }],
         meta: { timestamp: new Date().toISOString(), requestId: '' },
       }
@@ -76,7 +90,7 @@ export async function fetchApi<T>(
       return {
         success: false,
         message: 'ليس لديك صلاحية للقيام بهذا الإجراء',
-        data: null,
+        data: null as unknown as T,
         errors: [{ field: 'auth', message: 'Forbidden' }],
         meta: { timestamp: new Date().toISOString(), requestId: '' },
       }
@@ -90,13 +104,12 @@ export async function fetchApi<T>(
 
     const isTimeout = error instanceof Error && error.name === 'AbortError'
 
-    // معالجة السقوط الكامل للشبكة (Network/CORS/Timeout) بنفس الـ Interface
     return {
       success: false,
       message: isTimeout
         ? 'انتهت مهلة الاتصال بالخادم، يرجى المحاولة مرة أخرى'
         : 'فشل في الاتصال بالخادم',
-      data: null,
+      data: null as unknown as T,
       errors: [
         {
           field: 'server',
