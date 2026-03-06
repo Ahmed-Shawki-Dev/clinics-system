@@ -36,7 +36,7 @@
   --sidebar-border: #e2e8f0;
   --sidebar-ring: #0ea5e9;
   --font-sans: Cairo, ui-sans-serif, system-ui, sans-serif;
-  --font-serif: Source Serif 4, serif;
+  --font-serif: Tajawal, ui-sans-serif, system-ui, sans-serif;
   --font-mono: JetBrains Mono, monospace;
   --radius: 1rem;
   --shadow-x: 0;
@@ -90,9 +90,6 @@
   --sidebar-accent-foreground: #f8fafc;
   --sidebar-border: #252330;
   --sidebar-ring: #38bdf8;
-  --font-sans: Cairo, sans-serif;
-  --font-serif: Cairo, serif;
-  --font-mono: JetBrains Mono, monospace;
   --radius: 1rem;
   --shadow-x: 0;
   --shadow-y: 1px;

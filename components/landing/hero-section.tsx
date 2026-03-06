@@ -1,63 +1,173 @@
-import { Button } from '@/components/ui/button'
+'use client'
+
+import { ambientBlob1, ambientBlob2, fadeInUp, staggerContainer } from '@/animation'
 import { Typography } from '@/components/ui/typography'
-import { ArrowLeft, Rocket, Sparkles } from 'lucide-react'
-import Link from 'next/link'
+import { ChevronDown, HeartPulse, ShieldCheck, Star, Stethoscope } from 'lucide-react'
+import { motion, useMotionValue, useSpring, useTransform } from 'motion/react'
+import { StarfieldBackground } from '../ui/starfield'
 
-export function HeroSection() {
+export default function HeroSection() {
+  const mouseX = useMotionValue(0)
+  const mouseY = useMotionValue(0)
+
+  const springConfig = { damping: 25, stiffness: 150 }
+  const smoothX = useSpring(mouseX, springConfig)
+  const smoothY = useSpring(mouseY, springConfig)
+
+  // 4 طبقات من الحركة العكسية للكروت
+  const floatX1 = useTransform(smoothX, [-0.5, 0.5], [-30, 30])
+  const floatY1 = useTransform(smoothY, [-0.5, 0.5], [-30, 30])
+
+  const floatX2 = useTransform(smoothX, [-0.5, 0.5], [40, -40])
+  const floatY2 = useTransform(smoothY, [-0.5, 0.5], [40, -40])
+
+  const floatX3 = useTransform(smoothX, [-0.5, 0.5], [20, -20])
+  const floatY3 = useTransform(smoothY, [-0.5, 0.5], [-40, 40])
+
+  const floatX4 = useTransform(smoothX, [-0.5, 0.5], [-40, 40])
+  const floatY4 = useTransform(smoothY, [-0.5, 0.5], [20, -20])
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { clientX, clientY } = e
+    const { innerWidth, innerHeight } = window
+    mouseX.set(clientX / innerWidth - 0.5)
+    mouseY.set(clientY / innerHeight - 0.5)
+  }
+
   return (
-    <section className='relative flex flex-col  items-center justify-start  pt-16 md:pt-32 pb-10 text-center overflow-hidden'>
-      {/* Pattern Background */}
-      <div className='absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] bg-size-[16px_16px] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)] opacity-30'></div>
+    <section
+      className='relative font-serif min-h-[90vh] md:min-h-[95vh] flex items-center justify-center overflow-hidden w-full pt-20 pb-16'
+      dir='rtl'
+      onMouseMove={handleMouseMove}
+    >
+      <StarfieldBackground className='absolute inset-0 z-0' />
 
-      {/* Ambient Glow */}
-      <div className='absolute top-0 z-[-1] h-screen w-full overflow-hidden pointer-events-none'>
-        <div className='absolute left-1/2 top-[20%] -translate-x-1/2 h-100 w-150 rounded-full bg-primary/20 blur-[120px]'></div>
+      {/* Background Blobs */}
+      <motion.div
+        variants={ambientBlob1}
+        animate='animate'
+        className='absolute top-1/4 -right-10 w-120 h-120 bg-primary/10 rounded-full blur-[100px] pointer-events-none z-0'
+      />
+      <motion.div
+        variants={ambientBlob2}
+        animate='animate'
+        className='absolute bottom-0 -left-10 w-100 h-100 bg-secondary/10 rounded-full blur-[120px] pointer-events-none z-0'
+      />
+
+      <div className='absolute inset-0 bg-[url("https://grainy-gradients.vercel.app/noise.svg")] opacity-20 mix-blend-overlay pointer-events-none z-0'></div>
+
+      {/* ====== طبقة الـ Fade السحرية ====== */}
+      <div className='absolute bottom-0 left-0 w-full h-32 md:h-48 bg-linear-to-t from-background via-background/80 to-transparent pointer-events-none z-10' />
+
+      <div className='container mx-auto px-4 relative z-20'>
+        <motion.div
+          className='flex flex-col items-center justify-center text-center max-w-4xl mx-auto space-y-8'
+          variants={staggerContainer}
+          initial='hidden'
+          animate='visible'
+        >
+          {/* Main Title */}
+          <motion.div variants={fadeInUp} className='w-full relative'>
+            <Typography
+              variant='h1'
+              className='text-5xl md:text-7xl lg:text-8xl font-black text-foreground tracking-tighter leading-[1.1] bg-clip-text'
+            >
+              Medora
+            </Typography>
+          </motion.div>
+
+          {/* Subtitle */}
+          <motion.div variants={fadeInUp}>
+            <Typography
+              variant='lead'
+              className='text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-2xl leading-relaxed mx-auto'
+            >
+              نقدم لك ولأسرتك رعاية طبية متكاملة على يد نخبة من أفضل الأطباء. دقة في التشخيص، أحدث
+              الأجهزة، وتجربة خالية من الانتظار.
+            </Typography>
+          </motion.div>
+
+          {/* Trust Pile (Social Proof) */}
+          <motion.div variants={fadeInUp} className='flex flex-col items-center gap-3 pt-6'>
+            <div className='flex -space-x-3 -space-x-reverse'></div>
+            <div className='flex items-center gap-2 text-sm text-muted-foreground font-medium'>
+              <div className='flex'>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star key={i} className='w-4 h-4 text-amber-400 fill-amber-400' />
+                ))}
+              </div>
+              <span>موثوق من +10,000 مريض</span>
+            </div>
+          </motion.div>
+        </motion.div>
+
+        {/* Floating Cards - 4 زوايا */}
+        {/* Top Right */}
+        <motion.div
+          className='hidden lg:flex absolute top-10 right-5 bg-background/80 border border-border p-4 rounded-3xl shadow-xl items-center gap-3 backdrop-blur-xl'
+          style={{ x: floatX1, y: floatY1 }}
+        >
+          <div className='bg-primary/20 p-3 rounded-2xl'>
+            <Stethoscope className='h-6 w-6 text-primary' />
+          </div>
+          <div>
+            <p className='font-black text-base'>نخبة الأطباء</p>
+            <p className='text-xs text-muted-foreground'>خبرات عالمية</p>
+          </div>
+        </motion.div>
+
+        {/* Bottom Left */}
+        <motion.div
+          className='hidden lg:flex absolute bottom-20 left-10 bg-background/80 border border-border p-4 rounded-3xl shadow-xl items-center gap-3 backdrop-blur-xl'
+          style={{ x: floatX2, y: floatY2 }}
+        >
+          <div className='bg-secondary/20 p-3 rounded-2xl'>
+            <HeartPulse className='h-6 w-6 text-secondary-foreground' />
+          </div>
+          <div>
+            <p className='font-black text-base'>أحدث التقنيات</p>
+            <p className='text-xs text-muted-foreground'>تشخيص دقيق</p>
+          </div>
+        </motion.div>
+
+        {/* Top Left */}
+        <motion.div
+          className='hidden lg:flex absolute top-20 left-16 bg-background/80 border border-border p-4 rounded-3xl shadow-xl items-center gap-3 backdrop-blur-xl'
+          style={{ x: floatX3, y: floatY3 }}
+        >
+          <div className='bg-amber-500/20 p-3 rounded-2xl'>
+            <Star className='h-6 w-6 text-amber-500 fill-amber-500' />
+          </div>
+          <div>
+            <p className='font-black text-base'>4.9/5</p>
+            <p className='text-xs text-muted-foreground'>تقييم الزوار</p>
+          </div>
+        </motion.div>
+
+        {/* Bottom Right */}
+        <motion.div
+          className='hidden lg:flex absolute bottom-32 right-12 bg-background/80 border border-border p-4 rounded-3xl shadow-xl items-center gap-3 backdrop-blur-xl'
+          style={{ x: floatX4, y: floatY4 }}
+        >
+          <div className='bg-emerald-500/20 p-3 rounded-2xl'>
+            <ShieldCheck className='h-6 w-6 text-emerald-500' />
+          </div>
+          <div>
+            <p className='font-black text-base'>عيادات معتمدة</p>
+            <p className='text-xs text-muted-foreground'>معايير جودة عالية</p>
+          </div>
+        </motion.div>
       </div>
 
-      <div className='container px-4 md:px-6 z-10 flex flex-col items-center'>
-        {/* 1. Micro-copy / Badge */}
-        <div className='mb-8 flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary transition-colors'>
-          <Sparkles className='h-4 w-4' />
-          <span>نظام إدارة العيادات الأذكى في مصر</span>
-        </div>
-
-        {/* 2. Massive Typography */}
-        <Typography
-          variant='h1'
-          className='mb-6 max-w-4xl text-5xl md:text-7xl lg:text-8xl leading-tight tracking-tighter'
-        >
-          ارتقِ بعيادتك مع <br className='hidden md:block' />
-          <span className='text-transparent tracking-wide bg-clip-text bg-linear-to-r from-primary to-cyan-400 uppercase'>
-            Beta Clinics
-          </span>
-        </Typography>
-
-        <Typography
-          variant='lead'
-          className='mx-auto mb-10 max-w-2xl text-lg md:text-xl leading-relaxed'
-        >
-          نظام سحابي متكامل، مصمم خصيصاً لإدارة الحجوزات، الطوابير، والتقارير المالية بدقة وسرعة
-          فائقة. حول عيادتك لبيئة عمل رقمية بالكامل.
-        </Typography>
-
-        <div className='flex flex-col sm:flex-row gap-4 justify-center items-center mb-16'>
-          <Button size='lg' className='w-full sm:w-auto h-12 px-8 text-base gap-2' asChild>
-            <Link href='/login'>
-              ابدأ الآن <ArrowLeft className='h-5 w-5' />
-            </Link>
-          </Button>
-          <Button
-            size='lg'
-            variant='outline'
-            className='w-full sm:w-auto h-12 px-8 text-base gap-2'
-            asChild
-          >
-            <Link href='#features'>
-              <Rocket className='h-5 w-5' /> تصفح المميزات
-            </Link>
-          </Button>
-        </div>
-      </div>
+      {/* Scroll Down Indicator - خد بالك اديناه z-20 عشان يبان فوق الـ Fade */}
+      <motion.div
+        animate={{ y: [0, 10, 0] }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        className='absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-muted-foreground opacity-60 z-20'
+      >
+        <span className='text-xs uppercase tracking-wider font-semibold'>اكتشف المزيد</span>
+        <ChevronDown className='w-5 h-5' />
+      </motion.div>
     </section>
   )
 }

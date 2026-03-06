@@ -1,6 +1,8 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { CalendarCheck, Sparkles, UserRound } from 'lucide-react'
+import { ArrowLeft, Clock, ShieldCheck, Stethoscope } from 'lucide-react'
+import { motion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { IPublicClinic } from '../../types/public'
@@ -11,94 +13,89 @@ interface HeroProps {
 }
 
 export default function Hero({ clinic, tenantSlug }: HeroProps) {
-  const { clinicName, bookingEnabled } = clinic
+  // const clinicName = clinic?.clinicName || 'عيادتنا'
 
   return (
-    <section className='relative pt-12 md:pt-24 pb-20 md:pb-36 overflow-hidden' dir='rtl'>
-      <div
-        className='absolute inset-0 z-0 pointer-events-none opacity-[0.05] dark:opacity-[0.05]'
-        style={{
-          backgroundImage: `
-            linear-gradient(to right, gray 1px, transparent 1px),
-            linear-gradient(to bottom, gray 1px, transparent 1px)
-          `,
-          backgroundSize: '24px 24px',
-          // الـ Fade السحري اللي بيخليها تختفي تحت
-          maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)',
-        }}
-      />
-      <div className='absolute bottom-0 left-0 w-full h-32 md:h-48 bg-linear-to-t from-background to-transparent z-1' />
+    <section className='relative w-full  pt-24 pb-16 md:pt-32 md:pb-24 overflow-hidden'>
+      <div className='w-full max-w-400 mx-auto px-6 md:px-12 lg:px-16 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center'>
+        {/* النصف الأيمن: النصوص */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className='flex flex-col items-start space-y-8 text-start'
+        >
+          <div className='space-y-6 w-full'>
+            <h1 className='text-5xl md:text-6xl lg:text-[5rem] xl:text-[6rem] font-medium leading-[1.1] tracking-tight'>
+              رعاية متقدمة
+              <br />
+              <span className='font-bold italic text-primary'>يمكنك </span>
+              <span>الوثوق بها.</span>
+            </h1>
 
-      <div className='container mx-auto px-4 md:px-6 grid lg:grid-cols-2 gap-12 md:gap-16 items-center relative z-10'>
-        {/* الجزء اليمين: متسنتر في الموبايل، يمين في الديسكتوب */}
-        <div className='flex flex-col space-y-8 text-center lg:text-right items-center lg:items-start'>
-          <div className='space-y-5 flex flex-col items-center lg:items-start'>
-            <div className='inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-bold text-primary w-fit shadow-sm mx-auto lg:mx-0'>
-              <Sparkles className='ml-2 h-4 w-4' />
-              رعاية طبية بمقاييس عالمية
-            </div>
-
-            <Typography
-              variant='h1'
-              className='text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-[1.2] w-full'
-            >
-              {clinicName}
-            </Typography>
-
-            <Typography
-              variant='lead'
-              className='text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed mx-auto lg:mx-0'
-            >
-              نقدم لك ولأسرتك رعاية طبية متكاملة على يد نخبة من أفضل الأطباء. دقة في التشخيص، أحدث
-              الأجهزة، وبدون أوقات انتظار.
-            </Typography>
+            <p className='text-lg md:text-xl text-slate-500 max-w-lg leading-relaxed font-normal'>
+              تشخيص رقمي دقيق، إجراءات طبية متطورة، ونتائج مضمونة في كل مرحلة من مراحل علاجك معنا.
+            </p>
           </div>
 
-          <div className='flex flex-col space-y-4 pt-2 w-full'>
-            <div className='flex flex-wrap items-center justify-center lg:justify-start gap-3'>
-              {bookingEnabled && (
-                <Button
-                  className='h-11 px-6 text-base font-bold shadow-md hover:-translate-y-1 transition-transform gap-2'
-                  asChild
-                >
-                  <Link href={`/${tenantSlug}#booking`}>
-                    <CalendarCheck className='h-5 w-5' /> احجز كشفك
-                  </Link>
-                </Button>
-              )}
+          <Button
+            className='rounded-full h-14 px-8 text-base font-medium transition-colors gap-2'
+            asChild
+          >
+            <Link href={`/${tenantSlug}#booking`}>
+              احجز استشارتك <ArrowLeft className='w-5 h-5' />
+            </Link>
+          </Button>
+        </motion.div>
 
-              <Button variant='secondary' className='h-11 px-6 text-base font-bold gap-2' asChild>
-                <Link href={`/${tenantSlug}/patient/login`}>
-                  <UserRound className='h-5 w-5' /> بوابة المرضى
-                </Link>
-              </Button>
+        {/* النصف الأيسر: الصورة وصندوق الإحصائيات */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          // كبرنا العرض الأقصى للصورة عشان تملى المساحة الواسعة الجديدة
+          className='relative w-full max-w-2xl mx-auto lg:me-0 lg:max-w-none h-125 lg:h-160 rounded-[2.5rem] overflow-hidden shadow-2xl'
+        >
+          <Image
+            src='https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=1632&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+            alt='رعاية طبية'
+            fill
+            className='object-cover object-center '
+            priority
+          />
+          {/* صندوق المميزات (بديل الإحصائيات الوهمية) */}
+          <div className='absolute bottom-4 md:bottom-6 left-4 right-4 md:left-6 md:right-6  rounded-2xl p-3 flex gap-2 md:gap-3 '>
+            {/* الميزة الأولى: التعقيم والأمان */}
+            <div className='flex-1 bg-slate-50 rounded-xl p-3 md:p-4 flex flex-col items-center justify-center text-center transition-colors hover:bg-blue-50 group'>
+              <div className='bg-blue-100/50 p-2 rounded-full mb-2'>
+                <ShieldCheck className='w-5 h-5 md:w-6 md:h-6' />
+              </div>
+              <span className='font-bold text-sm md:text-base text-slate-900 mb-0.5'>
+                أمان وتعقيم
+              </span>
+            </div>
+
+            {/* الميزة الثانية: الرعاية */}
+            <div className='flex-1 bg-slate-50 rounded-xl p-3 md:p-4 flex flex-col items-center justify-center text-center transition-colors hover:bg-blue-50 group'>
+              <div className='bg-blue-100/50 p-2 rounded-full mb-2'>
+                <Stethoscope className='w-5 h-5 md:w-6 md:h-6' />
+              </div>
+              <span className='font-bold text-sm md:text-base text-slate-900 mb-0.5'>
+                رعاية شاملة
+              </span>
+            </div>
+
+            {/* الميزة الثالثة: الوقت */}
+            <div className='flex-1 bg-slate-50 rounded-xl p-3 md:p-4 flex flex-col items-center justify-center text-center transition-colors group'>
+              <div className='bg-blue-100/50 p-2 rounded-full mb-2  transition-colors'>
+                <Clock className='w-5 h-5 md:w-6 md:h-6 transition-colors' />
+              </div>
+              <span className='font-bold text-sm md:text-base text-slate-900 mb-0.5'>
+                بدون انتظار
+              </span>
             </div>
           </div>
-        </div>
-
-        {/* الجزء الشمال: مخفي في الموبايل، ظاهر في الديسكتوب */}
-        <div className='hidden lg:flex relative justify-end mt-8 lg:mt-0'>
-          <div className='relative w-full max-w-125 aspect-4/5 rounded-4xl overflow-hidden shadow-2xl border-8 border-muted/50 bg-muted'>
-            <Image
-              src='https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=2070&auto=format&fit=crop'
-              alt='صورة العيادة'
-              fill
-              className='object-cover hover:scale-105 transition-transform duration-1000'
-              priority
-            />
-          </div>
-
-          <div className='absolute -bottom-8 -left-8 bg-card border border-border/50 p-5 rounded-2xl shadow-xl flex items-center gap-4 z-20 backdrop-blur-sm'>
-            <div className='bg-primary/10 p-3 rounded-xl'>
-              <CalendarCheck className='h-8 w-8 text-primary' />
-            </div>
-            <div className='text-right'>
-              <p className='font-black text-foreground text-sm'>حجز فوري</p>
-              <p className='text-xs text-primary font-bold mt-1'>بدون قائمة انتظار</p>
-            </div>
-          </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   )

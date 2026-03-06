@@ -21,9 +21,8 @@ export default async function AppointmentsPage({ params }: PageProps) {
   ])
 
   const doctorsList = doctorsData.doctors || []
-  const patientsList = patientsData?.data?.items || [] // ضيفنا .data هنا
+  const patientsList = patientsData?.items || [] // ضيفنا .data هنا
   const bookingsList = bookingsData?.data?.items || [] // ضيفنا .data هنا
-
   return (
     <DashboardShell>
       <DashboardHeader heading='إدارة الحجوزات' text='عرض وجدولة المواعيد الخاصة بالعيادة.'>

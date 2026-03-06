@@ -2,14 +2,22 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { DirectionProvider } from '@/components/ui/direction'
 import { Toaster } from '@/components/ui/sonner'
 import type { Metadata } from 'next'
-import { Cairo } from 'next/font/google'
+import { Cairo, Tajawal } from 'next/font/google' // استدعاء الخطين
 import './globals.css'
 
+// خط الداشبورد الأساسي
 const cairo = Cairo({
   subsets: ['arabic'],
   variable: '--font-cairo',
   display: 'swap',
-  weight: ['300', '200', '400', '500', '600', '700','1000','800','900'],
+})
+
+// خط اللاندنج بيدج الفخم
+const tajawal = Tajawal({
+  subsets: ['arabic'],
+  variable: '--font-zain',
+  display: 'swap',
+  weight: ['200', '300', '400', '700', '800', '900'],
 })
 
 export const metadata: Metadata = {
@@ -24,8 +32,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='ar' dir='rtl' suppressHydrationWarning>
+      {/* رمينا المتغيرين هنا عشان يبقوا متاحين في ملف الـ CSS */}
       <body
-        className={`${cairo.variable} font-sans antialiased `}
+        className={`${cairo.variable} ${tajawal.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
         <DirectionProvider direction='rtl' dir={'rtl'}>

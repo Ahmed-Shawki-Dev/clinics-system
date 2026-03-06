@@ -18,7 +18,7 @@ export default function WorkingHoursSection({
   return (
     <section className='py-16 md:py-20 bg-background'>
       <div className='container px-4 md:px-6 max-w-3xl mx-auto'>
-        <Typography variant='h2' className='text-3xl md:text-4xl font-bold text-center mb-10'>
+        <Typography variant='h2' className='text-3xl md:text-4xl font-normal text-center mb-10'>
           مواعيد العمل
         </Typography>
 

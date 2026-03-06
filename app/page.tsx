@@ -1,7 +1,7 @@
 import { CTASection } from '../components/landing/cta-section'
 import { FeaturesSection } from '../components/landing/features-section'
 import { Footer } from '../components/landing/footer'
-import { HeroSection } from '../components/landing/hero-section'
+import HeroSection from '../components/landing/hero-section'
 import { Navbar } from '../components/landing/navbar'
 import { TechStackSection } from '../components/landing/tech-stack-section'
 
