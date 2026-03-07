@@ -2,8 +2,10 @@ import { getPatientProfileAction } from '@/actions/patient/get-patient-profile'
 import { GenericPagination } from '@/components/shared/pagination'
 import { DashboardShell } from '@/components/shell'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Activity, User } from 'lucide-react'
+import { Activity, ChevronLeft, User } from 'lucide-react'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { Button } from '../../../../../../components/ui/button'
 import { PatientInfoCard } from './patient-info-card'
 import { SubProfilesList } from './sub-profiles-list'
 import { VisitsTimeline } from './visits-timeline'
@@ -37,6 +39,12 @@ export default async function PatientProfilePage({ params, searchParams }: PageP
           </h1>
           <p className='text-sm text-muted-foreground mt-1'>إدارة السجل الطبي الشامل للمريض</p>
         </div>
+        <Button variant={'ghost'}>
+          <Link href={`/${tenantSlug}/dashboard/patients`} className='flex space-x-2 items-center'>
+            صفحة المرضى
+            <ChevronLeft />
+          </Link>
+        </Button>
       </div>
 
       <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
