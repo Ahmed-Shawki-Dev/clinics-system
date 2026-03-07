@@ -18,7 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Input } from '@/components/ui/input' // ضفنا الـ Input
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -36,6 +36,7 @@ import { Banknote, CreditCard, Loader2, Ticket } from 'lucide-react'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { mutate } from 'swr' // <--- الاستيراد السحري
 import { PatientSearch } from './patient-search'
 
 interface CutTicketDialogProps {
@@ -60,11 +61,10 @@ export function CutTicketDialog({
     defaultValues: {
       isUrgent: false,
       notes: '',
-      paymentMethod: 'Cash', // قيمة افتراضية عشان ميضربش إيرور
+      paymentMethod: 'Cash',
     },
   })
 
-  // بنراقب العيادة والخدمة عشان نظهر ونخفي حقول الدفع
   const selectedSessionId = form.watch('sessionId')
   const selectedServiceId = form.watch('doctorServiceId')
 
@@ -74,7 +74,6 @@ export function CutTicketDialog({
     return doctors.find((d) => d.id === session.doctorId)
   }, [selectedSessionId, activeSessions, doctors])
 
-  // الدالة دي بتسحب سعر الخدمة تلقائي وتحطه في حقل المبلغ
   const handleServiceChange = (serviceId: string) => {
     form.setValue('doctorServiceId', serviceId)
     const service = selectedDoctor?.services?.find((s) => s.id === serviceId)
@@ -101,6 +100,9 @@ export function CutTicketDialog({
       toast.success('تم الحجز وإصدار التذكرة بنجاح')
       setOpen(false)
       form.reset()
+
+      // 🔥 تحديث الشاشة فورا بدون ريفرش
+      await mutate(['queueBoard', tenantSlug])
     } catch (error) {
       if (error instanceof Error) toast.error(error.message)
     } finally {
@@ -113,7 +115,7 @@ export function CutTicketDialog({
       open={open}
       onOpenChange={(isOpen) => {
         setOpen(isOpen)
-        if (!isOpen) form.reset() // ننضف الفورمة لما تتقفل
+        if (!isOpen) form.reset()
       }}
     >
       <DialogTrigger asChild>
@@ -132,7 +134,6 @@ export function CutTicketDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5'>
-            {/* اختيار العيادة */}
             <FormField
               control={form.control}
               name='sessionId'
@@ -144,8 +145,6 @@ export function CutTicketDialog({
                       field.onChange(val)
                       const docId = activeSessions.find((s) => s.sessionId === val)?.doctorId
                       if (docId) form.setValue('doctorId', docId)
-
-                      // تصفير الخدمة والمبلغ لو غير العيادة عشان منبعتش داتا غلط
                       form.setValue('doctorServiceId', undefined)
                       form.setValue('paymentAmount', undefined)
                     }}
@@ -172,7 +171,6 @@ export function CutTicketDialog({
               )}
             />
 
-            {/* المريض */}
             <FormField
               control={form.control}
               name='patientId'
@@ -193,7 +191,6 @@ export function CutTicketDialog({
             />
 
             <div className='grid grid-cols-2 gap-4'>
-              {/* الخدمة */}
               <FormField
                 control={form.control}
                 name='doctorServiceId'
@@ -221,7 +218,6 @@ export function CutTicketDialog({
                 )}
               />
 
-              {/* الطوارئ */}
               <FormField
                 control={form.control}
                 name='isUrgent'
@@ -244,7 +240,6 @@ export function CutTicketDialog({
               />
             </div>
 
-            {/* قسم الدفع: بيظهر فقط لو تم اختيار خدمة */}
             {selectedServiceId && (
               <div className='grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-xl border border-muted'>
                 <FormField
@@ -300,7 +295,6 @@ export function CutTicketDialog({
               </div>
             )}
 
-            {/* الملاحظات */}
             <FormField
               control={form.control}
               name='notes'

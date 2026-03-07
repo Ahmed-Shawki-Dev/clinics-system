@@ -2,7 +2,7 @@ import { getPatientProfileAction } from '@/actions/patient/get-patient-profile'
 import { GenericPagination } from '@/components/shared/pagination'
 import { DashboardShell } from '@/components/shell'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Activity, Beaker, Pill, User } from 'lucide-react'
+import { Activity, User } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { PatientInfoCard } from './patient-info-card'
 import { SubProfilesList } from './sub-profiles-list'
@@ -88,7 +88,6 @@ export default async function PatientProfilePage({ params, searchParams }: PageP
               <TabsContent value='subProfiles' className='outline-none m-0'>
                 <SubProfilesList subProfiles={patient.subProfiles || []} />
               </TabsContent>
-
             </div>
           </Tabs>
         </div>

@@ -18,6 +18,7 @@ export default async function RootLayout({ children, params }: LayoutProps) {
     { next: { revalidate: 3600 } },
   )
 
+
   if (response.status === 404) {
     notFound()
   }

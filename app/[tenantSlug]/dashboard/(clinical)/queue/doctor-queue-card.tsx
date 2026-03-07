@@ -27,6 +27,7 @@ import { IQueueBoardSession } from '@/types/queue'
 import { ArrowUp, MoreHorizontal, Power, X } from 'lucide-react'
 import * as React from 'react'
 import { toast } from 'sonner'
+import { mutate } from 'swr' // الاستيراد السحري
 
 interface DoctorQueueCardProps {
   tenantSlug: string
@@ -44,20 +45,32 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
 
   const handleCloseSession = async () => {
     const res = await closeQueueSession(tenantSlug, session.sessionId)
-    if (res.success) toast.success(`تم إنهاء شفت د. ${session.doctorName}`)
-    else toast.error(res.message)
+    if (res.success) {
+      toast.success(`تم إنهاء شفت د. ${session.doctorName}`)
+      await mutate(['queueBoard', tenantSlug]) // تحديث فوري
+    } else {
+      toast.error(res.message)
+    }
   }
 
   const handleUrgent = async (ticketId: string) => {
     const res = await markTicketUrgent(tenantSlug, ticketId)
-    if (res.success) toast.success('تم رفع الحالة لطوارئ')
-    else toast.error(res.message)
+    if (res.success) {
+      toast.success('تم رفع الحالة لطوارئ')
+      await mutate(['queueBoard', tenantSlug]) // تحديث فوري
+    } else {
+      toast.error(res.message)
+    }
   }
 
   const handleCancel = async (ticketId: string) => {
     const res = await cancelTicket(tenantSlug, ticketId)
-    if (res.success) toast.success('تم إلغاء التذكرة')
-    else toast.error(res.message)
+    if (res.success) {
+      toast.success('تم إلغاء التذكرة')
+      await mutate(['queueBoard', tenantSlug]) // تحديث فوري
+    } else {
+      toast.error(res.message)
+    }
   }
 
   return (

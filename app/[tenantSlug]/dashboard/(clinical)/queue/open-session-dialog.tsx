@@ -5,6 +5,7 @@ import { Loader2, PlayCircle } from 'lucide-react'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import { mutate } from 'swr' // <--- الاستيراد السحري
 
 import { Button } from '@/components/ui/button'
 import {
@@ -65,6 +66,9 @@ export function OpenSessionDialog({ tenantSlug, doctors, activeSessions }: OpenS
       toast.success('تم فتح العيادة بنجاح')
       setOpen(false)
       form.reset()
+
+      // 🔥 تحديث الشاشة فورا
+      await mutate(['queueBoard', tenantSlug])
     } else {
       toast.error(res.message || 'فشل فتح العيادة')
     }

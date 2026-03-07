@@ -1,27 +1,46 @@
 'use client'
 
+import { getQueueBoard } from '@/actions/queue/queue-board' // الـ Action بتاعك
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
-// import { ScrollArea } from '@/components/ui/scroll-area' // هنستغنى عنه هنا عشان الموبايل
 import { cn } from '@/lib/utils'
-import { IQueueBoardSession } from '@/types/queue'
 import { LayoutGrid } from 'lucide-react'
 import * as React from 'react'
+import useSWR from 'swr' // <-- الاستيراد الجديد
+import { BaseApiResponse } from '../../../../../types/api'
+import { IDoctor } from '../../../../../types/doctor'
+import { IQueueBoard } from '../../../../../types/queue'
 import { DoctorQueueCard } from './doctor-queue-card'
 import { OpenSessionDialog } from './open-session-dialog'
-import { IDoctor } from '../../../../../types/doctor'
 
+// تعديل الـ Props لاستقبال الداتا المبدئية
 interface QueueViewProps {
   tenantSlug: string
-  activeSessions: IQueueBoardSession[]
+  initialBoardRes: BaseApiResponse<IQueueBoard>
   doctors: IDoctor[]
 }
 
-export function QueueView({ tenantSlug, activeSessions, doctors }: QueueViewProps) {
+export function QueueView({ tenantSlug, initialBoardRes, doctors }: QueueViewProps) {
+  // 🔥 السحر هنا: SWR بياخد الـ Server Action كـ Fetcher
+  const { data: boardRes } = useSWR(
+    ['queueBoard', tenantSlug],
+    ([, slug]) => getQueueBoard(slug),
+    {
+      fallbackData: initialBoardRes, // الداتا اللي جات من السيرفر أول مرة عشان الصفحة تفتح فوري
+      refreshInterval: 10000, // هيعمل ريكويست صامت كل 5 ثواني يجيب الجديد
+      revalidateOnFocus: true, // لو الريسبشن راحت تابة تانية ورجعت، هيحدث فورا
+      keepPreviousData: true, // بيمنع الشاشة تفلش (Flicker) أثناء التحديث
+    },
+  )
+
+  // استخراج الجلسات النشطة من الداتا اللي جاية من SWR (دايما هتبقى أحدث حاجة)
+  const activeSessions = (boardRes?.data?.sessions || []).filter((s) => s.isActive)
+
   const [selectedSessionId, setSelectedSessionId] = React.useState<string | null>(
     activeSessions.length > 0 ? activeSessions[0].sessionId : null,
   )
 
+  // تأثير عشان لو الجلسة اللي مختارها اتقفلت أو مفيش حاجة مختارة
   React.useEffect(() => {
     if (
       activeSessions.length > 0 &&
@@ -37,7 +56,7 @@ export function QueueView({ tenantSlug, activeSessions, doctors }: QueueViewProp
     <div className='flex flex-col h-[calc(100vh-220px)] md:h-[calc(100vh-200px)] gap-6'>
       {activeSessions.length > 0 ? (
         <div className='flex flex-col md:flex-row flex-1 gap-4 md:gap-6 overflow-hidden'>
-          {/* Sidebar List (Fixed for Mobile & Desktop) */}
+          {/* Sidebar List */}
           <Card className='w-full md:w-72 shrink-0 flex flex-col overflow-hidden border bg-muted/20 p-0'>
             <div className='p-3 border-b bg-background/50 flex items-center justify-between'>
               <h3 className='text-xs font-medium text-muted-foreground uppercase tracking-wider'>
@@ -69,14 +88,17 @@ export function QueueView({ tenantSlug, activeSessions, doctors }: QueueViewProp
                       <div className='flex items-center gap-2 truncate max-w-30 md:max-w-full'>
                         <div
                           className={cn(
-                            'w-2 h-2 rounded-full shrink-0',
-                            session.currentTicket ? 'bg-orange-500' : 'bg-green-500',
+                            'w-2 h-2 rounded-full shrink-0 transition-colors duration-500',
+                            session.currentTicket ? 'bg-orange-500 animate-pulse' : 'bg-green-500',
                           )}
                         />
                         <span className='truncate'>د. {session.doctorName}</span>
                       </div>
-                      <Badge variant='secondary' className='mr-2 text-xs h-5 px-1.5 font-normal'>
-                        {session.waitingCount}
+                      <Badge
+                        variant={isSelected ? 'default' : 'secondary'}
+                        className='mr-2 text-xs h-5 px-1.5 font-normal'
+                      >
+                        {session.waitingCount} انتظار
                       </Badge>
                     </button>
                   )
