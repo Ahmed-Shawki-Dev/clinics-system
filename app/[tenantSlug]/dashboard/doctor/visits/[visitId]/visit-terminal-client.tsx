@@ -13,17 +13,21 @@ import { IDoctor } from '../../../../../../types/doctor'
 import { ClinicalTab } from './clinical-tab'
 import { LabsTab } from './lab-tab'
 import { PrescriptionTab } from './prescription-tab'
+import { HistoryTab } from './history-tab'
+import { IPatientSummary } from '../../../../../../actions/patient/get-patient-summary'
 
 export function VisitTerminalClient({
   visit,
   tenantSlug,
   defaultTab,
   doctor,
+  summary,
 }: {
   visit: IVisit
   tenantSlug: string
   defaultTab: string
   doctor?: IDoctor
+  summary: IPatientSummary | null
 }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -122,6 +126,9 @@ export function VisitTerminalClient({
             <TabsTrigger value='clinical' className='px-4 sm:px-8 text-sm'>
               التشخيص والشكوى
             </TabsTrigger>
+            <TabsTrigger value='history' className='px-4 sm:px-8 text-sm'>
+              السجل الطبي
+            </TabsTrigger>
             <TabsTrigger value='prescription' className='px-4 sm:px-8 text-sm'>
               الروشتة
             </TabsTrigger>
@@ -132,6 +139,10 @@ export function VisitTerminalClient({
 
           <TabsContent value='clinical' className='focus-visible:outline-none mt-2'>
             <ClinicalTab visit={visit} tenantSlug={tenantSlug} doctor={doctor} />
+          </TabsContent>
+
+          <TabsContent value='history' className='focus-visible:outline-none mt-2'>
+            <HistoryTab summary={summary} tenantSlug={tenantSlug} currentVisitId={visit.id} />
           </TabsContent>
 
           <TabsContent value='prescription' className='focus-visible:outline-none mt-2'>

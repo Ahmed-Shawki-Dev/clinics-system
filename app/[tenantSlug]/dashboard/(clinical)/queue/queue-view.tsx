@@ -9,29 +9,28 @@ import * as React from 'react'
 import useSWR from 'swr' // <-- الاستيراد الجديد
 import { BaseApiResponse } from '../../../../../types/api'
 import { IDoctor } from '../../../../../types/doctor'
+import { IPatient } from '../../../../../types/patient'
 import { IQueueBoard } from '../../../../../types/queue'
 import { DoctorQueueCard } from './doctor-queue-card'
 import { OpenSessionDialog } from './open-session-dialog'
 
 // تعديل الـ Props لاستقبال الداتا المبدئية
+// تعديل الـ Props لاستقبال الداتا المبدئية والمرضى
 interface QueueViewProps {
   tenantSlug: string
   initialBoardRes: BaseApiResponse<IQueueBoard>
   doctors: IDoctor[]
+  patients: IPatient[] // 🔥 السطر ده اللي كان ناقص
 }
 
-export function QueueView({ tenantSlug, initialBoardRes, doctors }: QueueViewProps) {
+export function QueueView({ tenantSlug, initialBoardRes, doctors, patients }: QueueViewProps) {
   // 🔥 السحر هنا: SWR بياخد الـ Server Action كـ Fetcher
-  const { data: boardRes } = useSWR(
-    ['queueBoard', tenantSlug],
-    ([, slug]) => getQueueBoard(slug),
-    {
-      fallbackData: initialBoardRes, // الداتا اللي جات من السيرفر أول مرة عشان الصفحة تفتح فوري
-      refreshInterval: 10000, // هيعمل ريكويست صامت كل 5 ثواني يجيب الجديد
-      revalidateOnFocus: true, // لو الريسبشن راحت تابة تانية ورجعت، هيحدث فورا
-      keepPreviousData: true, // بيمنع الشاشة تفلش (Flicker) أثناء التحديث
-    },
-  )
+  const { data: boardRes } = useSWR(['queueBoard', tenantSlug], ([, slug]) => getQueueBoard(slug), {
+    fallbackData: initialBoardRes, // الداتا اللي جات من السيرفر أول مرة عشان الصفحة تفتح فوري
+    refreshInterval: 10000, // هيعمل ريكويست صامت كل 5 ثواني يجيب الجديد
+    revalidateOnFocus: true, // لو الريسبشن راحت تابة تانية ورجعت، هيحدث فورا
+    keepPreviousData: true, // بيمنع الشاشة تفلش (Flicker) أثناء التحديث
+  })
 
   // استخراج الجلسات النشطة من الداتا اللي جاية من SWR (دايما هتبقى أحدث حاجة)
   const activeSessions = (boardRes?.data?.sessions || []).filter((s) => s.isActive)
@@ -95,7 +94,7 @@ export function QueueView({ tenantSlug, initialBoardRes, doctors }: QueueViewPro
                         <span className='truncate'>د. {session.doctorName}</span>
                       </div>
                       <Badge
-                        variant={isSelected ? 'default' : 'secondary'}
+                        variant={isSelected ? 'outline' : 'secondary'}
                         className='mr-2 text-xs h-5 px-1.5 font-normal'
                       >
                         {session.waitingCount} انتظار

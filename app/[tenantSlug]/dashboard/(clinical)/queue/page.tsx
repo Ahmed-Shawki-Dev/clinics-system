@@ -22,20 +22,21 @@ export default async function QueuePage({ params }: { params: Promise<{ tenantSl
 
   return (
     <DashboardShell>
-      <DashboardHeader
-        heading='إدارة الطابور'
-        text={`مراقبة العيادات وإصدار التذاكر. يوجد ${activeSessions.length} عيادات نشطة حالياً.`}
-      >
+      <DashboardHeader heading='إدارة الطابور' text={`مراقبة العيادات وإصدار التذاكر.`}>
         <QueueActions
           tenantSlug={tenantSlug}
           doctors={doctors}
           patients={patients}
-          activeSessions={activeSessions}
+          initialBoardRes={boardRes} // 🔥 بصيناها هنا
         />
       </DashboardHeader>
 
-      {/* باصينا الداتا الكاملة بتاعت البورد كـ Initial Data */}
-      <QueueView tenantSlug={tenantSlug} initialBoardRes={boardRes} doctors={doctors} />
+      <QueueView
+        tenantSlug={tenantSlug}
+        initialBoardRes={boardRes}
+        doctors={doctors}
+        patients={patients} // 🔴 باصينا المرضى هنا
+      />
     </DashboardShell>
   )
 }

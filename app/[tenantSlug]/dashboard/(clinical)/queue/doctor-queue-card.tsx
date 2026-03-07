@@ -79,11 +79,14 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
       <div className='flex items-center justify-between p-4 border-b bg-card'>
         <div className='flex items-center gap-3'>
           <div className='h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold'>
-            {session.doctorName.charAt(0)}
+            {/* لو الاسم موجود هات أول حرف، لو مش موجود حط علامة استفهام أو أي حرف */}
+            {session.doctorName?.charAt(0) || '?'}
           </div>
           <div>
-            <h2 className='font-semibold'>د. {session.doctorName}</h2>
-            <p className='text-xs text-muted-foreground'>تم الكشف: {session.completedCount}</p>
+            {/* حط قيمة افتراضية عشان لو الاسم null متبقاش د. فاضية */}
+            <h2 className='font-semibold'>
+              {session.doctorName ? `د. ${session.doctorName}` : 'طبيب غير محدد'}
+            </h2>{' '}
           </div>
         </div>
 
