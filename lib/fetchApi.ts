@@ -1,5 +1,4 @@
 import { getToken } from '../actions/auth/getToken'
-import { refreshAccessToken } from '../actions/auth/refresh-token'
 import { BaseApiResponse } from '../types/api'
 
 interface FetchOptions extends RequestInit {
@@ -46,35 +45,15 @@ export async function fetchApi<T>(
 
   try {
     // 🔥 الريكويست الأول (الأصلي)
-    let response = await fetch(url, {
+    const response = await fetch(url, {
       headers,
       signal: controller.signal,
       ...restOptions,
     })
 
-    // 🔴 منطقة الـ Interceptor: لو التوكن خلص وهو ستاف مش مريض
-    if (response.status === 401 && authType === 'staff') {
-      const newToken = await refreshAccessToken(tenantSlug)
-
-      // لو قدرنا نجيب توكن جديد من الباك إند
-      if (newToken) {
-        // نحدث الهيدر بالتوكن الجديد
-        headers.set('Authorization', `Bearer ${newToken}`)
-
-        // 🔥 نعيد الريكويست مرة كمان بالتوكن الجديد (صاحب العيادة مش هيحس بحاجة)
-        response = await fetch(url, {
-          headers,
-          signal: controller.signal,
-          ...restOptions,
-        })
-      }
-    }
-
     clearTimeout(timeoutId)
     externalSignal?.removeEventListener('abort', onExternalAbort)
 
-    // بعد ما الريكويست خلص (سواء الأولاني نجح، أو التاني بعد الريفرش)
-    // لو لسه 401 يبقى الريفرش فشل واليوزر لازم يعمل لوجين تاني
     if (response.status === 401) {
       return {
         success: false,
