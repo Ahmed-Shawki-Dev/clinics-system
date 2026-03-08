@@ -66,7 +66,7 @@ export function StarfieldBackground({
     // 2. تحديد الألوان بناءً على الثيم الحالي
     const isDark = resolvedTheme === 'dark'
     // لو هو لايت واللون أبيض، هنقلبه أسود عشان النجوم تبان
-    const activeStarColor = !isDark && starColor === '#ffffff' ? '#000000' : starColor
+    const activeStarColor = !isDark && starColor === '#ffffff' ? '#0000003d' : starColor
     // ألوان خلفية الكانفاس عشان تعمل تأثير الذيل (Trails) صح بدل البج اللي كان موجود
     const trailFillStyle = isDark ? '#100E17' : 'rgba(255, 255, 255, 0.2)'
     const initialFillStyle = isDark ? '#0a0a0f' : '#ffffff'
