@@ -1,10 +1,12 @@
 'use client'
 
 import { valibotResolver } from '@hookform/resolvers/valibot'
-import { KeyRound, Loader2, UserRound } from 'lucide-react'
+import { KeyRound, Loader2, UserRound, ArrowRight } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -19,7 +21,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { usePatientAuthStore } from '@/store/usePatientAuthStore'
 import { LoginInput, LoginSchema } from '@/validation/login'
-import { useParams } from 'next/navigation'
 import { patientLoginAction } from '../../../../actions/auth/patientLogin'
 
 export default function PatientLoginPage() {
@@ -51,7 +52,19 @@ export default function PatientLoginPage() {
   }
 
   return (
-    <div className='min-h-screen flex items-center justify-center p-4'>
+    <div className='min-h-screen flex items-center justify-center p-4 relative' dir='rtl'>
+      {/* زرار الرجوع الطاير - تم التأكد من وجود Link فقط كإبن مباشر */}
+      <Button
+        variant='ghost'
+        className='absolute top-4 right-4 md:top-8 md:right-8 text-muted-foreground hover:text-foreground'
+        asChild
+      >
+        <Link href={`/${tenantSlug}`}>
+          <ArrowRight className='ml-2 h-4 w-4' />
+          العودة للرئيسية
+        </Link>
+      </Button>
+
       <Card className='w-full max-w-md shadow-xl'>
         <CardHeader className='space-y-1 text-center pb-8'>
           <CardTitle className='text-2xl font-bold tracking-tight'>بوابة المرضى</CardTitle>
@@ -73,7 +86,8 @@ export default function PatientLoginPage() {
                         <UserRound className='absolute right-3 top-2.5 h-4 w-4 text-muted-foreground' />
                         <Input
                           placeholder='رقم الهاتف أو اسم المستخدم'
-                          className='pr-9'
+                          className='pr-9 text-left'
+                          dir='ltr'
                           {...field}
                         />
                       </div>
@@ -91,15 +105,26 @@ export default function PatientLoginPage() {
                     <FormControl>
                       <div className='relative'>
                         <KeyRound className='absolute right-3 top-2.5 h-4 w-4 text-muted-foreground' />
-                        <Input type='password' placeholder='••••••••' className='pr-9' {...field} />
+                        <Input
+                          type='password'
+                          placeholder='••••••••'
+                          className='pr-9 text-left'
+                          dir='ltr'
+                          {...field}
+                        />
                       </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type='submit' className='w-full mt-4' disabled={isLoading}>
-                {isLoading && <Loader2 className='ml-2 h-4 w-4 animate-spin' />}
+              {/* زرار الدخول (لا نستخدم فيه asChild لأنه يحتوي على أيقونة التحميل والنص معاً) */}
+              <Button
+                type='submit'
+                className='w-full mt-4 h-12 text-md font-bold'
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className='ml-2 h-4 w-4 animate-spin' /> : null}
                 دخول
               </Button>
             </form>
