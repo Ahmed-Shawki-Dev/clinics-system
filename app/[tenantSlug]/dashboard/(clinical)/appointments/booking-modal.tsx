@@ -3,7 +3,7 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { format } from 'date-fns'
 import { ar } from 'date-fns/locale'
-import { AlertCircle, CalendarIcon, Check, ChevronsUpDown, Loader2 } from 'lucide-react'
+import { AlertCircle, CalendarIcon, Loader2 } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -11,14 +11,6 @@ import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command'
 import {
   Dialog,
   DialogContent,
@@ -48,22 +40,19 @@ import { cn } from '@/lib/utils'
 
 import { createBookingAction } from '@/actions/booking/create-booking'
 import { IDoctor } from '@/types/doctor'
-import { IPatient } from '@/types/patient'
 import { CreateBookingInput, createBookingSchema } from '@/validation/booking'
+import { PatientSearch } from '@/components/patient-search' // استيراد الكومبوننت الجديد
 
 interface Props {
-  patients: IPatient[]
+  // شيلنا patients من هنا لأن السيرش هيجيبهم لوحده
   doctors: IDoctor[]
 }
 
-export function BookingModal({ patients = [], doctors = [] }: Props) {
+export function BookingModal({ doctors = [] }: Props) {
   const [open, setOpen] = useState(false)
-  const [patientPopoverOpen, setPatientPopoverOpen] = useState(false)
   const { tenantSlug } = useParams()
 
   const safeDoctors = doctors.filter((doctor) => doctor.isEnabled) || []
-  const safePatients = patients || []
-
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null)
 
   const form = useForm<CreateBookingInput>({
@@ -79,11 +68,9 @@ export function BookingModal({ patients = [], doctors = [] }: Props) {
   })
 
   const activeDoctor = safeDoctors.find((d) => d.id === selectedDoctorId)
-  // تشييك: هل الدكتور المختار عنده خدمات؟
   const hasServices = activeDoctor && (activeDoctor.services?.length ?? 0) > 0
 
   const onSubmit = async (values: CreateBookingInput) => {
-    // زيادة تأكيد برمجياً قبل الـ Action
     if (!hasServices) {
       toast.error('لا يمكن الحجز لدكتور ليس لديه خدمات معرفة')
       return
@@ -116,71 +103,26 @@ export function BookingModal({ patients = [], doctors = [] }: Props) {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            {/* 1. اختيار المريض */}
+            {/* 1. اختيار المريض (التعديل الجديد هنا) */}
             <FormField
               control={form.control}
               name='patientId'
               render={({ field }) => (
                 <FormItem className='flex flex-col'>
                   <FormLabel>المريض</FormLabel>
-                  <Popover open={patientPopoverOpen} onOpenChange={setPatientPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant='outline'
-                          role='combobox'
-                          className={cn(
-                            'w-full justify-between text-right font-normal',
-                            !field.value && 'text-muted-foreground',
-                          )}
-                        >
-                          {field.value
-                            ? safePatients.find((p) => p.id === field.value)?.name
-                            : 'ابحث عن مريض...'}
-                          <ChevronsUpDown className='mr-2 h-4 w-4 shrink-0 opacity-50' />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className='w-100 p-0'>
-                      <Command>
-                        <CommandInput placeholder='بحث بالاسم ...' />
-                        <CommandList>
-                          <CommandEmpty>لا يوجد مريض بهذا الاسم.</CommandEmpty>
-                          <CommandGroup>
-                            {safePatients.map((patient) => (
-                              <CommandItem
-                                value={patient.name}
-                                key={patient.id}
-                                onSelect={() => {
-                                  form.setValue('patientId', patient.id)
-                                  setPatientPopoverOpen(false) // يقفل لما نختار
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    'ml-2 h-4 w-4',
-                                    patient.id === field.value ? 'opacity-100' : 'opacity-0',
-                                  )}
-                                />
-                                <div className='flex flex-col text-right'>
-                                  <span>{patient.name}</span>
-                                  <span className='text-xs text-muted-foreground font-mono'>
-                                    {patient.phone}
-                                  </span>
-                                </div>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                  <FormControl>
+                    <PatientSearch
+                      tenantSlug={tenantSlug as string}
+                      selectedPatientId={field.value}
+                      onSelect={field.onChange}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* 2. اختيار الطبيب */}
+            {/* 2. اختيار الطبيب (بدون تغيير) */}
             <FormField
               control={form.control}
               name='doctorId'
@@ -191,12 +133,12 @@ export function BookingModal({ patients = [], doctors = [] }: Props) {
                     onValueChange={(val) => {
                       field.onChange(val)
                       setSelectedDoctorId(val)
-                      form.setValue('doctorServiceId', '') // تصفير الخدمة
+                      form.setValue('doctorServiceId', '')
                     }}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className='text-right'>
+                      <SelectTrigger className='text-right h-11'>
                         <SelectValue placeholder='اختر الطبيب' />
                       </SelectTrigger>
                     </FormControl>
@@ -213,7 +155,7 @@ export function BookingModal({ patients = [], doctors = [] }: Props) {
               )}
             />
 
-            {/* 3. الخدمة - إجبارية وتظهر دايماً لو تم اختيار دكتور */}
+            {/* 3. الخدمة (بدون تغيير) */}
             {selectedDoctorId && (
               <FormField
                 control={form.control}
@@ -224,7 +166,7 @@ export function BookingModal({ patients = [], doctors = [] }: Props) {
                     {hasServices ? (
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger className='text-right'>
+                          <SelectTrigger className='text-right h-11'>
                             <SelectValue placeholder='اختر نوع الخدمة/الكشف' />
                           </SelectTrigger>
                         </FormControl>
@@ -239,7 +181,7 @@ export function BookingModal({ patients = [], doctors = [] }: Props) {
                     ) : (
                       <div className='flex items-center gap-2 p-3 text-xs bg-destructive/10 text-destructive rounded-md border border-destructive/20'>
                         <AlertCircle className='h-4 w-4' />
-                        عذراً، هذا الطبيب ليس لديه خدمات متاحة حالياً. يرجى إضافة خدمات له أولاً.
+                        عذراً، هذا الطبيب ليس لديه خدمات متاحة حالياً.
                       </div>
                     )}
                     <FormMessage />
@@ -248,7 +190,7 @@ export function BookingModal({ patients = [], doctors = [] }: Props) {
               />
             )}
 
-            {/* 4. التاريخ والوقت */}
+            {/* 4. التاريخ والوقت (بدون تغيير) */}
             <div className='grid grid-cols-2 gap-4'>
               <FormField
                 control={form.control}
@@ -262,7 +204,7 @@ export function BookingModal({ patients = [], doctors = [] }: Props) {
                           <Button
                             variant={'outline'}
                             className={cn(
-                              'w-full pl-3 text-right font-normal',
+                              'w-full pl-3 text-right font-normal h-11',
                               !field.value && 'text-muted-foreground',
                             )}
                           >
@@ -301,17 +243,8 @@ export function BookingModal({ patients = [], doctors = [] }: Props) {
                       <Input
                         type='time'
                         {...field}
-                        className='text-right cursor-pointer' // ضفنا cursor-pointer عشان يبان إنه كليكابل
-                        onClick={(e) => {
-                          try {
-                            // بنشيك لو المتصفح بيدعم الـ API ده الأول
-                            if (typeof e.currentTarget.showPicker === 'function') {
-                              e.currentTarget.showPicker()
-                            }
-                          } catch (error) {
-                            // لو المتصفح قديم، هيعمل Focus عادي واليوزر يكتب بإيده
-                          }
-                        }}
+                        className='text-right cursor-pointer h-11'
+                        onClick={(e) => e.currentTarget.showPicker?.()}
                       />
                     </FormControl>
                     <FormMessage />
@@ -329,7 +262,7 @@ export function BookingModal({ patients = [], doctors = [] }: Props) {
                   <FormLabel>ملاحظات (اختياري)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder='أي تفاصيل إضافية عن الحالة...'
+                      placeholder='أي تفاصيل إضافية...'
                       {...field}
                       className='text-right resize-none'
                     />
@@ -339,10 +272,9 @@ export function BookingModal({ patients = [], doctors = [] }: Props) {
               )}
             />
 
-            {/* الزرار يتقفل لو مفيش خدمات للدكتور المختار */}
             <Button
               type='submit'
-              className='w-full'
+              className='w-full h-11 text-lg font-bold'
               disabled={form.formState.isSubmitting || (selectedDoctorId !== null && !hasServices)}
             >
               {form.formState.isSubmitting ? (

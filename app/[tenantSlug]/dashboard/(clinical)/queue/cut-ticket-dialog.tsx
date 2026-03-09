@@ -28,7 +28,6 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { IDoctor } from '@/types/doctor'
-import { IPatient } from '@/types/patient'
 import { IQueueBoardSession } from '@/types/queue'
 import { CutTicketSchema, type CutTicketInput } from '@/validation/queue'
 import { valibotResolver } from '@hookform/resolvers/valibot'
@@ -36,24 +35,17 @@ import { Banknote, CreditCard, Loader2, Ticket } from 'lucide-react'
 import * as React from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import { mutate } from 'swr' // <--- الاستيراد السحري
-import { PatientSearch } from './patient-search'
+import { mutate } from 'swr'
+import { PatientSearch } from '../../../../../components/patient-search'
 
 interface CutTicketDialogProps {
   tenantSlug: string
-  patients: IPatient[]
   activeSessions: IQueueBoardSession[]
   doctors: IDoctor[]
 }
 
-export function CutTicketDialog({
-  tenantSlug,
-  patients,
-  activeSessions,
-  doctors,
-}: CutTicketDialogProps) {
+export function CutTicketDialog({ tenantSlug, activeSessions, doctors }: CutTicketDialogProps) {
   const [open, setOpen] = React.useState(false)
-  const [, setIsAddPatientOpen] = React.useState(false)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
 
   const form = useForm<CutTicketInput>({
@@ -93,6 +85,7 @@ export function CutTicketDialog({
         throw new Error(res.message || 'فشل إصدار التذكرة')
       }
 
+      // رفع التذكرة لحالة طوارئ لو تم اختيارها
       if (values.isUrgent && res.data?.id) {
         await markTicketUrgent(tenantSlug, res.data.id)
       }
@@ -101,7 +94,7 @@ export function CutTicketDialog({
       setOpen(false)
       form.reset()
 
-      // 🔥 تحديث الشاشة فورا بدون ريفرش
+      // تحديث الشاشة فورا بدون ريفرش
       await mutate(['queueBoard', tenantSlug])
     } catch (error) {
       if (error instanceof Error) toast.error(error.message)
@@ -134,6 +127,7 @@ export function CutTicketDialog({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5'>
+            {/* 1. العيادة */}
             <FormField
               control={form.control}
               name='sessionId'
@@ -171,6 +165,7 @@ export function CutTicketDialog({
               )}
             />
 
+            {/* 2. المريض (باستخدام الكومبوننت الذكي) */}
             <FormField
               control={form.control}
               name='patientId'
@@ -179,10 +174,9 @@ export function CutTicketDialog({
                   <FormLabel>المريض</FormLabel>
                   <FormControl>
                     <PatientSearch
-                      patients={patients}
+                      tenantSlug={tenantSlug}
                       selectedPatientId={field.value}
                       onSelect={field.onChange}
-                      onAddNew={() => setIsAddPatientOpen(true)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -190,13 +184,14 @@ export function CutTicketDialog({
               )}
             />
 
+            {/* 3. الخدمة والطوارئ */}
             <div className='grid grid-cols-2 gap-4'>
               <FormField
                 control={form.control}
                 name='doctorServiceId'
                 render={({ field }) => (
                   <FormItem className='md:col-span-1'>
-                    <FormLabel>الخدمة المطلوبة (اختياري)</FormLabel>
+                    <FormLabel>الخدمة المطلوبة</FormLabel>
                     <Select onValueChange={handleServiceChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className='h-11' disabled={!selectedDoctor}>
@@ -240,6 +235,7 @@ export function CutTicketDialog({
               />
             </div>
 
+            {/* 4. تفاصيل الدفع (تظهر فقط عند اختيار خدمة) */}
             {selectedServiceId && (
               <div className='grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-xl border border-muted'>
                 <FormField
@@ -295,6 +291,7 @@ export function CutTicketDialog({
               </div>
             )}
 
+            {/* 5. الملاحظات */}
             <FormField
               control={form.control}
               name='notes'
@@ -313,6 +310,7 @@ export function CutTicketDialog({
               )}
             />
 
+            {/* 6. زرار الحفظ */}
             <Button type='submit' className='w-full h-12 text-lg font-bold' disabled={isSubmitting}>
               {isSubmitting ? <Loader2 className='animate-spin' /> : 'إصدار التذكرة'}
             </Button>

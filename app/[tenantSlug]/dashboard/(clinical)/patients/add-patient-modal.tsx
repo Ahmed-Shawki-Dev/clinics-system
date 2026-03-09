@@ -3,13 +3,11 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { format } from 'date-fns'
 import { ar } from 'date-fns/locale'
-import { CalendarIcon, Loader2, Plus, UserPlus } from 'lucide-react'
-import { useParams } from 'next/navigation'
-import { useState } from 'react'
+import { CalendarIcon, Loader2, UserPlus } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
-// Components
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -40,34 +38,53 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 
-// Logic
 import { cn } from '@/lib/utils'
 import { CreatePatientInput, CreatePatientSchema } from '../../../../../validation/patient'
 import { createPatientAction } from '../../../../../actions/patient/createPatient'
 
+// التعديل هنا: ضفنا الـ Props دي عشان نتحكم فيه من بره
+interface AddPatientModalProps {
+  tenantSlug: string
+  initialPhone?: string
+  trigger?: React.ReactNode
+  onSuccess?: (patientId: string, patientName: string) => void
+}
 
-export function AddPatientModal() {
+export function AddPatientModal({
+  tenantSlug,
+  initialPhone,
+  trigger,
+  onSuccess,
+}: AddPatientModalProps) {
   const [open, setOpen] = useState(false)
-  const { tenantSlug } = useParams()
 
   const form = useForm<CreatePatientInput>({
     resolver: valibotResolver(CreatePatientSchema),
     defaultValues: {
       name: '',
-      phone: '',
+      phone: initialPhone || '', // بياخد الرقم اللي الريسبشن كتبه وملقاهوش
       address: '',
       notes: '',
     },
   })
 
+  // تحديث الـ phone لو الـ initialPhone اتغير من بره
+  useEffect(() => {
+    if (initialPhone) {
+      form.setValue('phone', initialPhone)
+    }
+  }, [initialPhone, form])
+
   const onSubmit = async (values: CreatePatientInput) => {
     try {
-      const result = await createPatientAction(values, tenantSlug as string)
+      const result = await createPatientAction(values, tenantSlug)
 
-      if (result.success) {
+      if (result.success && result.data) {
         toast.success(result.message)
         setOpen(false)
         form.reset()
+        // 🔥 بنبلغ الـ PatientSearch إن المريض اتضاف عشان يختاره أوتوماتيك
+        if (onSuccess) onSuccess(result.data.id, result.data.name)
       } else {
         toast.error(result.message)
       }
@@ -79,12 +96,21 @@ export function AddPatientModal() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen)
+        if (!isOpen) form.reset()
+      }}
+    >
       <DialogTrigger asChild>
-        <Button>
-          <Plus className='mr-2 h-4 w-4' />
-          مريض جديد
-        </Button>
+        {/* لو مفيش trigger مبعوت، هيعرض الزرار الافتراضي */}
+        {trigger || (
+          <Button>
+            <UserPlus className='mr-2 h-4 w-4' />
+            مريض جديد
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className='sm:max-w-125'>
         <DialogHeader>
@@ -99,7 +125,7 @@ export function AddPatientModal() {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            {/* الاسم ورقم الهاتف */}
+            {/* ... (نفس الكود بتاعك للفورمة بدون أي تغيير) ... */}
             <div className='grid grid-cols-2 gap-4'>
               <FormField
                 control={form.control}
@@ -129,7 +155,6 @@ export function AddPatientModal() {
               />
             </div>
 
-            {/* النوع وتاريخ الميلاد */}
             <div className='grid grid-cols-2 gap-4'>
               <FormField
                 control={form.control}
@@ -183,12 +208,12 @@ export function AddPatientModal() {
                           mode='single'
                           selected={field.value}
                           onSelect={field.onChange}
-                          captionLayout='dropdown' 
-                          fromYear={1900} 
-                          toYear={new Date().getFullYear()} 
+                          captionLayout='dropdown'
+                          fromYear={1900}
+                          toYear={new Date().getFullYear()}
                           disabled={(date) => date > new Date() || date < new Date('1900-01-01')}
                           initialFocus
-                          locale={ar} 
+                          locale={ar}
                         />
                       </PopoverContent>
                     </Popover>
@@ -198,7 +223,6 @@ export function AddPatientModal() {
               />
             </div>
 
-            {/* العنوان */}
             <FormField
               control={form.control}
               name='address'
@@ -213,7 +237,6 @@ export function AddPatientModal() {
               )}
             />
 
-            {/* ملاحظات */}
             <FormField
               control={form.control}
               name='notes'
@@ -232,7 +255,7 @@ export function AddPatientModal() {
               )}
             />
 
-            <DialogFooter className='gap-2 sm:gap-0'>
+            <DialogFooter className='gap-2 sm:gap-0 mt-6'>
               <Button type='button' variant='outline' onClick={() => setOpen(false)}>
                 إلغاء
               </Button>

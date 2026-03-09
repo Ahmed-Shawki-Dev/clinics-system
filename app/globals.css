@@ -191,3 +191,8 @@
   background: var(--background);
   border-radius: 6px;
 }
+
+[cmdk-list] {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+}

@@ -25,7 +25,7 @@ export default async function InvoicesPage({
     hasNextPage: response?.data?.hasNextPage || false,
     hasPreviousPage: response?.data?.hasPreviousPage || false,
   }
-
+console.log(response)
   return (
     <DashboardShell>
       <DashboardHeader heading='الفواتير والمدفوعات' text='إدارة مستحقات العيادة والتحصيلات'>

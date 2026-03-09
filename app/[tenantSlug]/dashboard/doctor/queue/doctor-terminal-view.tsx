@@ -34,6 +34,7 @@ export function DoctorTerminalView({ initialData, tenantSlug }: Props) {
       refreshInterval: 10000, // كل 10 ثواني هيسأل
       revalidateOnFocus: true,
       keepPreviousData: true,
+      refreshWhenHidden: false,
     },
   )
 

@@ -1,6 +1,5 @@
 import { getBookingsAction } from '@/actions/booking/get-booking'
 import { getDoctorsAction } from '@/actions/doctor/get-doctors'
-import { getPatientsAction } from '@/actions/patient/getPatients'
 import { DashboardHeader, DashboardShell } from '@/components/shell'
 import { Loader2 } from 'lucide-react'
 import { Suspense } from 'react'
@@ -14,19 +13,17 @@ interface PageProps {
 export default async function AppointmentsPage({ params }: PageProps) {
   const { tenantSlug } = await params
 
-  const [doctorsData, patientsData, bookingsData] = await Promise.all([
+  const [doctorsData, bookingsData] = await Promise.all([
     getDoctorsAction(tenantSlug),
-    getPatientsAction(tenantSlug),
     getBookingsAction(tenantSlug),
   ])
 
   const doctorsList = doctorsData.doctors || []
-  const patientsList = patientsData?.items || [] // ضيفنا .data هنا
   const bookingsList = bookingsData?.data?.items || [] // ضيفنا .data هنا
   return (
     <DashboardShell>
       <DashboardHeader heading='إدارة الحجوزات' text='عرض وجدولة المواعيد الخاصة بالعيادة.'>
-        <BookingModal doctors={doctorsList} patients={patientsList} />
+        <BookingModal doctors={doctorsList} />
       </DashboardHeader>
 
       <Suspense

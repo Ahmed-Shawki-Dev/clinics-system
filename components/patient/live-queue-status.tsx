@@ -10,7 +10,7 @@ export function LiveQueueStatus({ tenantSlug }: { tenantSlug: string }) {
   const { data: response, isLoading } = useSWR(
     'live-patient-ticket',
     () => getMyTicketAction(tenantSlug),
-    { refreshInterval: 10000 },
+    { refreshInterval: 10000, refreshWhenHidden: false },
   )
 
   // 1. Professional Skeleton Loading (بدل الـ Spinner)

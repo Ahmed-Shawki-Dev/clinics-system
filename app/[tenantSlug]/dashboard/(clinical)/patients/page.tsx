@@ -35,7 +35,7 @@ export default async function PatientsPage({ params, searchParams }: PageProps) 
         <PermissionGate
           allowedRoles={[ROLES.CLINIC_OWNER, ROLES.CLINIC_MANAGER, ROLES.SUPER_ADMIN]}
         >
-          <AddPatientModal />
+          <AddPatientModal tenantSlug={tenantSlug}/>
         </PermissionGate>
       </DashboardHeader>
 
