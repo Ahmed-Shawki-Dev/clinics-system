@@ -35,12 +35,7 @@ export function OpenMySessionButton({ tenantSlug }: Props) {
   }
 
   return (
-    <Button
-      onClick={handleOpenSession}
-      disabled={isLoading}
-      size='lg'
-      className='mt-6 bg-emerald-600 hover:bg-emerald-700 text-white shadow-md px-8 h-12 text-lg font-bold'
-    >
+    <Button onClick={handleOpenSession} disabled={isLoading} size='lg'>
       {isLoading ? (
         <Loader2 className='w-5 h-5 ml-2 animate-spin' />
       ) : (

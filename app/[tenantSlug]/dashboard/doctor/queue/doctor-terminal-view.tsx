@@ -6,6 +6,7 @@ import { AlertCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
 import useSWR from 'swr'
+import { Card, CardContent } from '../../../../../components/ui/card'
 import { BaseApiResponse } from '../../../../../types/api'
 import { CurrentPatientCard } from './current-patient-card'
 import { OpenMySessionButton } from './open-my-session-button'
@@ -44,13 +45,17 @@ export function DoctorTerminalView({ initialData, tenantSlug }: Props) {
   // 🔴 السحر هنا: الشاشة بتتغير أوتوماتيك لو مفيش داتا أو العيادة مش نشطة
   if (!currentData || !currentData.isActive) {
     return (
-      <div className='flex flex-col items-center justify-center h-[60vh] space-y-4 border-2 border-dashed rounded-lg border-muted bg-muted/10 animate-in fade-in duration-500'>
-        <AlertCircle className='w-16 h-16 text-muted-foreground' />
-        <h2 className='text-2xl font-bold text-destructive'>العيادة مغلقة حالياً</h2>
-        <p className='text-muted-foreground'>
-          لا توجد جلسة عمل (شفت) نشطة. افتح عيادتك الآن لتسمح للاستقبال بحجز المرضى.
-        </p>
-        <OpenMySessionButton tenantSlug={tenantSlug} />
+      <div className='max-w-2xl mx-auto mt-10'>
+        <Card className='border-dashed shadow-none bg-muted/10'>
+          <CardContent className='flex flex-col items-center justify-center py-16 text-center'>
+            <AlertCircle className='w-12 h-12 text-muted-foreground/50 mb-4' />
+            <h2 className='text-xl font-bold text-foreground mb-2'>العيادة مغلقة حالياً</h2>
+            <p className='text-sm text-muted-foreground mb-6'>
+              لا توجد جلسة عمل نشطة. افتح الجلسة لتمكين حجز المرضى وإدارة الطابور.
+            </p>
+            <OpenMySessionButton tenantSlug={tenantSlug} />
+          </CardContent>
+        </Card>
       </div>
     )
   }

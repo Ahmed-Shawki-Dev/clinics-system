@@ -1,6 +1,6 @@
 'use client'
 
-import { getPatientSummaryAction } from '@/actions/patient/get-patient-summary' // استيراد الأكشن اللي عملناه
+import { getPatientSummaryAction } from '@/actions/patient/get-patient-summary'
 import {
   callTicketAction,
   finishTicketAction,
@@ -12,14 +12,14 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ICreateTicketResponse, IQueueTicket } from '@/types/queue'
 import {
-  ArrowLeftRight,
+  ArrowRight,
   CheckCircle2,
+  Clock,
   FastForward,
   Loader2,
   PlayCircle,
   Stethoscope,
-  User,
-  UserPlus,
+  ClipboardList,
 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -45,31 +45,21 @@ export function CurrentPatientCard({ currentTicket, waitingTickets, isPending, o
   const tenantSlug = params.tenantSlug as string
   const [isReturning, setIsReturning] = useState(false)
 
-  // السحر الهندسي لحل مشكلة نقص الـ visitId
   const handleReturnToVisit = async () => {
     if (!currentTicket) return
-
-    // لو الباك إند ضافها في المستقبل، هنستخدمها مباشرة ونوفر الريكويست
     if ('visitId' in currentTicket && currentTicket.visitId) {
       router.push(`/${tenantSlug}/dashboard/doctor/visits/${currentTicket.visitId}`)
       return
     }
-
-    // الخطة البديلة: البحث عن الزيارة المفتوحة في سجل المريض
     setIsReturning(true)
     try {
       const summaryRes = await getPatientSummaryAction(tenantSlug, currentTicket.patientId)
-
       if (summaryRes.success && summaryRes.data) {
-        // بندور على الزيارة اللي لسه مخلصتش (مفتوحة حالياً)
         const activeVisit = summaryRes.data.recentVisits?.find(
           (v) => v.completedAt === null && v.doctorName === currentTicket.doctorName,
         )
-        if (activeVisit) {
-          router.push(`/${tenantSlug}/dashboard/doctor/visits/${activeVisit.id}`)
-        } else {
-          toast.error('لم يتم العثور على سجل زيارة مفتوح لهذا المريض.')
-        }
+        if (activeVisit) router.push(`/${tenantSlug}/dashboard/doctor/visits/${activeVisit.id}`)
+        else toast.error('لم يتم العثور على سجل زيارة مفتوح لهذا المريض.')
       } else {
         toast.error('فشل في جلب بيانات الزيارة.')
       }
@@ -81,57 +71,70 @@ export function CurrentPatientCard({ currentTicket, waitingTickets, isPending, o
   }
 
   return (
-    <Card>
-      <CardContent className='p-8'>
+    <Card className='border shadow-sm bg-card'>
+      <CardContent className='p-6 sm:p-8'>
         {currentTicket ? (
-          <div className='flex flex-col xl:flex-row items-start xl:items-center justify-between gap-8'>
-            <div className='flex items-center gap-5'>
-              <div className='w-16 h-16 rounded-full bg-muted flex items-center justify-center shrink-0'>
-                <User className='w-8 h-8 text-muted-foreground' />
-              </div>
-
-              <div className='space-y-1'>
-                <div className='flex items-center gap-3'>
-                  <h3 className='text-3xl font-bold tracking-tight text-foreground'>
-                    {currentTicket.patientName}
-                  </h3>
-                  {currentTicket?.isUrgent && (
-                    <Badge
-                      variant='destructive'
-                      className='px-2.5 py-0.5 rounded-sm font-semibold text-xs uppercase tracking-wider'
-                    >
-                      طارئ
-                    </Badge>
-                  )}
-                  {currentTicket.status === 'InVisit' && (
-                    <Badge className='bg-emerald-500/10 text-emerald-600 shadow-none border-0 px-2.5 py-0.5 rounded-sm font-semibold text-xs'>
-                      قيد الكشف
-                    </Badge>
-                  )}
-                </div>
-
-                <div className='flex items-center gap-3 text-sm text-muted-foreground'>
-                  <span className='font-mono font-medium'>#{currentTicket.ticketNumber}</span>
-                  <span className='text-muted/50'>•</span>
+          <div className='space-y-6'>
+            {/* الجزء الأول: بيانات المريض والبادجات */}
+            <div className='flex items-start justify-between'>
+              <div>
+                <h2 className='text-3xl font-bold tracking-tight text-foreground'>
+                  {currentTicket.patientName}
+                </h2>
+                <div className='flex items-center gap-3 mt-2 text-sm text-muted-foreground'>
+                  <span className='font-mono font-medium text-foreground bg-muted px-2 py-0.5 rounded'>
+                    #{currentTicket.ticketNumber}
+                  </span>
+                  <span>•</span>
                   <span className='flex items-center gap-1.5'>
-                    <Stethoscope className='w-3.5 h-3.5' /> {currentTicket.serviceName || 'كشف عام'}
+                    <Stethoscope className='w-4 h-4' />
+                    {currentTicket.serviceName || 'كشف عام'}
+                  </span>
+                  <span>•</span>
+                  <span className='flex items-center gap-1.5'>
+                    <Clock className='w-4 h-4' />
+                    {new Date(currentTicket.calledAt!).toLocaleTimeString('ar-EG', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
                   </span>
                 </div>
               </div>
+
+              <div className='flex gap-2'>
+                {currentTicket.isUrgent && (
+                  <Badge variant='destructive' className='px-3 py-1'>
+                    طارئ
+                  </Badge>
+                )}
+                {currentTicket.status === 'InVisit' && (
+                  <Badge className='bg-emerald-600 hover:bg-emerald-700 px-3 py-1'>قيد الكشف</Badge>
+                )}
+              </div>
             </div>
 
+            {/* الجزء المفقود اللي رجعناه: ملاحظات الاستقبال (الفحص المبدئي) */}
             {currentTicket.notes && (
-              <div className='w-full xl:w-auto xl:max-w-md p-3.5 bg-muted rounded-xl text-muted-foreground text-sm'>
-                {currentTicket.notes}
+              <div className='bg-muted/30 border-r-4 border-primary/50 p-4 rounded-l-lg'>
+                <div className='flex items-center gap-2 mb-1.5'>
+                  <ClipboardList className='w-4 h-4 text-primary/70' />
+                  <span className='text-sm font-semibold text-foreground'>
+                    ملاحظات الاستقبال / الفحص:
+                  </span>
+                </div>
+                <p className='text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed'>
+                  {currentTicket.notes}
+                </p>
               </div>
             )}
 
-            <div className='flex flex-col sm:flex-row gap-3 w-full xl:w-auto mt-6 xl:mt-0'>
+            {/* الإجراءات (الأزرار بحجم احترافي مش مبالغ فيه) */}
+            <div className='flex items-center gap-3 pt-4 border-t'>
               {currentTicket.status === 'Called' && (
                 <>
                   <Button
-                    variant='ghost'
-                    className='h-12 px-6 font-medium text-muted-foreground hover:bg-muted/50 transition-colors'
+                    variant='outline'
+                    className='h-11 px-6 font-medium'
                     disabled={isPending}
                     onClick={() => onAction(skipTicketAction, currentTicket.id)}
                   >
@@ -139,11 +142,11 @@ export function CurrentPatientCard({ currentTicket, waitingTickets, isPending, o
                   </Button>
 
                   <Button
-                    className='h-12 px-8 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-md transition-colors'
+                    className='h-11 px-8 font-medium bg-primary'
                     disabled={isPending}
                     onClick={() => onAction(startVisitAction, currentTicket.id)}
                   >
-                    <PlayCircle className='w-4 h-4 ml-2 opacity-90' /> بدء الكشف
+                    <PlayCircle className='w-5 h-5 ml-2' /> بدء الكشف
                   </Button>
                 </>
               )}
@@ -152,49 +155,43 @@ export function CurrentPatientCard({ currentTicket, waitingTickets, isPending, o
                 <>
                   <Button
                     variant='outline'
-                    className='h-12 px-6 font-medium text-primary border-primary hover:bg-primary/10 transition-colors'
+                    className='h-11 px-6 font-medium text-primary border-primary/30 hover:bg-primary/5'
                     disabled={isPending || isReturning}
                     onClick={handleReturnToVisit}
                   >
                     {isReturning ? (
                       <Loader2 className='w-4 h-4 ml-2 animate-spin' />
                     ) : (
-                      <ArrowLeftRight className='w-4 h-4 ml-2' />
+                      <ArrowRight className='w-4 h-4 ml-2' />
                     )}
-                    {isReturning ? 'جاري التحميل...' : 'العودة للكشف'}
+                    {isReturning ? 'جاري التحميل...' : 'العودة لصفحة الكشف'}
                   </Button>
 
                   <Button
-                    variant='default'
-                    className='h-12 px-6 font-semibold'
+                    className='h-11 px-8 font-medium bg-emerald-600 hover:bg-emerald-700'
                     disabled={isPending || isReturning}
                     onClick={() => onAction(finishTicketAction, currentTicket.id)}
                   >
-                    <CheckCircle2 className='w-4 h-4 ml-2 opacity-90' /> إنهاء الكشف
+                    <CheckCircle2 className='w-5 h-5 ml-2' /> إنهاء الكشف
                   </Button>
                 </>
               )}
             </div>
           </div>
         ) : (
-          /* حالة الفراغ */
-          <div className='flex flex-col items-center justify-center space-y-6'>
-            <div className='w-16 h-16 rounded-full bg-muted/50 flex items-center justify-center'>
-              <UserPlus className='w-8 h-8 text-muted-foreground/60' />
-            </div>
-            <div className='text-center space-y-1.5'>
-              <h3 className='text-xl font-semibold text-foreground'>الغرفة فارغة</h3>
-              <p className='text-sm text-muted-foreground'>
-                اضغط لنداء المريض التالي من قائمة الانتظار.
-              </p>
-            </div>
+          /* حالة الفراغ - ملمومة وصغيرة جداً */
+          <div className='flex flex-col items-center justify-center py-12 text-center'>
+            <h3 className='text-xl font-bold text-foreground mb-1'>الغرفة فارغة</h3>
+            <p className='text-sm text-muted-foreground mb-6'>
+              لا يوجد مريض حالياً. يمكنك نداء المريض التالي.
+            </p>
             <Button
+              className='h-11 px-8'
               variant={waitingTickets.length > 0 ? 'default' : 'secondary'}
-              className='h-12 px-8 font-semibold rounded-md transition-colors'
               disabled={waitingTickets.length === 0 || isPending}
               onClick={() => onAction(callTicketAction, waitingTickets[0]?.id)}
             >
-              {waitingTickets.length > 0 ? 'نداء المريض التالي' : 'الطابور فارغ'}
+              {waitingTickets.length > 0 ? 'نداء المريض التالي' : 'قائمة الانتظار فارغة'}
             </Button>
           </div>
         )}

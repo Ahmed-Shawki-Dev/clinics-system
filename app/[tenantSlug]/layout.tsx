@@ -8,7 +8,6 @@ interface LayoutProps {
   params: Promise<{ tenantSlug: string }>
 }
 
-// ضيفنا التايب عشان TypeScript ميعيطش ويقولك any
 
 export default async function RootLayout({ children, params }: LayoutProps) {
   const { tenantSlug } = await params
