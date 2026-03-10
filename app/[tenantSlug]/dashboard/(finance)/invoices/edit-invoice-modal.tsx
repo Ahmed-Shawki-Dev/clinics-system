@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Loader2, Pencil } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { editInvoiceAction } from '@/actions/finance/invoices'
 import { IInvoice } from '@/types/visit'
 import { Button } from '@/components/ui/button'
@@ -13,17 +13,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 
 export function EditInvoiceDialog({
   invoice,
   tenantSlug,
+  open,
+  setOpen,
 }: {
   invoice: IInvoice
   tenantSlug: string
+  open: boolean
+  setOpen: (open: boolean) => void
 }) {
-  const [open, setOpen] = useState(false)
   const [amount, setAmount] = useState<string>(invoice.amount.toString())
   const [loading, setLoading] = useState(false)
 
@@ -43,7 +45,7 @@ export function EditInvoiceDialog({
 
     if (res.success) {
       toast.success('تم التعديل بنجاح')
-      setOpen(false) // اقفل المودال
+      setOpen(false)
     } else {
       toast.error(res.message || 'حدث خطأ')
     }
@@ -51,12 +53,6 @@ export function EditInvoiceDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant='outline' size='sm' title='تعديل الإجمالي'>
-          <Pencil className='h-4 w-4' />
-        </Button>
-      </DialogTrigger>
-
       <DialogContent dir='rtl'>
         <DialogHeader>
           <DialogTitle>تعديل إجمالي الفاتورة</DialogTitle>
@@ -76,7 +72,7 @@ export function EditInvoiceDialog({
             />
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className='gap-2 sm:gap-0'>
           <Button variant='outline' onClick={() => setOpen(false)} disabled={loading}>
             إلغاء
           </Button>

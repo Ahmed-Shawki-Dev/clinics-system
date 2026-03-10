@@ -58,3 +58,11 @@ export async function editInvoiceAction(
   }
   return result
 }
+
+export async function getInvoiceByIdAction(tenantSlug: string, invoiceId: string) {
+  return await fetchApi<IInvoice>(`/api/clinic/invoices/${invoiceId}`, {
+    tenantSlug,
+    authType: 'staff',
+    cache: 'no-store',
+  })
+}

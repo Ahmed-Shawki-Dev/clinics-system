@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Loader2, Plus } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { addPaymentAction } from '@/actions/finance/invoices'
 import { IInvoice } from '@/types/visit'
 import { Button } from '@/components/ui/button'
@@ -20,11 +20,19 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 
-export function PaymentDialog({ invoice, tenantSlug }: { invoice: IInvoice; tenantSlug: string }) {
-  const [open, setOpen] = useState(false)
+export function PaymentDialog({
+  invoice,
+  tenantSlug,
+  open,
+  setOpen,
+}: {
+  invoice: IInvoice
+  tenantSlug: string
+  open: boolean
+  setOpen: (open: boolean) => void
+}) {
   const [amount, setAmount] = useState<string>('')
   const [method, setMethod] = useState<string>('Cash')
   const [loading, setLoading] = useState(false)
@@ -49,8 +57,8 @@ export function PaymentDialog({ invoice, tenantSlug }: { invoice: IInvoice; tena
 
     if (res.success) {
       toast.success('تم تسجيل الدفعة بنجاح')
-      setAmount('') // صفر القيمة
-      setOpen(false) // اقفل المودال
+      setAmount('')
+      setOpen(false)
     } else {
       toast.error(res.message || 'حدث خطأ')
     }
@@ -58,12 +66,6 @@ export function PaymentDialog({ invoice, tenantSlug }: { invoice: IInvoice; tena
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size='sm' title='تسجيل دفعة' variant={'outline'}>
-          <Plus className='h-4 w-4 ml-1' /> دفع
-        </Button>
-      </DialogTrigger>
-
       <DialogContent dir='rtl'>
         <DialogHeader>
           <DialogTitle>تسجيل دفعة جديدة</DialogTitle>
@@ -85,7 +87,7 @@ export function PaymentDialog({ invoice, tenantSlug }: { invoice: IInvoice; tena
           </div>
           <div className='space-y-2'>
             <label className='text-xs font-bold'>طريقة الدفع</label>
-            <Select value={method} onValueChange={setMethod} disabled={loading}>
+            <Select value={method} onValueChange={setMethod} disabled={loading} dir='rtl'>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -97,7 +99,7 @@ export function PaymentDialog({ invoice, tenantSlug }: { invoice: IInvoice; tena
             </Select>
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className='gap-2 sm:gap-0'>
           <Button variant='outline' onClick={() => setOpen(false)} disabled={loading}>
             إلغاء
           </Button>
