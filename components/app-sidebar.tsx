@@ -14,6 +14,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar'
 
 import { SIDEBAR_NAVIGATION } from '@/config/navigation'
@@ -26,7 +27,7 @@ export function AppSidebar() {
   const pathname = usePathname()
   const params = useParams()
   const tenantSlug = params.tenantSlug as string
-
+  const { setOpenMobile, isMobile } = useSidebar()
   const user = useAuthStore((state) => state.user)
   const tenantConfig = useTenantStore((state) => state.config) // 2. قراءة بيانات العيادة
 
@@ -40,11 +41,11 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible='icon' side='right'>
       {/* 3. الهيدر الديناميكي */}
-      <SidebarHeader className='flex h-16 shrink-0 flex-row items-center gap-2 border-b px-4 text-xl font-bold text-primary'>
+      <SidebarHeader className='flex h-16 shrink-0 flex-row items-center gap-2 border-b px-4 text-xl font-bold '>
         {tenantConfig ? (
           // الداتا وصلت، ارسم العيادة
           <>
-            <div className='relative flex h-8 w-8 items-center justify-center overflow-hidden rounded-md bg-primary/10 text-primary'>
+            <div className='relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-md text-primary'>
               {tenantConfig.logoUrl ? (
                 <Image
                   src={tenantConfig.logoUrl}
@@ -93,7 +94,12 @@ export function AppSidebar() {
                         tooltip={item.title}
                         className='transition-all duration-200 hover:bg-primary/5 data-[active=true]:bg-primary/10'
                       >
-                        <Link href={fullUrl}>
+                        <Link
+                          href={fullUrl}
+                          onClick={() => {
+                            if (isMobile) setOpenMobile(false)
+                          }}
+                        >
                           <item.icon className='h-4 w-4' />
                           <span>{item.title}</span>
                         </Link>

@@ -51,7 +51,7 @@ export function QueueView({ tenantSlug, initialBoardRes, doctors }: QueueViewPro
   const selectedSession = activeSessions.find((s) => s.sessionId === selectedSessionId)
 
   return (
-    <div className='flex flex-col h-[calc(100vh-220px)] md:h-[calc(100vh-200px)] gap-6'>
+    <div className='flex flex-col h-[calc(100vh-200px)] md:h-[calc(100vh-250px)] gap-6'>
       {activeSessions.length > 0 ? (
         <div className='flex flex-col md:flex-row flex-1 gap-4 md:gap-6 overflow-hidden'>
           {/* Sidebar List */}
@@ -124,16 +124,25 @@ export function QueueView({ tenantSlug, initialBoardRes, doctors }: QueueViewPro
         </div>
       ) : (
         /* Empty State */
-        <div className='flex flex-col items-center justify-center flex-1 border border-dashed rounded-lg bg-muted/10 p-8 text-center'>
-          <div className='p-4 rounded-full bg-muted/30 mb-4'>
-            <LayoutGrid className='h-8 w-8 text-muted-foreground' />
+        <div className='flex flex-col items-center  justify-center w-full max-w-2xl mx-auto my-auto border-2 rounded-2xl p-10 sm:p-12 text-center shadow-sm'>
+          <div className='w-16 h-16 rounded-full bg-muted/40 flex items-center justify-center mb-5'>
+            <LayoutGrid className='h-8 w-8 text-muted-foreground/70' />
           </div>
-          <h3 className='text-lg font-medium mb-2'>لا توجد عيادات نشطة</h3>
-          <OpenSessionDialog
-            tenantSlug={tenantSlug}
-            doctors={doctors}
-            activeSessions={activeSessions}
-          />
+
+          <h3 className='text-xl font-bold text-foreground mb-2'>لوحة العيادات فارغة</h3>
+
+          <p className='text-sm text-muted-foreground max-w-md mx-auto mb-8 leading-relaxed'>
+            لا يوجد أي شفت طبيب مفتوح حالياً. قم بفتح شيفت جديدة للبدء في إصدار التذاكر وإدارة
+            طابور الانتظار.
+          </p>
+
+          <div className='shrink-0'>
+            <OpenSessionDialog
+              tenantSlug={tenantSlug}
+              doctors={doctors}
+              activeSessions={activeSessions}
+            />
+          </div>
         </div>
       )}
     </div>

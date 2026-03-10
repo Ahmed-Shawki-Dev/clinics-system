@@ -8,7 +8,6 @@ interface LayoutProps {
   params: Promise<{ tenantSlug: string }>
 }
 
-
 export default async function RootLayout({ children, params }: LayoutProps) {
   const { tenantSlug } = await params
 
@@ -16,7 +15,6 @@ export default async function RootLayout({ children, params }: LayoutProps) {
     `${process.env.NEXT_PUBLIC_API_URL}/api/public/${tenantSlug}/clinic`,
     { next: { revalidate: 3600 } },
   )
-
 
   if (response.status === 404) {
     notFound()
