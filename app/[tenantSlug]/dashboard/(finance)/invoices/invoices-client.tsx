@@ -10,6 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Input } from '@/components/ui/input'
 import {
   Table,
   TableBody,
@@ -19,12 +20,13 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { IInvoice } from '@/types/visit'
-import { MoreHorizontal, Pencil, Plus, Printer } from 'lucide-react'
+import { MoreHorizontal, Pencil, Plus, Printer, Search } from 'lucide-react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { GenericPagination } from '../../../../../components/shared/pagination'
 import { EditInvoiceDialog } from './edit-invoice-modal'
-import { PaymentDialog } from './payment-modal'
 import { InvoiceDetailsAction } from './invoice-details-modal'
+import { PaymentDialog } from './payment-modal'
 
 interface InvoicesClientProps {
   initialInvoices: IInvoice[]
@@ -38,19 +40,38 @@ interface InvoicesClientProps {
 }
 
 export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: InvoicesClientProps) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('invoiceNumber') || '')
+
   const [editingInvoice, setEditingInvoice] = useState<IInvoice | null>(null)
   const [payingInvoice, setPayingInvoice] = useState<IInvoice | null>(null)
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    const params = new URLSearchParams(searchParams.toString())
+    if (searchQuery.trim()) {
+      params.set('invoiceNumber', searchQuery.trim())
+    } else {
+      params.delete('invoiceNumber')
+    }
+    params.set('page', '1')
+    router.push(`?${params.toString()}`)
+  }
+
   const handlePrint = (invoice: IInvoice) => {
+    // الطباعة بتفضل hardcoded كـ HTML عشان البراوزر بيفصلها عن الـ React
     const printContent = `
       <div dir="rtl" style="font-family: Arial; padding: 20px;">
         <h2 style="text-align: center;">إيصال استلام نقدية</h2>
+        <p style="text-align: center; color: #666;">رقم الفاتورة: #${invoice.invoiceNumber}</p>
         <hr />
-        <p><strong>المريض:</strong> ${invoice.patientName}</p>
+        <p><strong>المريض:</strong> ${invoice.patientName} ${invoice.patientPhone ? `(${invoice.patientPhone})` : ''}</p>
         <p><strong>الطبيب:</strong> ${invoice.doctorName}</p>
         <p><strong>الإجمالي:</strong> ${invoice.amount} ج.م</p>
         <p><strong>المدفوع:</strong> ${invoice.paidAmount} ج.م</p>
         <p><strong>المتبقي:</strong> ${invoice.remainingAmount} ج.م</p>
+        ${invoice.creditAmount > 0 ? `<p style="color: red;"><strong>رصيد مستحق للمريض:</strong> ${invoice.creditAmount} ج.م</p>` : ''}
         <hr />
         <p style="text-align: center; font-size: 12px;">تم الإصدار من النظام الآلي</p>
       </div>
@@ -67,19 +88,47 @@ export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: Invo
 
   return (
     <div className='space-y-4'>
+      <form onSubmit={handleSearch} className='flex items-center gap-2 max-w-sm'>
+        <div className='relative flex-1'>
+          <Search className='absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
+          <Input
+            placeholder='ابحث برقم الفاتورة...'
+            className='pr-9'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <Button type='submit' variant='secondary'>
+          بحث
+        </Button>
+        {searchParams.get('invoiceNumber') && (
+          <Button
+            type='button'
+            variant='ghost'
+            onClick={() => {
+              setSearchQuery('')
+              const params = new URLSearchParams(searchParams.toString())
+              params.delete('invoiceNumber')
+              params.set('page', '1')
+              router.push(`?${params.toString()}`)
+            }}
+          >
+            مسح
+          </Button>
+        )}
+      </form>
+
       <div className='border rounded-md overflow-hidden shadow-sm'>
         <Table>
-          <TableHeader className='bg-muted/30 h-12'>
+          <TableHeader className='bg-muted/50 h-12'>
             <TableRow>
-              <TableHead className='font-bold text-right text-muted-foreground'>
-                رقم الفاتورة
-              </TableHead>
-              <TableHead className='font-bold text-right text-muted-foreground'>التاريخ</TableHead>
-              <TableHead className='font-bold text-right text-muted-foreground'>المريض</TableHead>
-              <TableHead className='font-bold text-right text-muted-foreground'>الطبيب</TableHead>
-              <TableHead className='font-bold text-right text-muted-foreground'>الإجمالي</TableHead>
-              <TableHead className='font-bold text-right text-muted-foreground'>المتبقي</TableHead>
-              <TableHead className='font-bold text-right text-muted-foreground'>الحالة</TableHead>
+              <TableHead className='font-bold text-muted-foreground'>رقم الفاتورة</TableHead>
+              <TableHead className='font-bold text-muted-foreground'>التاريخ</TableHead>
+              <TableHead className='font-bold text-muted-foreground'>المريض</TableHead>
+              <TableHead className='font-bold text-muted-foreground'>الطبيب</TableHead>
+              <TableHead className='font-bold text-muted-foreground'>الإجمالي</TableHead>
+              <TableHead className='font-bold text-muted-foreground'>المتبقي</TableHead>
+              <TableHead className='font-bold text-muted-foreground'>الحالة</TableHead>
               <TableHead className='font-bold text-center text-muted-foreground w-16'>
                 إجراءات
               </TableHead>
@@ -88,8 +137,8 @@ export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: Invo
           <TableBody>
             {initialInvoices.map((inv) => (
               <TableRow key={inv.id}>
-                <TableCell className='font-mono text-xs text-muted-foreground'>
-                  #{inv.id.split('-')[0].toUpperCase()}
+                <TableCell className='text-xs text-muted-foreground font-bold'>
+                  {inv.invoiceNumber}
                 </TableCell>
                 <TableCell className='text-sm whitespace-nowrap'>
                   {inv.createdAt ? new Date(inv.createdAt).toLocaleDateString() : '—'}
@@ -132,7 +181,7 @@ export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: Invo
                       {inv.status !== 'Paid' && (
                         <DropdownMenuItem
                           onClick={() => setPayingInvoice(inv)}
-                          className='cursor-pointer font-bold text-emerald-600 focus:text-emerald-700'
+                          className='cursor-pointer font-bold text-primary focus:text-primary/80'
                         >
                           <Plus className='h-4 w-4 ml-2' /> تسجيل دفعة
                         </DropdownMenuItem>
@@ -168,7 +217,6 @@ export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: Invo
           setOpen={(open) => !open && setEditingInvoice(null)}
         />
       )}
-
       {payingInvoice && (
         <PaymentDialog
           invoice={payingInvoice}
@@ -181,22 +229,20 @@ export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: Invo
   )
 }
 
-function StatusBadge({ status }: { status: IInvoice['status'] }) {
+function StatusBadge({ status }: { status: string }) {
   if (status === 'Paid')
     return (
-      <Badge className='bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-0 shadow-none px-2.5 py-0.5'>
-        مدفوع
+      <Badge variant='secondary' className='bg-primary/10 text-primary hover:bg-primary/20'>
+        مدفوعة
       </Badge>
     )
-  if (status === 'PartiallyPaid')
-    return (
-      <Badge className='bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-0 shadow-none px-2.5 py-0.5'>
-        دفع جزئي
-      </Badge>
-    )
+  if (status === 'PartiallyPaid') return <Badge variant='secondary'>دفع جزئي</Badge>
   return (
-    <Badge className='bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 border-0 shadow-none px-2.5 py-0.5'>
-      غير مدفوع
+    <Badge
+      variant='destructive'
+      className='bg-destructive/10 text-destructive hover:bg-destructive/20'
+    >
+      غير مدفوعة
     </Badge>
   )
 }

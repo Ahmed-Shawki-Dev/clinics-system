@@ -3,20 +3,20 @@ import { PeriodFilter } from '../../../../../components/shared/period-filter'
 import { DashboardHeader, DashboardShell } from '../../../../../components/shell'
 import { InvoicesClient } from './invoices-client'
 
-// import { StatusFilter } from './status-filter' // لو عملتها زي ما اتفقنا فك الكومنت
-
 export default async function InvoicesPage({
   params,
   searchParams,
 }: {
   params: Promise<{ tenantSlug: string }>
-  searchParams: Promise<{ page?: string; from?: string; to?: string }>
+  // ضفنا invoiceNumber هنا
+  searchParams: Promise<{ page?: string; from?: string; to?: string; invoiceNumber?: string }>
 }) {
   const { tenantSlug } = await params
-  const { page, from, to } = await searchParams
+  const { page, from, to, invoiceNumber } = await searchParams
   const currentPage = Number(page) || 1
 
-  const response = await getInvoicesAction(tenantSlug, currentPage, 10, from, to)
+  // لازم تتأكد إن الأكشن ده في فولدر الـ actions متعدل إنه يستقبل invoiceNumber ويبعته للباك إند
+  const response = await getInvoicesAction(tenantSlug, currentPage, 10, from, to, invoiceNumber)
   const invoices = response?.data?.items || []
 
   const pagination = {
@@ -25,7 +25,7 @@ export default async function InvoicesPage({
     hasNextPage: response?.data?.hasNextPage || false,
     hasPreviousPage: response?.data?.hasPreviousPage || false,
   }
-console.log(response)
+
   return (
     <DashboardShell>
       <DashboardHeader heading='الفواتير والمدفوعات' text='إدارة مستحقات العيادة والتحصيلات'>

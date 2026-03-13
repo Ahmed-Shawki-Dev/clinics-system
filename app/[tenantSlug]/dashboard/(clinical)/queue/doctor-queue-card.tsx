@@ -25,9 +25,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { IQueueBoardSession } from '@/types/queue'
 import { ArrowUp, MoreHorizontal, Power, X } from 'lucide-react'
-import * as React from 'react'
 import { toast } from 'sonner'
-import { mutate } from 'swr' // الاستيراد السحري
+import { mutate } from 'swr'
 
 interface DoctorQueueCardProps {
   tenantSlug: string
@@ -35,19 +34,19 @@ interface DoctorQueueCardProps {
 }
 
 export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
-  const sortedWaitlist = React.useMemo(() => {
-    return [...session.waitingTickets].sort((a, b) => {
-      if (a.isUrgent && !b.isUrgent) return -1
-      if (!a.isUrgent && b.isUrgent) return 1
-      return a.ticketNumber - b.ticketNumber
-    })
-  }, [session.waitingTickets])
+  // 1. الداتا بتتعرض زي ما الباك إند باعتها بدون أي تلاعب في الترتيب
+  const waitlist = session.waitingTickets || []
+
+  // 2. متغيرات حالة الطابور عشان الـ Force Close
+  const isPatientInVisit = !!session.currentTicket
+  const hasWaitingPatients = waitlist.length > 0
 
   const handleCloseSession = async () => {
+    // الإنهاء الإجباري بيتبعت بس لو فيه مريض لسه بيكشف جوه الأوضة
     const res = await closeQueueSession(tenantSlug, session.sessionId)
     if (res.success) {
       toast.success(`تم إنهاء شفت د. ${session.doctorName}`)
-      await mutate(['queueBoard', tenantSlug]) // تحديث فوري
+      await mutate(['queueBoard', tenantSlug])
     } else {
       toast.error(res.message)
     }
@@ -57,7 +56,7 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
     const res = await markTicketUrgent(tenantSlug, ticketId)
     if (res.success) {
       toast.success('تم رفع الحالة لطوارئ')
-      await mutate(['queueBoard', tenantSlug]) // تحديث فوري
+      await mutate(['queueBoard', tenantSlug])
     } else {
       toast.error(res.message)
     }
@@ -67,7 +66,7 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
     const res = await cancelTicket(tenantSlug, ticketId)
     if (res.success) {
       toast.success('تم إلغاء التذكرة')
-      await mutate(['queueBoard', tenantSlug]) // تحديث فوري
+      await mutate(['queueBoard', tenantSlug])
     } else {
       toast.error(res.message)
     }
@@ -79,14 +78,12 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
       <div className='flex items-center justify-between p-4 border-b bg-card'>
         <div className='flex items-center gap-3'>
           <div className='h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold'>
-            {/* لو الاسم موجود هات أول حرف، لو مش موجود حط علامة استفهام أو أي حرف */}
             {session.doctorName?.charAt(0) || '?'}
           </div>
           <div>
-            {/* حط قيمة افتراضية عشان لو الاسم null متبقاش د. فاضية */}
             <h2 className='font-semibold'>
               {session.doctorName ? `د. ${session.doctorName}` : 'طبيب غير محدد'}
-            </h2>{' '}
+            </h2>
           </div>
         </div>
 
@@ -99,13 +96,26 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>إغلاق العيادة؟</AlertDialogTitle>
-              <AlertDialogDescription>هل أنت متأكد من إنهاء شفت الطبيب؟</AlertDialogDescription>
+              <AlertDialogTitle className={isPatientInVisit ? 'text-destructive' : ''}>
+                {isPatientInVisit ? 'تحذير: إنهاء إجباري للعيادة!' : 'إغلاق العيادة؟'}
+              </AlertDialogTitle>
+              <AlertDialogDescription
+                className={isPatientInVisit ? 'font-bold text-destructive/80' : ''}
+              >
+                {isPatientInVisit
+                  ? 'يوجد مريض داخل غرفة الكشف حالياً! هل أنت متأكد من الإنهاء الإجباري للعيادة؟'
+                  : hasWaitingPatients
+                    ? `هل أنت متأكد من إغلاق العيادة؟ يوجد (${waitlist.length}) مرضى في الانتظار سيتم تحويلهم إلى متغيبين.`
+                    : 'هل أنت متأكد من إنهاء شفت الطبيب؟'}
+              </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>إلغاء</AlertDialogCancel>
-              <AlertDialogAction onClick={handleCloseSession} variant={'destructive'}>
-                تأكيد الإغلاق
+              <AlertDialogAction
+                onClick={handleCloseSession}
+                variant={isPatientInVisit ? 'destructive' : 'default'}
+              >
+                {isPatientInVisit ? 'تأكيد الإنهاء الإجباري' : 'تأكيد الإغلاق'}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -113,7 +123,7 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
       </div>
 
       <div className='flex-1 overflow-y-auto p-4 space-y-6'>
-        {/* Current Patient (Minimal) */}
+        {/* Current Patient */}
         <div className='rounded-lg border bg-muted/30 p-6 flex flex-col items-center justify-center text-center space-y-2'>
           {session.currentTicket ? (
             <>
@@ -143,13 +153,13 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
           <h3 className='font-semibold text-sm mb-3 flex items-center gap-2'>
             الانتظار
             <Badge variant='secondary' className='rounded-full'>
-              {sortedWaitlist.length}
+              {waitlist.length}
             </Badge>
           </h3>
 
           <div className='rounded-md border divide-y'>
-            {sortedWaitlist.length > 0 ? (
-              sortedWaitlist.map((ticket) => (
+            {waitlist.length > 0 ? (
+              waitlist.map((ticket) => (
                 <div
                   key={ticket.id}
                   className='flex items-center justify-between p-3 hover:bg-muted/50 transition-colors'
@@ -173,7 +183,7 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
                     </div>
                   </div>
 
-                  {/* Actions Dropdown for Cleanliness */}
+                  {/* Actions Dropdown */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant='ghost' size='icon' className='h-8 w-8'>

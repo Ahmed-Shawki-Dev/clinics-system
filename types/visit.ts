@@ -37,14 +37,19 @@ export interface IPayment {
 
 export interface IInvoice {
   id: string
+  invoiceNumber: string
   visitId: string
   patientId: string
   patientName: string
+  patientPhone: string | null
   doctorId: string
   doctorName: string
   amount: number
   paidAmount: number
   remainingAmount: number
+  creditAmount: number
+  creditIssuedAt: string | null 
+  isServiceRendered: boolean
   status: 'Unpaid' | 'PartiallyPaid' | 'Paid'
   notes: string | null
   payments: IPayment[]

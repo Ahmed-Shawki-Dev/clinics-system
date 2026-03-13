@@ -9,13 +9,15 @@ export async function getInvoicesAction(
   tenantSlug: string,
   pageNumber: number = 1,
   pageSize: number = 10,
-  from?: string, // 👈 ضفنا دول
+  from?: string,
   to?: string,
+  invoiceNumber?: string, // 👈 1. ضفنا الباراميتر هنا
 ) {
   let url = `/api/clinic/invoices?pageNumber=${pageNumber}&pageSize=${pageSize}`
 
   if (from) url += `&from=${from}`
   if (to) url += `&to=${to}`
+  if (invoiceNumber) url += `&invoiceNumber=${invoiceNumber}` // 👈 2. لزقناه في الـ URL للباك إند
 
   return await fetchApi<IPaginatedData<IInvoice>>(url, {
     tenantSlug,
