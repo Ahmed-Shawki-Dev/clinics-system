@@ -2,10 +2,10 @@
 
 import { Typography } from '@/components/ui/typography'
 import { MapPin, MessageCircle, Phone } from 'lucide-react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { IPublicClinic } from '../../types/public'
 import { publicRoutes } from './navbar'
+import { ClinicImage } from '../shared/clinic-image' // 👈 استيراد المكون الموحد
 
 interface FooterProps {
   clinic: IPublicClinic
@@ -22,21 +22,23 @@ export default function Footer({ clinic, tenantSlug }: FooterProps) {
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16'>
           {/* العمود الأول: البراند والنبذة */}
           <div className='space-y-6'>
-            <Link href={`/${tenantSlug}`} className='flex items-center gap-3'>
-              {/* لو العيادة رافعة لوجو هيظهر، لو لأ هنعرض اسمها بخط عريض */}
+            <Link
+              href={`/${tenantSlug}`}
+              className='flex items-center gap-3 transition-opacity hover:opacity-80'
+            >
               {clinic.logoUrl ? (
-                <div className='relative w-12 h-12 rounded-xl overflow-hidden bg-background border border-border'>
-                  <Image
+                /* 👈 استخدام المكون الموحد لضمان ظهور اللوجو */
+                <div className='relative w-12 h-12 rounded-xl overflow-hidden bg-background border border-border shrink-0'>
+                  <ClinicImage
                     src={clinic.logoUrl}
                     alt={clinic.clinicName}
                     fill
-                    className='object-cover'
+                    fallbackType='logo'
+                    className='object-contain p-1'
                   />
                 </div>
-              ) : (
-                ''
-              )}
-              <Typography variant='h4' className='font-black text-foreground'>
+              ) : null}
+              <Typography variant='h4' className='font-black text-foreground tracking-tight'>
                 {clinic.clinicName}
               </Typography>
             </Link>
@@ -53,8 +55,12 @@ export default function Footer({ clinic, tenantSlug }: FooterProps) {
             </Typography>
             <nav className='flex flex-col gap-3'>
               {publicRoutes.map((route) => (
-                <Link key={route.label} href={`/${tenantSlug}${route.href}`} className='w-fit'>
-                  <span className='text-sm text-muted-foreground hover:text-primary transition-colors'>
+                <Link
+                  key={route.label}
+                  href={`/${tenantSlug}${route.href}`}
+                  className='w-fit group'
+                >
+                  <span className='text-sm text-muted-foreground group-hover:text-primary transition-colors'>
                     {route.label}
                   </span>
                 </Link>
@@ -85,9 +91,12 @@ export default function Footer({ clinic, tenantSlug }: FooterProps) {
                 </div>
               )}
               {clinic.supportWhatsAppNumber && (
-                <div className='flex items-center gap-3'>
+                <div className='flex items-center gap-3 group cursor-pointer'>
                   <MessageCircle className='w-5 h-5 text-[#25D366] shrink-0' />
-                  <span className='text-sm text-muted-foreground' dir='ltr'>
+                  <span
+                    className='text-sm text-muted-foreground group-hover:text-[#25D366] transition-colors'
+                    dir='ltr'
+                  >
                     {clinic.supportWhatsAppNumber}
                   </span>
                 </div>
@@ -95,12 +104,12 @@ export default function Footer({ clinic, tenantSlug }: FooterProps) {
             </div>
           </div>
 
-          {/* العمود الرابع: ساعات العمل أو الطوارئ */}
+          {/* العمود الرابع: معلومات هامة */}
           <div className='space-y-6'>
             <Typography variant='h4' className='font-bold text-foreground text-lg'>
               معلومات هامة
             </Typography>
-            <div className='p-4 rounded-2xl bg-primary/5 border border-primary/10 space-y-3'>
+            <div className='p-5 rounded-2xl bg-primary/5 border border-primary/10 space-y-3'>
               <Typography variant='small' className='font-bold text-primary block'>
                 حالات الطوارئ
               </Typography>
@@ -114,12 +123,14 @@ export default function Footer({ clinic, tenantSlug }: FooterProps) {
 
         {/* الشريط السفلي: حقوق النشر */}
         <div className='pt-8 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-4'>
-          <Typography variant='muted' className='text-xs text-center md:text-start'>
+          <Typography variant='muted' className='text-xs text-center md:text-start font-medium'>
             &copy; {new Date().getFullYear()} {clinic.clinicName}. جميع الحقوق محفوظة.
           </Typography>
 
-          {/* لمسة السوفتوير بتاعك */}
-          <Typography variant='muted' className='text-[10px] text-center md:text-end opacity-70'>
+          <Typography
+            variant='muted'
+            className='text-[10px] text-center md:text-end opacity-70 tracking-widest uppercase'
+          >
             Powered by <span className='font-bold text-foreground'>Medora</span>
           </Typography>
         </div>

@@ -18,7 +18,7 @@ import { PrescriptionTab } from './prescription-tab'
 
 // إضافات الروشتة الجديدة
 import { useTenantStore } from '@/store/useTenantStore'
-import Image from 'next/image'
+import { ClinicImage } from '../../../../../../components/shared/clinic-image'
 
 export function VisitTerminalClient({
   visit,
@@ -296,18 +296,19 @@ export function VisitTerminalClient({
                           style={{
                             width: '40px',
                             height: '40px',
-                            position: 'relative',
+                            position: 'relative', // مهم جداً عشان fill في ClinicImage يشتغل
                             borderRadius: '4px',
                             overflow: 'hidden',
                             border: '1px solid #ccc',
                             flexShrink: 0,
                           }}
                         >
-                          <Image
-                            src={tenantConfig.logoUrl}
-                            alt='Logo'
+                          <ClinicImage
+                            src={tenantConfig?.logoUrl}
+                            alt='Clinic Logo'
                             fill
-                            className='object-cover'
+                            fallbackType='logo'
+                            className='object-contain'
                           />
                         </div>
                       )}

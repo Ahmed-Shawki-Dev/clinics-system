@@ -1,8 +1,8 @@
 'use client'
 
 import { valibotResolver } from '@hookform/resolvers/valibot'
-import { AlertCircle, Clock, Loader2, Plus } from 'lucide-react'
-import { useState } from 'react'
+import { AlertCircle, Camera, Clock, Loader2, Plus } from 'lucide-react'
+import { useRef, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -30,14 +30,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 
 import { createDoctorAction } from '@/actions/doctor/create-doctor'
+import { uploadDoctorPhotoAction } from '@/actions/doctor/upload-photo'
+import { ClinicImage } from '@/components/shared/clinic-image' // 👈 المكون السحري بتاعنا
+import { MEDICAL_SPECIALTIES } from '@/constants/specialties'
 import { CreateDoctorInput, CreateDoctorSchema } from '@/validation/doctor'
-import { Textarea } from '../../../../../components/ui/textarea'
-import { MEDICAL_SPECIALTIES } from '../../../../../constants/specialties'
 
 export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
   const [open, setOpen] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<CreateDoctorInput>({
     resolver: valibotResolver(CreateDoctorSchema),
@@ -53,38 +60,108 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
     },
   })
 
-  const onSubmit = async (values: CreateDoctorInput) => {
-    const res = await createDoctorAction(values, tenantSlug)
-    if (res.success) {
-      toast.success(res.message)
-      setOpen(false)
-      form.reset()
-    } else {
-      toast.error(res.message)
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) return toast.error('حجم الصورة يجب أن لا يتعدى 2 ميجا')
+
+      // مسح الـ ObjectURL القديم عشان ميسحبش ميموري (Performance tip)
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+
+      const objectUrl = URL.createObjectURL(file)
+      setSelectedFile(file)
+      setPreviewUrl(objectUrl)
     }
   }
 
-  const selectedSpecialty = form.watch('specialty')
+  const handleReset = () => {
+    form.reset()
+    if (previewUrl) URL.revokeObjectURL(previewUrl)
+    setSelectedFile(null)
+    setPreviewUrl(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const onSubmit = async (values: CreateDoctorInput) => {
+    setIsSubmitting(true)
+    try {
+      // 1. إنشاء الدكتور أولاً
+      const res = await createDoctorAction(values, tenantSlug)
+
+      if (res.success && res.data) {
+        const newDoctorId = res.data.id
+
+        // 2. رفع الصورة لو موجودة
+        if (selectedFile) {
+          const formData = new FormData()
+          formData.append('file', selectedFile)
+          const photoRes = await uploadDoctorPhotoAction(tenantSlug, newDoctorId, formData)
+          if (!photoRes.success) toast.error('تم إنشاء الدكتور ولكن فشل رفع الصورة')
+        }
+
+        toast.success('تم إضافة الطبيب بنجاح')
+        setOpen(false)
+        handleReset()
+      } else {
+        toast.error(res.message || 'فشل إنشاء الحساب')
+      }
+    } catch (error) {
+      toast.error('حدث خطأ غير متوقع')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(val) => {
+        setOpen(val)
+        if (!val) handleReset()
+      }}
+    >
       <DialogTrigger asChild>
         <Button>
-          <Plus className='ml-2 h-4 w-4' />
-          طبيب جديد
+          <Plus className='ml-2 h-4 w-4' /> طبيب جديد
         </Button>
       </DialogTrigger>
-      <DialogContent>
+
+      <DialogContent className='max-w-2xl max-h-[95vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>بيانات الطبيب الجديد</DialogTitle>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className='space-y-4 py-2'
-            autoComplete='off'
+        {/* دمج الـ ClinicImage في الـ Preview */}
+        <div className='flex flex-col items-center justify-center gap-2 py-4'>
+          <div
+            className='relative h-24 w-24 rounded-full border-2 border-dashed border-primary/30 flex items-center justify-center bg-muted overflow-hidden group cursor-pointer hover:border-primary transition-all'
+            onClick={() => fileInputRef.current?.click()}
           >
+            {/* 👈 استخدام ClinicImage يضمن إن لو مفيش صورة يظهر الـ Fallback الموحد للسيستم */}
+            <ClinicImage
+              src={previewUrl}
+              alt='Doctor Preview'
+              fill
+              fallbackType='doctor'
+              className='object-cover'
+            />
+
+            <div className='absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'>
+              <Camera className='text-white w-6 h-6' />
+            </div>
+          </div>
+          <input
+            type='file'
+            className='hidden'
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept='image/*'
+          />
+          <span className='text-xs text-muted-foreground'>اضغط لرفع صورة تعريفية</span>
+        </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4' autoComplete='off'>
             <div className='grid grid-cols-2 gap-4'>
               <FormField
                 control={form.control}
@@ -122,7 +199,7 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
                   <FormItem>
                     <FormLabel>اسم المستخدم</FormLabel>
                     <FormControl>
-                      <Input placeholder='dr_mohamed' {...field} autoComplete='one-time-code' />
+                      <Input placeholder='dr_mohamed' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -135,12 +212,7 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
                   <FormItem>
                     <FormLabel>كلمة المرور</FormLabel>
                     <FormControl>
-                      <Input
-                        type='password'
-                        placeholder='******'
-                        {...field}
-                        autoComplete='new-password'
-                      />
+                      <Input type='password' placeholder='******' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -148,71 +220,41 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
               />
             </div>
 
-            <div className='space-y-4'>
-              <FormField
-                control={form.control}
-                name='specialty'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>التخصص</FormLabel>
-                    <Select
-                      onValueChange={(value) => {
-                        field.onChange(value)
-                      }}
-                      defaultValue={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='اختر التخصص الطبي' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className='max-h-50'>
-                        {MEDICAL_SPECIALTIES.map((spec) => (
-                          <SelectItem key={spec} value={spec}>
-                            {spec}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* 3. الـ Input الإضافي يظهر فقط عند اختيار "أخرى" */}
-              {selectedSpecialty === 'أخرى' && (
-                <FormField
-                  control={form.control}
-                  name='specialty' // بنربطه بنفس الاسم عشان يعمل Override للقيمة
-                  render={({ field }) => (
-                    <FormItem className='animate-in fade-in slide-in-from-top-2'>
-                      <FormLabel>اكتب التخصص المخصص</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder='مثلاً: طب وجراحة الفم'
-                          {...field}
-                          // عشان لما يكتب يمسح كلمة "أخرى" ويحط القيمة الجديدة
-                          onChange={(e) => field.onChange(e.target.value)}
-                          value={field.value === 'أخرى' ? '' : field.value}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+            <FormField
+              control={form.control}
+              name='specialty'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>التخصص</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder='اختر التخصص' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className='max-h-40'>
+                      {MEDICAL_SPECIALTIES.map((spec) => (
+                        <SelectItem key={spec} value={spec}>
+                          {spec}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
               )}
-            </div>
+            />
 
             <FormField
               control={form.control}
               name='bio'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>النبذة التعريفية (Bio)</FormLabel>
+                  <FormLabel>النبذة التعريفية</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder='اكتب نبذة قصيرة عن خبرات الطبيب...'
-                      className='resize-none'
+                      placeholder='خبرات الطبيب...'
+                      className='resize-none h-20'
                       {...field}
                     />
                   </FormControl>
@@ -221,7 +263,7 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
               )}
             />
 
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg border'>
+            <div className='grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg border'>
               <FormField
                 control={form.control}
                 name='avgVisitDurationMinutes'
@@ -233,9 +275,9 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
                     <FormControl>
                       <Input
                         type='number'
-                        {...field}
-                        value={(field.value as number | string) ?? ''}
-                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                        {...field} // 1. نفك الـ props الأول
+                        value={(field.value as number) ?? ''}
+                        onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
                       />
                     </FormControl>
                     <FormMessage />
@@ -247,29 +289,37 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
                 name='urgentCaseMode'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='flex items-center  gap-2'>
-                      <AlertCircle className='w-4 h-4' /> نظام الطوارئ
+                    <FormLabel className='flex items-center gap-2'>
+                      <AlertCircle className='w-4 h-4' /> الطوارئ
                     </FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={String(field.value)}>
+                    <Select
+                      onValueChange={(val) => field.onChange(Number(val))}
+                      defaultValue={String(field.value)}
+                    >
                       <FormControl>
-                        <SelectTrigger className='w-full'>
-                          <SelectValue placeholder='اختر النظام' />
+                        <SelectTrigger>
+                          <SelectValue />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value='0'>بعد الحالة الحالية (Next)</SelectItem>
-                        <SelectItem value='1'>في السلة (Bucket)</SelectItem>
-                        <SelectItem value='2'>أول الطابور (Front)</SelectItem>
+                        <SelectItem value='0'>Next (الدور على مين؟)</SelectItem>
+                        <SelectItem value='1'>Bucket (أول واحد يخلص)</SelectItem>
+                        <SelectItem value='2'>Front (يدخل أول واحد)</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            <Button type='submit' className='w-full' disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? <Loader2 className='animate-spin' /> : 'حفظ البيانات'}
+            <Button type='submit' className='w-full h-12 text-lg' disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className='animate-spin ml-2' /> جاري الحفظ...
+                </>
+              ) : (
+                'إضافة الطبيب'
+              )}
             </Button>
           </form>
         </Form>

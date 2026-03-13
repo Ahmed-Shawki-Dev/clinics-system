@@ -1,6 +1,5 @@
 'use client'
 
-import { Stethoscope } from 'lucide-react'
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 
@@ -20,7 +19,7 @@ import {
 import { SIDEBAR_NAVIGATION } from '@/config/navigation'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useTenantStore } from '@/store/useTenantStore' // 1. استيراد الـ Store
-import Image from 'next/image'
+import { ClinicImage } from './shared/clinic-image'
 import { Skeleton } from './ui/skeleton'
 
 export function AppSidebar() {
@@ -45,17 +44,15 @@ export function AppSidebar() {
         {tenantConfig ? (
           // الداتا وصلت، ارسم العيادة
           <>
-            <div className='relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-md text-primary'>
-              {tenantConfig.logoUrl ? (
-                <Image
-                  src={tenantConfig.logoUrl}
-                  alt={tenantConfig.name || 'Logo'}
-                  fill
-                  className='object-cover'
-                />
-              ) : (
-                <Stethoscope className='h-5 w-5' />
-              )}
+            <div className='relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md'>
+              {/* 2. استخدم الـ Component الجديد هنا */}
+              <ClinicImage
+                src={tenantConfig.logoUrl}
+                alt={tenantConfig.name || 'Logo'}
+                fill
+                fallbackType='logo' // عشان لو مفيش صورة يطلع أيقونة العيادة
+                className='object-cover'
+              />
             </div>
             <span className='truncate font-extrabold group-data-[collapsible=icon]:hidden'>
               {tenantConfig.name}

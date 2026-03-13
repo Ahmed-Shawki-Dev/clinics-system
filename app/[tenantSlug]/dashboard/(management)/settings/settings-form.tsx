@@ -1,10 +1,12 @@
 'use client'
 
 import { updateClinicSettings } from '@/actions/settings/update-settings'
+import { uploadClinicLogoAction } from '@/actions/settings/upload-logo'
 import { DAYS_AR } from '@/types/public'
 import { IClinicSettings } from '@/types/settings'
 import { UpdateSettingsInput, UpdateSettingsSchema } from '@/validation/settings'
 import { valibotResolver } from '@hookform/resolvers/valibot'
+import { useRef, useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -13,7 +15,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -22,6 +23,8 @@ import {
 import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Loader2, Upload } from 'lucide-react'
+import { ClinicImage } from '../../../../../components/shared/clinic-image'
 
 interface SettingsFormProps {
   initialData: IClinicSettings
@@ -31,63 +34,89 @@ interface SettingsFormProps {
 export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
   const defaultDays = Object.keys(DAYS_AR) as UpdateSettingsInput['workingHours'][0]['dayOfWeek'][]
 
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+
   const form = useForm<UpdateSettingsInput>({
     resolver: valibotResolver(UpdateSettingsSchema),
     defaultValues: {
-      clinicName: initialData.clinicName || 'عيادة جديدة',
+      clinicName: initialData.clinicName || '',
       phone: initialData.phone || '',
-      whatsAppSenderNumber: initialData.whatsAppSenderNumber || '',
       supportWhatsAppNumber: initialData.supportWhatsAppNumber || '',
-      supportPhoneNumber: initialData.supportPhoneNumber || '',
       address: initialData.address || '',
       city: initialData.city || '',
       logoUrl: initialData.logoUrl || '',
       bookingEnabled: initialData.bookingEnabled,
       cancellationWindowHours: initialData.cancellationWindowHours,
-
-      // 2. اللوجيك الهندسي: دمج الداتا (Merge)
       workingHours: defaultDays.map((dayName) => {
-        // بندور: هل الباك إند بعت داتا لليوم ده بالذات؟
         const backendDay = initialData.workingHours?.find((wh) => wh.dayOfWeek === dayName)
-
-        if (backendDay) {
-          // لو الباك إند بعته، نستخدم بياناته مع تنظيف صيغة الوقت
-          return {
-            dayOfWeek: dayName,
-            startTime: backendDay.startTime?.split('.')[0] || '09:00:00',
-            endTime: backendDay.endTime?.split('.')[0] || '17:00:00',
-            isActive: backendDay.isActive,
-          }
-        } else {
-          // لو الباك إند مبعتوش (أو بعت مصفوفة فاضية)، نفرش إحنا اليوم مقفول
-          return {
-            dayOfWeek: dayName,
-            startTime: '09:00:00',
-            endTime: '17:00:00',
-            isActive: false,
-          }
-        }
+        return backendDay
+          ? {
+              dayOfWeek: dayName,
+              startTime: backendDay.startTime?.split('.')[0] || '09:00:00',
+              endTime: backendDay.endTime?.split('.')[0] || '17:00:00',
+              isActive: backendDay.isActive,
+            }
+          : {
+              dayOfWeek: dayName,
+              startTime: '09:00:00',
+              endTime: '17:00:00',
+              isActive: false,
+            }
       }),
     },
   })
 
-  const { fields } = useFieldArray({
-    control: form.control,
-    name: 'workingHours',
-  })
+  const { fields } = useFieldArray({ control: form.control, name: 'workingHours' })
+
+  // --- منطق بناء اللينك الكامل ---
+  const watchLogoUrl = form.watch('logoUrl')
+  const baseUrl = process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') || ''
+  const fullLogoUrl = watchLogoUrl
+    ? watchLogoUrl.startsWith('http')
+      ? watchLogoUrl
+      : `${baseUrl}${watchLogoUrl.startsWith('/') ? '' : '/'}${watchLogoUrl}`
+    : ''
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 2 * 1024 * 1024) return toast.error('حجم الصورة يجب أن لا يتعدى 2 ميجا بايت')
+
+    const objectUrl = URL.createObjectURL(file)
+    setPreviewUrl(objectUrl)
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    setIsUploadingLogo(true)
+    try {
+      const res = await uploadClinicLogoAction(tenantSlug, formData)
+      if (res.success && res.data?.publicUrl) {
+        form.setValue('logoUrl', res.data.publicUrl, { shouldDirty: true })
+        toast.success('تم رفع اللوجو بنجاح')
+      } else {
+        toast.error(res.message || 'فشل في رفع اللوجو')
+      }
+    } catch (error) {
+      toast.error('حدث خطأ أثناء الرفع')
+    } finally {
+      setIsUploadingLogo(false)
+    }
+  }
 
   const onSubmit = async (data: UpdateSettingsInput) => {
     try {
       const response = await updateClinicSettings(tenantSlug, data)
       if (response.success) {
         toast.success('تم حفظ الإعدادات بنجاح')
+        setPreviewUrl(null)
       } else {
         toast.error(response.message || 'حدث خطأ أثناء الحفظ')
       }
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error('حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى')
-      }
+      toast.error('حدث خطأ غير متوقع')
     }
   }
 
@@ -95,27 +124,53 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
         <Tabs defaultValue='general' className='w-full'>
-          <TabsList className='flex w-full overflow-x-auto justify-start mb-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]'>
-            <TabsTrigger value='general' className='min-w-fit whitespace-nowrap'>
-              البيانات الأساسية
-            </TabsTrigger>
-            <TabsTrigger value='contact' className='min-w-fit whitespace-nowrap'>
-              أرقام التواصل
-            </TabsTrigger>
-            <TabsTrigger value='booking' className='min-w-fit whitespace-nowrap'>
-              إعدادات الحجز
-            </TabsTrigger>
-            <TabsTrigger value='workingHours' className='min-w-fit whitespace-nowrap'>
-              أوقات العمل
-            </TabsTrigger>
+          <TabsList className='mb-8'>
+            <TabsTrigger value='general'>البيانات الأساسية</TabsTrigger>
+            <TabsTrigger value='contact'>أرقام التواصل</TabsTrigger>
+            <TabsTrigger value='booking'>إعدادات الحجز</TabsTrigger>
+            <TabsTrigger value='workingHours'>أوقات العمل</TabsTrigger>
           </TabsList>
 
           <TabsContent value='general'>
             <Card>
               <CardHeader>
-                <CardTitle>البيانات الأساسية للعيادة</CardTitle>
+                <CardTitle>البيانات الأساسية</CardTitle>
               </CardHeader>
-              <CardContent className='space-y-4'>
+              <CardContent className='space-y-6'>
+                <div className='flex items-center gap-6 p-4 border rounded-lg bg-muted/20'>
+                  <div className='relative h-20 w-20 shrink-0 rounded-full border-2 border-dashed flex items-center justify-center overflow-hidden bg-background'>
+                    {isUploadingLogo ? (
+                      <Loader2 className='animate-spin' />
+                    ) : (
+                      <ClinicImage
+                        src={previewUrl || form.watch('logoUrl')} // بياخد البريفيو أو اللينك من الفورم
+                        alt='Clinic Logo'
+                        fill
+                        fallbackType='logo'
+                        className='object-cover'
+                      />
+                    )}
+                  </div>
+                  <div className='space-y-1.5'>
+                    <h3 className='font-semibold text-sm'>شعار العيادة</h3>
+                    <Button
+                      type='button'
+                      variant='secondary'
+                      size='sm'
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isUploadingLogo}
+                    >
+                      <Upload className='w-4 h-4 ml-2' /> رفع صورة
+                    </Button>
+                    <input
+                      type='file'
+                      className='hidden'
+                      ref={fileInputRef}
+                      onChange={handleLogoUpload}
+                      accept='image/*'
+                    />
+                  </div>
+                </div>
                 <FormField
                   control={form.control}
                   name='clinicName'
@@ -123,13 +178,12 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
                     <FormItem>
                       <FormLabel>اسم العيادة</FormLabel>
                       <FormControl>
-                        <Input placeholder='أدخل اسم العيادة' {...field} />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-                {/* تم التعديل للموبايل: grid-cols-1 md:grid-cols-2 */}
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                   <FormField
                     control={form.control}
@@ -138,7 +192,7 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
                       <FormItem>
                         <FormLabel>المدينة</FormLabel>
                         <FormControl>
-                          <Input placeholder='مثال: القاهرة' {...field} />
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -149,9 +203,9 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
                     name='address'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>العنوان التفصيلي</FormLabel>
+                        <FormLabel>العنوان</FormLabel>
                         <FormControl>
-                          <Input placeholder='أدخل العنوان بالتفصيل' {...field} />
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -165,9 +219,8 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
           <TabsContent value='contact'>
             <Card>
               <CardHeader>
-                <CardTitle>أرقام التواصل والدعم</CardTitle>
+                <CardTitle>أرقام التواصل</CardTitle>
               </CardHeader>
-              {/* تم التعديل للموبايل: grid-cols-1 md:grid-cols-2 */}
               <CardContent className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                 <FormField
                   control={form.control}
@@ -176,20 +229,7 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
                     <FormItem>
                       <FormLabel>رقم هاتف العيادة</FormLabel>
                       <FormControl>
-                        <Input placeholder='رقم الهاتف' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='whatsAppSenderNumber'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>رقم إرسال الواتساب (للنظام)</FormLabel>
-                      <FormControl>
-                        <Input placeholder='الرقم المربوط بالـ API' {...field} />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -200,22 +240,9 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
                   name='supportWhatsAppNumber'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>رقم واتساب الدعم الفني</FormLabel>
+                      <FormLabel>رقم واتساب الدعم (للمرضى)</FormLabel>
                       <FormControl>
-                        <Input placeholder='رقم دعم المرضى' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name='supportPhoneNumber'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>رقم هاتف الدعم الفني</FormLabel>
-                      <FormControl>
-                        <Input placeholder='رقم دعم المرضى' {...field} />
+                        <Input {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -228,20 +255,15 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
           <TabsContent value='booking'>
             <Card>
               <CardHeader>
-                <CardTitle>إعدادات الحجز الأونلاين</CardTitle>
+                <CardTitle>إعدادات الحجز</CardTitle>
               </CardHeader>
               <CardContent className='space-y-6'>
                 <FormField
                   control={form.control}
                   name='bookingEnabled'
                   render={({ field }) => (
-                    <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
-                      <div className='space-y-0.5'>
-                        <FormLabel className='text-base'>تفعيل الحجز الأونلاين</FormLabel>
-                        <FormDescription>
-                          السماح للمرضى بحجز المواعيد عبر التطبيق الخاص بهم.
-                        </FormDescription>
-                      </div>
+                    <FormItem className='flex items-center justify-between border p-4 rounded-lg'>
+                      <FormLabel>تفعيل الحجز الأونلاين</FormLabel>
                       <FormControl>
                         <Switch checked={field.value} onCheckedChange={field.onChange} dir='ltr' />
                       </FormControl>
@@ -253,7 +275,7 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
                   name='cancellationWindowHours'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>فترة السماح بإلغاء الحجز (بالساعات)</FormLabel>
+                      <FormLabel>فترة الإلغاء (ساعات)</FormLabel>
                       <FormControl>
                         <Input
                           type='number'
@@ -261,9 +283,6 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
                           onChange={(e) => field.onChange(Number(e.target.value))}
                         />
                       </FormControl>
-                      <FormDescription>
-                        عدد الساعات المسموح للمريض بإلغاء حجزه قبل الموعد.
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -275,50 +294,42 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
           <TabsContent value='workingHours'>
             <Card>
               <CardHeader>
-                <CardTitle>أوقات عمل العيادة</CardTitle>
+                <CardTitle>أوقات العمل</CardTitle>
               </CardHeader>
               <CardContent className='space-y-4'>
                 {fields.map((field, index) => (
-                  <div
-                    key={field.id}
-                    className='flex flex-col md:flex-row items-start md:items-end gap-4 border-b pb-4 mb-4'
-                  >
-                    <div className='w-32 pb-2 font-bold text-lg'>{DAYS_AR[field.dayOfWeek]}</div>
-
+                  <div key={field.id} className='flex items-end gap-4 border-b pb-4'>
+                    <div className='w-24 font-bold'>{DAYS_AR[field.dayOfWeek]}</div>
                     <FormField
                       control={form.control}
                       name={`workingHours.${index}.startTime`}
                       render={({ field }) => (
-                        <FormItem className='flex-1 w-full'>
+                        <FormItem className='flex-1'>
                           <FormLabel>من</FormLabel>
                           <FormControl>
                             <Input type='time' step='1' {...field} />
                           </FormControl>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name={`workingHours.${index}.endTime`}
                       render={({ field }) => (
-                        <FormItem className='flex-1 w-full'>
+                        <FormItem className='flex-1'>
                           <FormLabel>إلى</FormLabel>
                           <FormControl>
                             <Input type='time' step='1' {...field} />
                           </FormControl>
-                          <FormMessage />
                         </FormItem>
                       )}
                     />
-
                     <FormField
                       control={form.control}
                       name={`workingHours.${index}.isActive`}
                       render={({ field }) => (
-                        <FormItem className='flex flex-col items-start md:items-center justify-center pb-2'>
-                          <FormLabel className='mb-2'>يعمل؟</FormLabel>
+                        <FormItem className='pb-2'>
+                          <FormLabel>يعمل؟</FormLabel>
                           <FormControl>
                             <Switch
                               checked={field.value}
@@ -337,12 +348,11 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
         </Tabs>
 
         <div className='flex justify-end'>
-          {/* تم التعديل: الزرار ياخد العرض كله في الموبايل بس */}
           <Button
             type='submit'
             className='w-full md:w-auto'
             size='lg'
-            disabled={form.formState.isSubmitting}
+            disabled={form.formState.isSubmitting || isUploadingLogo}
           >
             {form.formState.isSubmitting ? 'جاري الحفظ...' : 'حفظ الإعدادات'}
           </Button>

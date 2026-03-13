@@ -12,9 +12,8 @@ import {
 } from '@/components/ui/carousel'
 import { Typography } from '@/components/ui/typography'
 import { motion } from 'framer-motion'
-import { UserRound } from 'lucide-react'
-import Image from 'next/image'
 import { IPublicDoctor } from '../../types/public'
+import { ClinicImage } from '../shared/clinic-image' // 👈 استيراد المكون الموحد
 
 export default function DoctorsSection({ doctors }: { doctors: IPublicDoctor[] }) {
   if (!doctors || doctors.length <= 1) return null
@@ -57,19 +56,18 @@ export default function DoctorsSection({ doctors }: { doctors: IPublicDoctor[] }
           </motion.div>
         </div>
 
-        {/* --- Shadcn Carousel --- */}
+        {/* --- Carousel --- */}
         <motion.div variants={fadeInUp} className='max-w-7xl mx-auto w-full relative'>
           <Carousel
             opts={{
               align: 'start',
-              direction: 'rtl', // السر هنا عشان السحب بالموبايل يشتغل مع اتجاه العربي
+              direction: 'rtl',
               loop: false,
             }}
             className='w-full'
           >
             <CarouselContent className='-ml-2 md:-ml-4'>
               {doctors.map((doctor) => (
-                // المقاسات هنا: الموبايل بياخد 85% عشان يبان حتة من الكارت اللي بعده، والكمبيوتر بياخد التلت
                 <CarouselItem
                   key={doctor.id}
                   className='pl-2 md:pl-4 basis-[85%] sm:basis-1/2 lg:basis-1/3'
@@ -77,18 +75,14 @@ export default function DoctorsSection({ doctors }: { doctors: IPublicDoctor[] }
                   <Card className='group p-0 flex flex-col h-full rounded-4xl border border-border/50 bg-card/60 backdrop-blur-sm hover:bg-card shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 overflow-hidden cursor-grab active:cursor-grabbing'>
                     {/* Image Container */}
                     <div className='relative w-full aspect-square md:aspect-4/3 overflow-hidden bg-muted/50'>
-                      {doctor.photoUrl ? (
-                        <Image
-                          src={doctor.photoUrl}
-                          alt={doctor.name}
-                          fill
-                          className='object-cover select-none object-top transition-transform duration-700 group-hover:scale-110'
-                        />
-                      ) : (
-                        <div className='absolute inset-0 flex flex-col items-center justify-center text-muted-foreground/30'>
-                          <UserRound className='h-24 w-24' />
-                        </div>
-                      )}
+                      {/* 👈 استخدام المكون الموحد: بيتعامل مع المسار الـ relative والـ absolute لوحده */}
+                      <ClinicImage
+                        src={doctor.photoUrl}
+                        alt={doctor.name}
+                        fill
+                        fallbackType='doctor'
+                        className='object-cover select-none object-top transition-transform duration-700 group-hover:scale-110'
+                      />
 
                       {/* Gradient Overlay */}
                       <div className='absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500' />
@@ -110,28 +104,18 @@ export default function DoctorsSection({ doctors }: { doctors: IPublicDoctor[] }
                         {doctor.name}
                       </Typography>
 
-                      {doctor.bio ? (
-                        <Typography
-                          variant='muted'
-                          className='line-clamp-3 leading-relaxed text-sm mb-4 flex-1'
-                        >
-                          {doctor.bio}
-                        </Typography>
-                      ) : (
-                        <Typography
-                          variant='muted'
-                          className='italic opacity-50 text-sm mb-4 flex-1'
-                        >
-                          لا توجد نبذة مختصرة.
-                        </Typography>
-                      )}
+                      <Typography
+                        variant='muted'
+                        className='line-clamp-3 leading-relaxed text-sm mb-4 flex-1'
+                      >
+                        {doctor.bio || 'لا توجد نبذة مختصرة.'}
+                      </Typography>
                     </CardContent>
                   </Card>
                 </CarouselItem>
               ))}
             </CarouselContent>
 
-            {/* أزرار التقليب بتظهر في الكمبيوتر بس عشان الموبايل بيعتمد على السحب */}
             <div className='hidden md:flex items-center justify-center gap-4 mt-10'>
               <CarouselNext className='static translate-y-0 translate-x-0 h-12 w-12 border-border/50 bg-card hover:bg-primary hover:text-primary-foreground transition-colors' />
               <CarouselPrevious className='static translate-y-0 translate-x-0 h-12 w-12 border-border/50 bg-card hover:bg-primary hover:text-primary-foreground transition-colors' />
