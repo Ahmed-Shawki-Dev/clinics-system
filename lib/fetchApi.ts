@@ -6,7 +6,7 @@ interface FetchOptions extends RequestInit {
   authType?: 'staff' | 'patient'
 }
 
-const FETCH_TIMEOUT_MS = 15000 // 15 seconds
+const FETCH_TIMEOUT_MS = 15000
 
 export async function fetchApi<T>(
   endpoint: string,
@@ -23,7 +23,10 @@ export async function fetchApi<T>(
   const token = await getToken(authType)
   const headers = new Headers(customHeaders)
 
-  headers.set('Content-Type', 'application/json')
+  // هندلة الـ Content-Type بناءً على نوع الـ Body (عشان رفع الصور يشتغل)
+  if (!(restOptions.body instanceof FormData)) {
+    headers.set('Content-Type', 'application/json')
+  }
 
   if (token) {
     headers.set('Authorization', `Bearer ${token}`)
@@ -44,7 +47,6 @@ export async function fetchApi<T>(
   }
 
   try {
-    // 🔥 الريكويست الأول (الأصلي)
     const response = await fetch(url, {
       headers,
       signal: controller.signal,
@@ -54,30 +56,58 @@ export async function fetchApi<T>(
     clearTimeout(timeoutId)
     externalSignal?.removeEventListener('abort', onExternalAbort)
 
-    if (response.status === 401) {
+    // تعريف دقيق لشكل الرد في حالة الخطأ عشان TypeScript ميعيطش
+    type ErrorResponse = {
+      message?: string
+      errors?: { field: string; message: string }[]
+      meta?: { timestamp: string; requestId: string }
+    }
+
+    let responseData: ErrorResponse | null = null
+    try {
+      responseData = (await response.json()) as ErrorResponse
+    } catch {
+      responseData = null
+    }
+
+    const defaultMeta = { timestamp: new Date().toISOString(), requestId: '' }
+
+    if (response.status === 429) {
       return {
         success: false,
-        message: 'حدث خطأ ما',
+        message: responseData?.message || 'طلبات كثيرة جداً، يرجى الانتظار قليلاً',
         data: null as unknown as T,
-        errors: [{ field: 'auth', message: 'Unauthorized' }],
-        meta: { timestamp: new Date().toISOString(), requestId: '' },
+        errors: responseData?.errors || [{ field: 'rate_limit', message: 'Too Many Requests' }],
+        meta: responseData?.meta || defaultMeta,
       }
     }
 
-    // لو الباك إند رجع 403
+    if (response.status === 401) {
+      const isLoginRequest = endpoint.toLowerCase().includes('/login')
+
+      return {
+        success: false,
+        message:
+          responseData?.message ||
+          (isLoginRequest ? 'بيانات الدخول غير صحيحة' : 'انتهت الجلسة، يرجى تسجيل الدخول'),
+        data: null as unknown as T,
+        errors: responseData?.errors || [{ field: 'auth', message: 'Unauthorized' }],
+        meta: responseData?.meta || defaultMeta,
+      }
+    }
+
     if (response.status === 403) {
       return {
         success: false,
-        message: 'ليس لديك صلاحية للقيام بهذا الإجراء',
+        message: responseData?.message || 'ليس لديك صلاحية للقيام بهذا الإجراء',
         data: null as unknown as T,
-        errors: [{ field: 'auth', message: 'Forbidden' }],
-        meta: { timestamp: new Date().toISOString(), requestId: '' },
+        errors: responseData?.errors || [{ field: 'auth', message: 'Forbidden' }],
+        meta: responseData?.meta || defaultMeta,
       }
     }
 
-    const data = await response.json()
-    return data as BaseApiResponse<T>
-  } catch (error) {
+    return responseData as unknown as BaseApiResponse<T>
+  } catch (error: unknown) {
     clearTimeout(timeoutId)
     externalSignal?.removeEventListener('abort', onExternalAbort)
 
@@ -85,9 +115,7 @@ export async function fetchApi<T>(
 
     return {
       success: false,
-      message: isTimeout
-        ? 'انتهت مهلة الاتصال بالخادم، يرجى المحاولة مرة أخرى'
-        : 'فشل في الاتصال بالخادم',
+      message: isTimeout ? 'انتهت مهلة الاتصال بالخادم' : 'فشل في الاتصال بالخادم',
       data: null as unknown as T,
       errors: [
         {
