@@ -12,9 +12,9 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react'
-import { UserRole } from './roles'
+import { UserRole } from './roles' // تأكد من مسار الـ UserRole عندك
 
-type NavItem = {
+export type NavItem = {
   title: string
   href: string
   icon: LucideIcon
@@ -27,28 +27,49 @@ export type NavCategory = {
 }
 
 export const SIDEBAR_NAVIGATION: NavCategory[] = [
+  // 1. مساحة عمل الطبيب (حصرية للدكتور فقط بسبب الـ Self-Scoped APIs)
   {
-    label: 'الرئيسية',
+    label: 'مساحة عمل الطبيب',
+    items: [
+      {
+        title: 'طابور الكشف',
+        href: '/doctor/queue',
+        icon: Activity,
+        roles: ['Doctor'],
+      },
+      {
+        title: 'زياراتي',
+        href: '/doctor/visits', // 👈 الراوت المباشر
+        icon: CalendarDays,
+        roles: ['Doctor'],
+      },
+      {
+        title: 'سجل مرضاي',
+        href: '/doctor/patients',
+        icon: Users,
+        roles: ['Doctor'],
+      },
+      {
+        title: 'الإعدادات',
+        href: '/doctor/settings',
+        icon: Settings,
+        roles: ['Doctor'],
+      },
+    ],
+  },
+
+  // 2. التشغيل والاستقبال (Front-desk)
+  {
+    label: 'العيادة والاستقبال',
     items: [
       {
         title: 'لوحة التحكم',
         href: '/',
         icon: LayoutDashboard,
-        roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'Doctor'],
+        roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
       },
       {
-        title: 'طابور الطبيب',
-        href: '/doctor/queue',
-        icon: Activity,
-        roles: ['Doctor'],
-      },
-    ],
-  },
-  {
-    label: 'العيادة والاستقبال',
-    items: [
-      {
-        title: 'الطابور والاستقبال',
+        title: 'الطابور المجمع',
         href: '/queue',
         icon: Clock,
         roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
@@ -57,16 +78,18 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
         title: 'المواعيد والحجوزات',
         href: '/appointments',
         icon: CalendarDays,
-        roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'Doctor', 'SuperAdmin'],
+        roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
       },
       {
-        title: 'المرضى',
+        title: 'قاعدة المرضى',
         href: '/patients',
         icon: Users,
-        roles: ['ClinicOwner', 'ClinicManager', 'Doctor', 'SuperAdmin'],
+        roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
       },
     ],
   },
+
+  // 3. الإدارة المالية
   {
     label: 'الماليات',
     items: [
@@ -74,13 +97,13 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
         title: 'الفواتير والمدفوعات',
         href: '/invoices',
         icon: Receipt,
-        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
+        roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'], // الريسبشن بيكريت فواتير
       },
       {
         title: 'المصروفات',
         href: '/expenses',
         icon: Banknote,
-        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
+        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'], // المصروفات للإدارة بس
       },
       {
         title: 'التقارير المالية',
@@ -90,6 +113,8 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
       },
     ],
   },
+
+  // 4. الإدارة والتشغيل
   {
     label: 'الإدارة والإعدادات',
     items: [
@@ -109,7 +134,7 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
         title: 'الخدمات والأسعار',
         href: '/services',
         icon: Banknote,
-        roles: ['ClinicOwner', 'SuperAdmin'],
+        roles: ['ClinicOwner', 'SuperAdmin'], // المدير ملوش يغير أسعار
       },
       {
         title: 'إعدادات العيادة',

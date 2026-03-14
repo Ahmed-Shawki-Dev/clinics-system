@@ -18,7 +18,7 @@ import {
 
 import { SIDEBAR_NAVIGATION } from '@/config/navigation'
 import { useAuthStore } from '@/store/useAuthStore'
-import { useTenantStore } from '@/store/useTenantStore' // 1. استيراد الـ Store
+import { useTenantStore } from '@/store/useTenantStore'
 import { ClinicImage } from './shared/clinic-image'
 import { Skeleton } from './ui/skeleton'
 
@@ -28,7 +28,7 @@ export function AppSidebar() {
   const tenantSlug = params.tenantSlug as string
   const { setOpenMobile, isMobile } = useSidebar()
   const user = useAuthStore((state) => state.user)
-  const tenantConfig = useTenantStore((state) => state.config) // 2. قراءة بيانات العيادة
+  const tenantConfig = useTenantStore((state) => state.config)
 
   const getFullUrl = (href: string) => `/${tenantSlug}/dashboard${href === '/' ? '' : href}`
 
@@ -39,38 +39,36 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible='icon' side='right'>
-      {/* 3. الهيدر الديناميكي */}
-      <SidebarHeader className='flex h-16 shrink-0 flex-row items-center gap-2 border-b px-4 text-xl font-bold '>
+      {/* الهيدر الديناميكي مع تظبيط اللوجو في النص وقت الإغلاق */}
+      <SidebarHeader className='flex h-16 shrink-0 flex-row items-center border-b px-4 group-data-[collapsible=icon]:px-0 overflow-hidden'>
         {tenantConfig ? (
-          // الداتا وصلت، ارسم العيادة
-          <>
-            <div className='relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md'>
-              {/* 2. استخدم الـ Component الجديد هنا */}
+          <div className='flex items-center gap-2 w-full group-data-[collapsible=icon]:justify-center'>
+            <div className='relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-background'>
               <ClinicImage
                 src={tenantConfig.logoUrl}
                 alt={tenantConfig.name || 'Logo'}
                 fill
-                fallbackType='logo' // عشان لو مفيش صورة يطلع أيقونة العيادة
-                className='object-cover'
+                fallbackType='logo'
+                className='object-contain p-0.5'
               />
             </div>
-            <span className='truncate font-extrabold group-data-[collapsible=icon]:hidden'>
+            <span className='truncate text-xl font-extrabold group-data-[collapsible=icon]:hidden'>
               {tenantConfig.name}
             </span>
-          </>
+          </div>
         ) : (
-          // الداتا لسه بتيجي، ارسم السكيلتون (حجز مكان احترافي)
-          <>
-            <Skeleton className='h-8 w-8 rounded-md' />
+          <div className='flex items-center gap-2 w-full group-data-[collapsible=icon]:justify-center'>
+            <Skeleton className='h-10 w-10 shrink-0 rounded-md' />
             <Skeleton className='h-5 w-24 group-data-[collapsible=icon]:hidden' />
-          </>
+          </div>
         )}
       </SidebarHeader>
 
       <SidebarContent>
         {filteredConfig.map((category) => (
           <SidebarGroup key={category.label}>
-            <SidebarGroupLabel className='text-xs font-bold text-muted-foreground/70 uppercase tracking-widest'>
+            {/* إخفاء عنوان الجروب لو السايدبار مقفول */}
+            <SidebarGroupLabel className='text-xs font-bold text-muted-foreground/70 uppercase tracking-widest group-data-[collapsible=icon]:hidden'>
               {category.label}
             </SidebarGroupLabel>
 
@@ -78,10 +76,12 @@ export function AppSidebar() {
               <SidebarMenu>
                 {category.items.map((item) => {
                   const fullUrl = getFullUrl(item.href)
-                  const isActive =
-                    item.href === '/'
-                      ? pathname === fullUrl
-                      : pathname === fullUrl || pathname.startsWith(`${fullUrl}/`)
+
+                  // حل مشكلة اللينكين اللي بينوروا مع بعض
+                  const isExactOnly = item.href === '/' || item.href === '/doctor'
+                  const isActive = isExactOnly
+                    ? pathname === fullUrl
+                    : pathname === fullUrl || pathname.startsWith(`${fullUrl}/`)
 
                   return (
                     <SidebarMenuItem key={item.title}>
@@ -97,7 +97,7 @@ export function AppSidebar() {
                             if (isMobile) setOpenMobile(false)
                           }}
                         >
-                          <item.icon className='h-4 w-4' />
+                          <item.icon className='h-4 w-4 shrink-0' />
                           <span>{item.title}</span>
                         </Link>
                       </SidebarMenuButton>

@@ -9,18 +9,9 @@ import { Label } from '@/components/ui/label'
 import { Loader2 } from 'lucide-react'
 import { IDoctorVisitConfig } from '@/types/doctor'
 import { updateVisitFieldsAction } from '@/actions/doctor/update-visit-fields'
+import { VISIT_CONFIG_LABELS } from '../../../../../constants/visit-fields'
 
-const configLabels: Record<keyof IDoctorVisitConfig, string> = {
-  bloodPressure: 'الضغط',
-  heartRate: 'النبض',
-  temperature: 'الحرارة',
-  weight: 'الوزن',
-  height: 'الطول',
-  bmi: 'مؤشر كتلة الجسم',
-  bloodSugar: 'السكر',
-  oxygenSaturation: 'نسبة الأكسجين',
-  respiratoryRate: 'معدل التنفس',
-}
+
 
 interface Props {
   tenantSlug: string
@@ -69,10 +60,10 @@ export function VisitFieldsConfigModal({
         </DialogHeader>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 py-6'>
-          {(Object.keys(configLabels) as Array<keyof IDoctorVisitConfig>).map((key) => (
+          {(Object.keys(VISIT_CONFIG_LABELS) as Array<keyof IDoctorVisitConfig>).map((key) => (
             <div key={key} className='flex items-center justify-between border-b pb-2'>
               <Label htmlFor={key} className='text-sm font-bold cursor-pointer'>
-                {configLabels[key]}
+                {VISIT_CONFIG_LABELS[key]}
               </Label>
               <Switch
                 id={key}

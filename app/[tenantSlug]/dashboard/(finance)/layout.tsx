@@ -8,7 +8,7 @@ interface FinanceLayoutProps {
 }
 
 // الدكتور ممنوع من القسم ده نهائياً
-const ALLOWED_ROLES: UserRole[] = ['ClinicOwner', 'ClinicManager', 'SuperAdmin']
+const ALLOWED_ROLES: UserRole[] = ['ClinicOwner', 'ClinicManager', 'SuperAdmin','Receptionist']
 
 export default async function FinanceLayout({ children, params }: FinanceLayoutProps) {
   const { tenantSlug } = await params

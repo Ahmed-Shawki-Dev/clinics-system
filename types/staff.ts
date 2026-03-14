@@ -10,7 +10,4 @@ export interface IStaff {
   createdAt: string
 }
 
-export interface IStaffResponse {
-  items: IStaff[]
-  totalCount: number
-}
+

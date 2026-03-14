@@ -31,7 +31,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   switch (role) {
     case 'ClinicOwner':
     case 'ClinicManager':
-      return <OwnerDashboard tenantSlug={tenantSlug}  />
+      return <OwnerDashboard tenantSlug={tenantSlug} />
 
     case 'Receptionist':
       return <div className='p-4 font-bold'>داشبورد الاستقبال (قيد الإنشاء)</div>
