@@ -56,7 +56,6 @@ export function AddPatientModal({
   onSuccess,
 }: AddPatientModalProps) {
   const [open, setOpen] = useState(false)
-  // 🔥 State جديدة عشان نحتفظ ببيانات الدخول بعد الإضافة
   const [credentials, setCredentials] = useState<{
     username: string
     password: string
@@ -87,9 +86,8 @@ export function AddPatientModal({
       if (result.success && result.data) {
         toast.success('تمت إضافة المريض بنجاح')
 
-        // 🔥 بدل ما نقفل المودال، هنحفظ البيانات عشان نعرضها للريسبشن
         setCredentials({
-          username: result.data.username || '', 
+          username: result.data.username || '',
           password: result.data.password || result.data.initialPassword || '',
           name: values.name,
           phone: values.phone,
@@ -108,19 +106,24 @@ export function AddPatientModal({
     }
   }
 
-  // دالة عشان نفتح الواتساب أوتوماتيك
+  // 🔥 دالة إرسال الواتساب مع إضافة رابط العيادة
   const handleSendWhatsApp = () => {
     if (!credentials) return
 
-    // تظبيط رقم التليفون (لو بيبدأ بـ 0 نشيله ونحط كود الدولة، عدلها حسب دولتك)
+    // تظبيط رقم التليفون
     let phone = credentials.phone
     if (phone.startsWith('0')) {
-      phone = '+20' + phone.substring(1) 
+      phone = '20' + phone.substring(1)
+    } else {
+      phone = phone.replace(/\+/g, '')
     }
 
-    const message = `أهلاً بك أ. ${credentials.name} في العيادة.\n\nبيانات الدخول الخاصة بك لتطبيق المرضى هي:\nاسم المستخدم: ${credentials.username}\nكلمة المرور: ${credentials.password}\n\nنتمنى لك دوام الصحة والعافية.`
+    // 👈 توليد رابط العيادة لصفحة دخول المرضى
+    const clinicLink = `${window.location.origin}/${tenantSlug}/patient/login`
+
+    const message = `أهلاً بك أ. ${credentials.name} في العيادة \n\nبيانات الدخول الخاصة بك لتطبيق المرضى هي:\nاسم المستخدم: *${credentials.username}*\nكلمة المرور: *${credentials.password}*\n\nيمكنك الدخول لمتابعة حسابك المباشر عبر الرابط التالي:\n${clinicLink}\n\nنتمنى لك دوام الصحة والعافية.`
     const encodedMessage = encodeURIComponent(message)
-    const whatsappUrl = `https://wa.me/${phone.replace(/\+/g, '')}?text=${encodedMessage}`
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`
 
     window.open(whatsappUrl, '_blank')
   }
@@ -150,7 +153,6 @@ export function AddPatientModal({
         )}
       </DialogTrigger>
       <DialogContent className='sm:max-w-125'>
-        {/* 🔥 لو في Credentials، اعرض شاشة النجاح */}
         {credentials ? (
           <div className='flex flex-col items-center justify-center py-6 space-y-6'>
             <div className='flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100'>
@@ -173,12 +175,12 @@ export function AddPatientModal({
             </div>
 
             <div className='flex w-full gap-3 pt-4'>
-              <Button onClick={handleClose} variant='outline' className='flex-1'>
+              <Button onClick={handleClose} variant='outline' className='flex-1 font-bold'>
                 إغلاق
               </Button>
               <Button
                 onClick={handleSendWhatsApp}
-                className='flex-1 bg-green-600 hover:bg-green-700 text-white'
+                className='flex-1 bg-green-600 hover:bg-green-700 text-white font-bold shadow-md'
               >
                 <MessageCircle className='mr-2 h-4 w-4' />
                 إرسال عبر واتساب
@@ -186,7 +188,6 @@ export function AddPatientModal({
             </div>
           </div>
         ) : (
-          /* الشاشة العادية بتاعت الفورمة */
           <>
             <DialogHeader>
               <DialogTitle className='flex items-center gap-2'>

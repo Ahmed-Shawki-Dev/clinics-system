@@ -4,6 +4,7 @@ import {
   CalendarDays,
   ClipboardList,
   Clock,
+  Handshake,
   LayoutDashboard,
   PieChart,
   Receipt,
@@ -39,7 +40,7 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
       },
       {
         title: 'زياراتي',
-        href: '/doctor/visits', // 👈 الراوت المباشر
+        href: '/doctor/visits',
         icon: CalendarDays,
         roles: ['Doctor'],
       },
@@ -109,6 +110,12 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
         title: 'التقارير المالية',
         href: '/reports',
         icon: PieChart,
+        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
+      },
+      {
+        title: 'التعاقدات',
+        href: '/contracts',
+        icon: Handshake ,
         roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
       },
     ],

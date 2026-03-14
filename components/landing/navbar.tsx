@@ -18,7 +18,7 @@ export function Navbar() {
         <div className='flex h-14 items-center justify-between px-4 md:px-6'>
           {/* اليمين: اللوجو */}
           <Link href='/' className='flex items-center gap-2 group'>
-            <span className='font-black text-lg tracking-tight bg-clip-text text-transparent bg-gradient-to-l from-foreground to-foreground/70'>
+            <span className='font-black text-lg tracking-tight bg-clip-text text-transparent bg-linear-to-l from-foreground to-foreground/70'>
               ميدورا
             </span>
           </Link>
