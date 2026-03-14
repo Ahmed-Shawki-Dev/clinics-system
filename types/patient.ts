@@ -22,3 +22,10 @@ export interface IPatient {
   subProfiles: ISubProfile[]
   createdAt: string
 }
+
+export interface ICreatePatientResponse {
+  patient: IPatient
+  username: string
+  password?: string
+  initialPassword?: string
+}
