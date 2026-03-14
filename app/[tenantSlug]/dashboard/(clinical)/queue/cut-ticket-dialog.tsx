@@ -1,6 +1,6 @@
 'use client'
 
-import { createTicket, markTicketUrgent } from '@/actions/queue/tickets'
+import { createTicket } from '@/actions/queue/tickets'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -79,16 +79,14 @@ export function CutTicketDialog({ tenantSlug, activeSessions, doctors }: CutTick
   async function onSubmit(values: CutTicketInput) {
     setIsSubmitting(true)
     try {
+      // الـ values دلوقتي شايلة الـ isUrgent جواها، فهتتبعت للباك-إند علطول
       const res = await createTicket(tenantSlug, values)
 
       if (!res.success) {
         throw new Error(res.message || 'فشل إصدار التذكرة')
       }
 
-      // رفع التذكرة لحالة طوارئ لو تم اختيارها
-      if (values.isUrgent && res.data?.id) {
-        await markTicketUrgent(tenantSlug, res.data.id)
-      }
+      // ❌ مسحنا الريكوست التاني بتاع الـ markTicketUrgent لأنه ملوش لازمة خلاص
 
       toast.success('تم الحجز وإصدار التذكرة بنجاح')
       setOpen(false)
@@ -220,7 +218,7 @@ export function CutTicketDialog({ tenantSlug, activeSessions, doctors }: CutTick
                   <FormItem className='flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-destructive/5 border-destructive/10 md:col-span-1 h-11 mt-8'>
                     <div className='space-y-0.5'>
                       <FormLabel className='text-destructive font-bold cursor-pointer ml-2'>
-                        حالة طارئة
+                        كشف مستعجل
                       </FormLabel>
                     </div>
                     <FormControl>

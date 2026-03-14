@@ -8,7 +8,6 @@ import { CutTicketInput } from '../../validation/queue'
 
 // 1. إنشاء تذكرة (الريسبشن)
 export async function createTicket(tenantSlug: string, data: CutTicketInput) {
-  // 1. ضفنا <IQueueTicket> هنا
   if (data.doctorServiceId) {
     const res = await fetchApi<IQueueTicket>(`/api/clinic/queue/tickets/with-payment`, {
       method: 'POST',
@@ -19,6 +18,7 @@ export async function createTicket(tenantSlug: string, data: CutTicketInput) {
         doctorId: data.doctorId,
         doctorServiceId: data.doctorServiceId,
         notes: data.notes || '',
+        isUrgent: data.isUrgent || false, // 👈 ضفناها هنا
         paymentAmount: data.paymentAmount || 0,
         paymentMethod: data.paymentMethod || 'Cash',
         paymentReference: data.paymentReference || '',
@@ -30,7 +30,6 @@ export async function createTicket(tenantSlug: string, data: CutTicketInput) {
     return res
   }
 
-  // 2. وضفنا <IQueueTicket> هنا
   const res = await fetchApi<IQueueTicket>(`/api/clinic/queue/tickets`, {
     method: 'POST',
     headers: { 'X-Tenant': tenantSlug },
@@ -39,6 +38,7 @@ export async function createTicket(tenantSlug: string, data: CutTicketInput) {
       patientId: data.patientId,
       doctorId: data.doctorId,
       notes: data.notes || '',
+      isUrgent: data.isUrgent || false, // 👈 وضفناها هنا كمان
     }),
   })
 
