@@ -15,24 +15,17 @@ import {
 } from './ui/dropdown-menu'
 import { Separator } from './ui/separator'
 import { SidebarTrigger } from './ui/sidebar'
+import { DoctorNotesBell } from './DoctorNotesBell'
 
 export function AppHeader() {
   const pathname = usePathname()
   const { user } = useAuthStore()
 
-  // 1. هل إحنا في لوحة تحكم المنصة ولا العيادة؟
-  const isAdmin = pathname.startsWith('/admin')
+  // الشرط بقا صريح: أي حد مسموح له يشوف الجرس ما عدا الدكتور
+  // (الريسبشن، المدير، المالك)
+  const isNotDoctor = user?.role !== 'Doctor'
 
   const getTitle = () => {
-    // 2. عناوين السوبر أدمن
-    if (isAdmin) {
-      if (pathname.includes('/tenants')) return 'إدارة العيادات'
-      if (pathname.includes('/subscriptions')) return 'الاشتراكات'
-      if (pathname.includes('/features')) return 'خواص النظام'
-      return 'نظرة عامة'
-    }
-
-    // 3. عناوين العيادة
     if (pathname.includes('/patients')) return 'سجل المرضى'
     if (pathname.includes('/staff')) return 'إدارة الموظفين'
     if (pathname.includes('/settings')) return 'الإعدادات'
@@ -46,20 +39,23 @@ export function AppHeader() {
       <Separator orientation='vertical' className='mx-2 h-4' />
 
       <div className='flex-1 flex items-center gap-2 text-sm'>
-        {/* 4. تغيير الكلمة ديناميكياً */}
-        <span className='text-muted-foreground'>{isAdmin ? 'المنصة' : 'العيادة'}</span>
+        <span className='text-muted-foreground'>العيادة</span>
         <span className='text-muted-foreground'>/</span>
         <h2 className='font-semibold text-foreground'>{getTitle()}</h2>
       </div>
 
       <div className='flex items-center gap-4'>
+        {/* الجرس هيظهر لكل أدوار العيادة إلا الدكتور */}
+        {isNotDoctor && user?.tenantSlug && <DoctorNotesBell tenantSlug={user.tenantSlug} />}
+
         <ModeToggle />
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Avatar className='h-9 w-9 cursor-pointer border border-primary/20 hover:ring-2 hover:ring-primary/50 transition-all'>
               <AvatarImage src='' />
               <AvatarFallback className='bg-primary/10 text-primary font-bold'>
-                {user?.displayName?.charAt(0) || 'D'}
+                {user?.displayName?.charAt(0) || 'U'}
               </AvatarFallback>
             </Avatar>
           </DropdownMenuTrigger>

@@ -20,6 +20,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   const payload = JSON.parse(Buffer.from(payloadBase64, 'base64').toString('utf-8'))
   const role = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
 
+
   if (role === 'Doctor') {
     redirect(`/${tenantSlug}/dashboard/doctor/queue`)
   }
