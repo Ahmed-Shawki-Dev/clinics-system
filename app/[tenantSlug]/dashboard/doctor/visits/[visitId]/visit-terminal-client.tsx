@@ -2,23 +2,23 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ILabRequest, IPrescription, IVisit } from '@/types/visit'
-import { Printer, Save } from 'lucide-react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { Activity, History, Printer, Save } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { IPatientSummary } from '../../../../../../actions/patient/get-patient-summary'
 import { completeVisitAction } from '../../../../../../actions/visit/complete-visit'
 import { IDoctor } from '../../../../../../types/doctor'
-import { ClinicalTab } from './clinical-tab'
 import { HistoryTab } from './history-tab'
 import { LabsTab } from './lab-tab'
 import { PrescriptionTab } from './prescription-tab'
 
-// إضافات الروشتة الجديدة
+// إضافات
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { useTenantStore } from '@/store/useTenantStore'
 import { ClinicImage } from '../../../../../../components/shared/clinic-image'
+import { ClinicalTab } from './clinical-tab'
 
 export function VisitTerminalClient({
   visit,
@@ -29,18 +29,17 @@ export function VisitTerminalClient({
 }: {
   visit: IVisit
   tenantSlug: string
-  defaultTab: string
+  defaultTab?: string
   doctor?: IDoctor
   summary: IPatientSummary | null
 }) {
   const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-
   const [isCompleting, setIsCompleting] = useState(false)
 
   // سحب بيانات العيادة (اللوجو والاسم)
   const tenantConfig = useTenantStore((state) => state.config)
+
+  const isClosed = visit.status === 'Completed' || visit.completedAt !== null
 
   const handleCompleteVisit = async () => {
     setIsCompleting(true)
@@ -53,12 +52,6 @@ export function VisitTerminalClient({
     } else {
       toast.error(res.message || 'حدث خطأ أثناء إنهاء الزيارة')
     }
-  }
-
-  const handleTabChange = (value: string) => {
-    const params = new URLSearchParams(searchParams.toString())
-    params.set('tab', value)
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
   return (
@@ -199,7 +192,7 @@ export function VisitTerminalClient({
       {/* ========================================= */}
       {/* واجهة المستخدم (تختفي وقت الطباعة) */}
       {/* ========================================= */}
-      <div className='print:hidden flex flex-col gap-4'>
+      <div className='print:hidden flex flex-col gap-6 w-full max-w-6xl mx-auto'>
         {/* Header الزيارة */}
         <div className='flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-card p-4 rounded-xl border shadow-sm'>
           <div className='flex items-center gap-4 w-full sm:w-auto'>
@@ -209,63 +202,81 @@ export function VisitTerminalClient({
                 <Badge variant='outline' className='whitespace-nowrap'>
                   زيارة كشف
                 </Badge>
-                <Badge
-                  variant={visit.status === 'Open' ? 'default' : 'secondary'}
-                  className='whitespace-nowrap'
-                >
-                  {visit.status === 'Open' ? 'حالة مفتوحة' : 'مكتملة'}
+                {/* 🔧 تعديل الكلمة المستفزة هنا */}
+                <Badge variant={!isClosed ? 'default' : 'secondary'} className='whitespace-nowrap'>
+                  {!isClosed ? 'قيد الكشف' : 'زيارة مكتملة (للقراءة فقط)'}
                 </Badge>
               </div>
             </div>
           </div>
 
-          <div className='flex w-full sm:w-auto gap-2 mt-2 sm:mt-0'>
-            <Button variant='outline' onClick={() => window.print()}>
-              <Printer className='w-4 h-4 ml-2' /> طباعة الروشتة
+          <div className='flex w-full sm:w-auto gap-2 mt-2 sm:mt-0 flex-wrap justify-end'>
+            {/* التاريخ المرضي */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button
+                  variant='secondary'
+                  size='sm'
+                  className='bg-muted/50 hover:bg-muted text-foreground h-9'
+                >
+                  <History className='w-4 h-4 ml-1 sm:ml-2' />
+                  <span className='hidden sm:inline'>التاريخ المرضي</span>
+                  <span className='sm:hidden'>السجل</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side='right' className='w-full sm:max-w-md overflow-y-auto pt-10 px-5'>
+                <SheetHeader className='mb-6'>
+                  <SheetTitle className='flex items-center gap-2 text-primary border-b pb-4'>
+                    <Activity className='w-5 h-5' />
+                    التاريخ المرضي: {visit.patientName}
+                  </SheetTitle>
+                </SheetHeader>
+                <HistoryTab summary={summary} tenantSlug={tenantSlug} currentVisitId={visit.id} />
+              </SheetContent>
+            </Sheet>
+
+            <Button variant='outline' size='sm' onClick={() => window.print()} className='h-9'>
+              <Printer className='w-4 h-4 ml-1 sm:ml-2' />
+              <span className='hidden sm:inline'>طباعة الروشتة</span>
+              <span className='sm:hidden'>طباعة</span>
             </Button>
 
-            {!visit.completedAt && (
-              <Button onClick={handleCompleteVisit} disabled={isCompleting} variant={'destructive'}>
-                <Save className='w-4 h-4 ml-2' />
-                {isCompleting ? 'جاري الإنهاء...' : 'إنهاء الزيارة'}
+            {!isClosed && (
+              <Button
+                onClick={handleCompleteVisit}
+                disabled={isCompleting}
+                variant='destructive'
+                size='sm'
+                className='h-9'
+              >
+                {isCompleting ? 'جاري...' : 'إنهاء الزيارة'}
               </Button>
             )}
           </div>
         </div>
+        {/* ... هنا مساحة العمل بتاعتك (التشخيص، الروشتة، التحاليل) ... */}
+        {/* 2. السحر كله هنا: الزرار الطاير في آخر الصفحة خالص قبل قفلة الـ div */}
+        {!isClosed && (
+          <div className='fixed bottom-8 left-8 z-50 print:hidden'>
+            <Button
+              form='clinical-form'
+              type='submit'
+              size='lg'
+              className='bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full px-8 py-6 shadow-[0_10px_40px_-10px_rgba(5,150,105,0.7)] transition-transform hover:scale-105'
+            >
+              <Save className='w-5 h-5 ml-2' />
+              حفظ التعديلات
+            </Button>
+          </div>
+        )}
+        {/* 🔥 مساحة العمل المريحة والواسعة (عمود واحد واخد مساحة حلوة) */}
+        <div className='flex flex-col gap-6 w-full pb-10'>
+          <ClinicalTab visit={visit} tenantSlug={tenantSlug} doctor={doctor} isClosed={isClosed} />
 
-        {/* التابات */}
-        <Tabs defaultValue={defaultTab} onValueChange={handleTabChange} className='w-full'>
-          <TabsList className='flex w-full h-12 overflow-x-auto justify-start sm:justify-center bg-muted/50 p-1 mb-4'>
-            <TabsTrigger value='clinical' className='px-4 sm:px-8 text-sm'>
-              التشخيص والشكوى
-            </TabsTrigger>
-            <TabsTrigger value='history' className='px-4 sm:px-8 text-sm'>
-              السجل الطبي
-            </TabsTrigger>
-            <TabsTrigger value='prescription' className='px-4 sm:px-8 text-sm'>
-              الروشتة
-            </TabsTrigger>
-            <TabsTrigger value='labs' className='px-4 sm:px-8 text-sm'>
-              التحاليل والأشعة
-            </TabsTrigger>
-          </TabsList>
+          <PrescriptionTab visit={visit} tenantSlug={tenantSlug} isClosed={isClosed} />
 
-          <TabsContent value='clinical' className='focus-visible:outline-none mt-2'>
-            <ClinicalTab visit={visit} tenantSlug={tenantSlug} doctor={doctor} />
-          </TabsContent>
-
-          <TabsContent value='history' className='focus-visible:outline-none mt-2'>
-            <HistoryTab summary={summary} tenantSlug={tenantSlug} currentVisitId={visit.id} />
-          </TabsContent>
-
-          <TabsContent value='prescription' className='focus-visible:outline-none mt-2'>
-            <PrescriptionTab visit={visit} tenantSlug={tenantSlug} />
-          </TabsContent>
-
-          <TabsContent value='labs' className='focus-visible:outline-none mt-2'>
-            <LabsTab tenantSlug={tenantSlug} visit={visit} />
-          </TabsContent>
-        </Tabs>
+          <LabsTab visit={visit} tenantSlug={tenantSlug} isClosed={isClosed} />
+        </div>
       </div>
 
       {/* ========================================= */}
@@ -296,7 +307,7 @@ export function VisitTerminalClient({
                           style={{
                             width: '40px',
                             height: '40px',
-                            position: 'relative', // مهم جداً عشان fill في ClinicImage يشتغل
+                            position: 'relative',
                             borderRadius: '4px',
                             overflow: 'hidden',
                             border: '1px solid #ccc',

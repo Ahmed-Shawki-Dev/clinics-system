@@ -1,23 +1,28 @@
 'use client'
 
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Form, FormControl, FormField, FormItem } from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
 import { IPrescription, IVisit } from '@/types/visit'
 import { valibotResolver } from '@hookform/resolvers/valibot'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Loader2, Pill, Plus, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { Calendar, Loader2, Pill, Plus, Trash2 } from 'lucide-react'
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+
 import { createPrescriptionAction } from '../../../../../../actions/prescription/create-prescription'
 import { deletePrescriptionAction } from '../../../../../../actions/prescription/delete-prescription'
 import {
@@ -25,44 +30,23 @@ import {
   prescriptionSchema,
 } from '../../../../../../validation/prescription'
 
-const prescriptionFields: {
-  name: keyof PrescriptionFormInput
-  placeholder: string
-  icon?: React.ReactNode
-  className?: string
-}[] = [
-  {
-    name: 'medicationName',
-    placeholder: 'اسم الدواء (مثال: كتافلام)',
-    icon: <Pill className='w-4 h-4 text-muted-foreground' />,
-    className: 'md:col-span-2',
-  },
-  {
-    name: 'dosage',
-    placeholder: 'الجرعة (قرص)',
-  },
-  {
-    name: 'frequency',
-    placeholder: 'التكرار (3 مرات)',
-  },
-  {
-    name: 'duration',
-    placeholder: 'المدة (أسبوع)',
-    icon: <Calendar className='w-4 h-4 text-muted-foreground' />,
-  },
-  {
-    name: 'instructions',
-    placeholder: 'تعليمات إضافية (اختياري)',
-    className: 'md:col-span-4',
-  },
-]
-
 interface PrescriptionTabProps {
   visit: IVisit
   tenantSlug: string
+  isClosed?: boolean
 }
 
-export function PrescriptionTab({ visit, tenantSlug }: PrescriptionTabProps) {
+// تعريف الاختيارات السريعة
+const quickChips = {
+  dosage: ['قرص', 'نصف قرص', 'ملعقة', 'بخة', 'دهان'],
+  frequency: ['مرة يومياً', 'كل 12 ساعة', 'كل 8 ساعات', 'عند اللزوم'],
+  duration: ['أسبوع', '5 أيام', '10 أيام', 'شهر'],
+}
+
+export function PrescriptionTab({ visit, tenantSlug, isClosed }: PrescriptionTabProps) {
+  // تحديد الحقول اللي مسموح ليها تظهر اقتراحات
+  const [activeField, setActiveField] = useState<keyof typeof quickChips | null>(null)
+
   const form = useForm<PrescriptionFormInput>({
     resolver: valibotResolver(prescriptionSchema),
     defaultValues: {
@@ -75,131 +59,249 @@ export function PrescriptionTab({ visit, tenantSlug }: PrescriptionTabProps) {
   })
 
   const onSubmit = async (data: PrescriptionFormInput) => {
+    if (isClosed) return
     const res = await createPrescriptionAction(tenantSlug, visit.id, data)
     if (res.success) {
-      toast.success('تم إضافة الدواء للروشتة', {
-        description: `${data.medicationName} - ${data.dosage}`,
-      })
+      toast.success('تم إضافة الدواء')
       form.reset()
+      setActiveField(null)
+      document.getElementById('medicationNameInput')?.focus()
     } else {
       toast.error('حدث خطأ', { description: res.message })
     }
   }
 
-  const handleDelete = async (id: string, medicationName: string) => {
-    if (confirm(`هل أنت متأكد من حذف ${medicationName}؟`)) {
-      const res = await deletePrescriptionAction(tenantSlug, visit.id, id)
-      if (res.success) {
-        toast.success('تم حذف الدواء', { description: medicationName })
-      } else {
-        toast.error(res.message)
-      }
-    }
+  const handleDelete = async (id: string) => {
+    const res = await deletePrescriptionAction(tenantSlug, visit.id, id)
+    if (res.success) toast.success('تم حذف الدواء')
+    else toast.error(res.message)
+  }
+
+  // 🔥 الدالة دي دلوقتي Typed صح 100% ومفيش any
+  const setQuickChoice = (fieldName: keyof typeof quickChips, value: string) => {
+    form.setValue(fieldName, value, { shouldValidate: true })
   }
 
   return (
-    <div className='relative w-full mt-4 print:hidden space-y-6'>
-      {/* بطاقة إضافة دواء */}
-      <Card>
-        <CardHeader className='pb-4'>
-          <CardTitle className='text-lg flex items-center gap-2'>
-            <Plus className='w-5 h-5 text-primary' />
-            إضافة دواء للروشتة
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
+    <div className='w-full mt-2 print:hidden space-y-2'>
+      <div className='flex items-center gap-2 border-b pb-2 mb-2'>
+        <Pill className='w-4 h-4 text-muted-foreground' />
+        <h3 className='text-sm font-semibold text-foreground'>الروشتة</h3>
+      </div>
+
+      {!isClosed && (
+        <div className='relative'>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-              <div className='grid grid-cols-1 md:grid-cols-5 gap-4'>
-                {prescriptionFields.map((field) => (
-                  <FormField
-                    key={field.name}
-                    control={form.control}
-                    name={field.name}
-                    render={({ field: formField }) => (
-                      <FormItem className={field.className}>
-                        <FormControl>
-                          <div className='relative'>
-                            {field.icon && (
-                              <div className='absolute right-3 top-1/2 -translate-y-1/2'>
-                                {field.icon}
-                              </div>
-                            )}
-                            <Input
-                              placeholder={field.placeholder}
-                              {...formField}
-                              value={(formField.value as string) ?? ''}
-                              className={`${field.icon ? 'pr-10' : ''}`}
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                ))}
-              </div>
-              <div className='flex justify-end pt-2'>
-                <Button type='submit' disabled={form.formState.isSubmitting}>
-                  {form.formState.isSubmitting ? (
-                    <Loader2 className='w-4 h-4 ml-2 animate-spin' />
-                  ) : (
-                    <Plus className='w-4 h-4 ml-2' />
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <div className='flex flex-col md:flex-row bg-card border rounded-lg shadow-sm focus-within:ring-1 focus-within:ring-primary overflow-hidden transition-all'>
+                {/* اسم الدواء */}
+                <FormField
+                  control={form.control}
+                  name='medicationName'
+                  render={({ field }) => (
+                    <FormItem className='flex-[1.5] space-y-0'>
+                      <FormControl>
+                        <Input
+                          id='medicationNameInput'
+                          placeholder='اسم الدواء...'
+                          className='border-0 focus-visible:ring-0 rounded-none h-10 font-bold text-primary placeholder:font-normal'
+                          {...field}
+                          value={field.value ?? ''}
+                          onFocus={() => setActiveField(null)}
+                        />
+                      </FormControl>
+                    </FormItem>
                   )}
-                  حفظ الدواء
+                />
+
+                <div className='hidden md:block w-px h-6 bg-border my-auto' />
+
+                {/* الجرعة */}
+                <FormField
+                  control={form.control}
+                  name='dosage'
+                  render={({ field }) => (
+                    <FormItem className='w-full md:w-24 space-y-0'>
+                      <FormControl>
+                        <Input
+                          placeholder='الجرعة'
+                          className='border-0 focus-visible:ring-0 rounded-none h-10 text-sm text-center md:text-right'
+                          {...field}
+                          value={field.value ?? ''}
+                          onFocus={() => setActiveField('dosage')}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <div className='hidden md:block w-px h-6 bg-border my-auto' />
+
+                {/* التكرار */}
+                <FormField
+                  control={form.control}
+                  name='frequency'
+                  render={({ field }) => (
+                    <FormItem className='w-full md:w-32 space-y-0'>
+                      <FormControl>
+                        <Input
+                          placeholder='التكرار'
+                          className='border-0 focus-visible:ring-0 rounded-none h-10 text-sm text-center md:text-right'
+                          {...field}
+                          value={field.value ?? ''}
+                          onFocus={() => setActiveField('frequency')}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <div className='hidden md:block w-px h-6 bg-border my-auto' />
+
+                {/* المدة */}
+                <FormField
+                  control={form.control}
+                  name='duration'
+                  render={({ field }) => (
+                    <FormItem className='w-full md:w-24 space-y-0'>
+                      <FormControl>
+                        <Input
+                          placeholder='المدة'
+                          className='border-0 focus-visible:ring-0 rounded-none h-10 text-sm text-center md:text-right'
+                          {...field}
+                          value={field.value ?? ''}
+                          onFocus={() => setActiveField('duration')}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <div className='hidden md:block w-px h-6 bg-border my-auto' />
+
+                {/* ملاحظات */}
+                <FormField
+                  control={form.control}
+                  name='instructions'
+                  render={({ field }) => (
+                    <FormItem className='flex-1 space-y-0'>
+                      <FormControl>
+                        <Input
+                          placeholder='ملاحظات...'
+                          className='border-0 focus-visible:ring-0 rounded-none h-10 text-sm'
+                          {...field}
+                          value={field.value ?? ''}
+                          onFocus={() => setActiveField(null)}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type='submit'
+                  disabled={form.formState.isSubmitting}
+                  className='h-10 w-full md:w-12 rounded-none bg-primary/10 hover:bg-primary text-primary hover:text-white shrink-0'
+                >
+                  {form.formState.isSubmitting ? (
+                    <Loader2 className='w-4 h-4 animate-spin' />
+                  ) : (
+                    <Plus className='w-4 h-4' />
+                  )}
                 </Button>
               </div>
             </form>
           </Form>
-        </CardContent>
-      </Card>
 
-      {/* جدول الأدوية */}
-      <Table>
-        <TableHeader className='bg-muted/50'>
-          <TableRow>
-            <TableHead className='text-right w-12'>#</TableHead>
-            <TableHead className='text-right'>الدواء</TableHead>
-            <TableHead className='text-right'>الجرعة</TableHead>
-            <TableHead className='text-right'>التكرار</TableHead>
-            <TableHead className='text-right'>المدة</TableHead>
-            <TableHead className='text-right'>ملاحظات</TableHead>
-            <TableHead className='w-16'></TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {!visit.prescriptions?.length ? (
-            <TableRow>
-              <TableCell colSpan={7} className='text-center py-12 text-muted-foreground'>
-                الروشتة فارغة حالياً.
-              </TableCell>
-            </TableRow>
-          ) : (
-            visit.prescriptions.map((p: IPrescription, index: number) => (
-              <TableRow key={p.id}>
-                <TableCell className='text-muted-foreground'>{index + 1}</TableCell>
-                <TableCell className='font-bold text-foreground'>{p.medicationName}</TableCell>
-                <TableCell>{p.dosage}</TableCell>
-                <TableCell>{p.frequency}</TableCell>
-                <TableCell>{p.duration}</TableCell>
-                <TableCell className='text-muted-foreground max-w-50 truncate'>
-                  {p.instructions || '-'}
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className='text-destructive hover:text-destructive hover:bg-destructive/10'
-                    onClick={() => handleDelete(p.id, p.medicationName)}
-                  >
-                    <Trash2 className='w-4 h-4' />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+          {/* الاقتراحات - تظهر وتختفي وتزق اللي تحتها بنعومة */}
+          <AnimatePresence>
+            {activeField && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className='overflow-hidden'
+              >
+                <div className='flex items-center gap-3 px-3 py-2 bg-muted/30 border-x border-b rounded-b-lg'>
+                  <span className='text-[10px] font-bold text-muted-foreground uppercase tracking-tight'>
+                    اقتراحات:
+                  </span>
+                  <div className='flex gap-1.5 flex-wrap'>
+                    {quickChips[activeField].map((chip) => (
+                      <Badge
+                        key={chip}
+                        variant='secondary'
+                        className='cursor-pointer font-normal hover:bg-primary hover:text-white px-2 py-0.5 text-[11px] shadow-none border-transparent hover:border-primary transition-all'
+                        onClick={() => setQuickChoice(activeField, chip)}
+                      >
+                        {chip}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* قائمة الأدوية */}
+      <div className='flex flex-col border rounded-lg bg-card shadow-sm overflow-hidden mt-1'>
+        {!visit.prescriptions?.length ? (
+          <div className='text-center py-4 text-muted-foreground/30 text-[10px] italic'>
+            لا توجد أدوية مضافة
+          </div>
+        ) : (
+          visit.prescriptions.map((p: IPrescription, index: number) => (
+            <div
+              key={p.id}
+              className='group flex items-center justify-between px-4 py-1.5 border-b last:border-0 hover:bg-muted/20 transition-colors'
+            >
+              <div className='flex items-center gap-2 text-sm'>
+                <span className='text-muted-foreground/40 font-mono text-[10px]'>{index + 1}.</span>
+                <span className='font-bold text-primary text-sm'>{p.medicationName}</span>
+                <span className='text-muted-foreground/20'>|</span>
+                <span className='text-foreground/70 text-xs'>
+                  {p.dosage} {p.frequency && `• ${p.frequency}`} {p.duration && `• ${p.duration}`}
+                </span>
+                {p.instructions && (
+                  <span className='text-muted-foreground text-[10px] bg-muted px-1.5 py-0.5 rounded ml-2'>
+                    {p.instructions}
+                  </span>
+                )}
+              </div>
+
+              {!isClosed && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className='h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity'
+                    >
+                      <Trash2 className='h-3.5 w-3.5 text-muted-foreground/40 hover:text-destructive' />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className='text-sm'>حذف الدواء؟</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className='h-8 text-xs'>إلغاء</AlertDialogCancel>
+                      <AlertDialogAction
+                        className='h-8 text-xs bg-destructive'
+                        onClick={() => handleDelete(p.id)}
+                      >
+                        حذف
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
+          ))
+        )}
+      </div>
     </div>
   )
 }

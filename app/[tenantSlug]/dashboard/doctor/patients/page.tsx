@@ -47,9 +47,7 @@ export default async function DoctorPatientsPage({ params, searchParams }: Props
   return (
     <DashboardShell>
       <DashboardHeader heading='سجل مرضاي' text='قائمة المرضى الذين قمت بالكشف عليهم سابقاً.' />
-
       <PatientSearch />
-
       <div>
         {patients.length === 0 ? (
           <div className='flex flex-col items-center justify-center py-20 text-center'>
@@ -115,18 +113,16 @@ export default async function DoctorPatientsPage({ params, searchParams }: Props
                 ))}
               </TableBody>
             </Table>
-
-            {/* الباجينيشن الأسطوري بتاعك */}
-            {paginatedData && paginatedData.totalPages > 1 && (
-              <div className='p-4 border-t'>
-                <GenericPagination
-                  currentPage={paginatedData.pageNumber}
-                  totalPages={paginatedData.totalPages}
-                  hasNextPage={paginatedData.hasNextPage}
-                  hasPreviousPage={paginatedData.hasPreviousPage}
-                />
-              </div>
-            )}
+          </div>
+        )}
+        {paginatedData && paginatedData.totalPages > 1 && (
+          <div className='p-4 border-t'>
+            <GenericPagination
+              currentPage={paginatedData.pageNumber}
+              totalPages={paginatedData.totalPages}
+              hasNextPage={paginatedData.hasNextPage}
+              hasPreviousPage={paginatedData.hasPreviousPage}
+            />
           </div>
         )}
       </div>

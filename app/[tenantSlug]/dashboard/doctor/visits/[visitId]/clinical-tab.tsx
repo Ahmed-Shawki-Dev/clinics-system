@@ -3,36 +3,36 @@
 import { IVisit } from '@/types/visit'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { useForm } from 'react-hook-form'
-
-import { Button } from '@/components/ui/button'
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
+
+import { Form, FormControl, FormField } from '@/components/ui/form'
+import { Textarea } from '@/components/ui/textarea'
+import { CalendarIcon, FileText, Activity } from 'lucide-react'
 import { updateVisit } from '../../../../../../actions/visit/update-visit'
-import { notesFields, vitalsFields } from '../../../../../../constants/vitals-fields'
+import { vitalsFields } from '../../../../../../constants/vitals-fields'
 import { IDoctor } from '../../../../../../types/doctor'
 import { ClinicalFormInput, clinicalSchema } from '../../../../../../validation/visit'
+
+import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { cn } from '@/lib/utils'
+import { format, isBefore, startOfDay } from 'date-fns'
+import { ar } from 'date-fns/locale'
 
 interface ClinicalTabProps {
   tenantSlug: string
   visit: IVisit
   doctor?: IDoctor
+  isClosed?: boolean
 }
 
-export function ClinicalTab({ tenantSlug, visit, doctor }: ClinicalTabProps) {
+export function ClinicalTab({ tenantSlug, visit, doctor, isClosed }: ClinicalTabProps) {
   const form = useForm<ClinicalFormInput>({
     resolver: valibotResolver(clinicalSchema),
     defaultValues: {
-      complaint: visit.complaint ?? null,
-      diagnosis: visit.diagnosis ?? null,
+      complaint: visit.complaint ?? '',
+      diagnosis: visit.diagnosis ?? '',
       notes: visit.notes ?? null,
       bloodPressureSystolic: visit.bloodPressureSystolic ?? null,
       bloodPressureDiastolic: visit.bloodPressureDiastolic ?? null,
@@ -48,117 +48,156 @@ export function ClinicalTab({ tenantSlug, visit, doctor }: ClinicalTabProps) {
   })
 
   const onSubmit = async (data: ClinicalFormInput) => {
+    if (isClosed) return
     try {
+      const loadingToast = toast.loading('جاري حفظ البيانات...')
       const response = await updateVisit(tenantSlug, visit.id, data)
+      toast.dismiss(loadingToast)
 
       if (response.success) {
-        toast.success('تم حفظ البيانات السريرية بنجاح')
+        toast.success('تم الحفظ')
+        // 🔥 الحل هنا: بنحدث الفورم بالداتا اللي لسه باعتينها عشان تفضل معروضة
+        form.reset(data)
       } else {
-        toast.error(response.message || 'فشل في حفظ البيانات')
+        toast.error(response.message || 'فشل الحفظ')
       }
     } catch (error) {
-      toast.error('حدث خطأ غير متوقع، يرجى المحاولة مرة أخرى')
-      console.error('Submit Error:', error)
+      toast.dismiss()
+      toast.error('حدث خطأ غير متوقع')
     }
   }
 
+  const autoGrow = (e: React.FormEvent<HTMLTextAreaElement>) => {
+    const target = e.currentTarget
+    target.style.height = 'auto'
+    target.style.height = `${target.scrollHeight}px`
+  }
+
+  const visibleVitals = vitalsFields.filter(
+    (fieldConfig) => !doctor?.visitFieldConfig || doctor?.visitFieldConfig[fieldConfig.configKey],
+  )
+
+  const visitDate = visit.startedAt ? startOfDay(new Date(visit.startedAt)) : startOfDay(new Date())
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8 mt-4'>
-        {/* قسم العلامات الحيوية */}
-        <div className='bg-card p-6 rounded-xl border shadow-sm'>
-          <h3 className='text-lg font-bold mb-4 border-b pb-2'>العلامات الحيوية</h3>
-          <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-            {vitalsFields
-              .filter(
-                (fieldConfig) =>
-                  // لو مفيش config (لسه مجبناهوش) اعرض كله، لو فيه، اعرض اللي بـ true بس
-                  !doctor?.visitFieldConfig || doctor?.visitFieldConfig[fieldConfig.configKey],
-              )
-              .map((fieldConfig) => (
-                <FormField
-                  key={fieldConfig.name}
-                  control={form.control}
-                  name={fieldConfig.name}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{fieldConfig.label}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type='number'
-                          placeholder={fieldConfig.placeholder}
-                          {...field}
-                          value={field.value ?? ''}
-                          onChange={(e) => {
-                            const val = e.target.value
-                            field.onChange(val === '' ? null : Number(val))
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              ))}
-          </div>
-        </div>
-
-        {/* قسم التشخيص والشكوى */}
-        {/* قسم التشخيص والشكوى */}
-        <div className='bg-card p-6 rounded-xl border shadow-sm'>
-          <h3 className='text-lg font-bold mb-4 border-b pb-2'>التشخيص والملاحظات</h3>
-          {/* هنا التعديل: قلبناها Grid عمودين في الشاشات الكبيرة */}
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            {notesFields.map((fieldConfig) => (
+      <form id='clinical-form' onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+        {/* 1. العلامات الحيوية */}
+        {visibleVitals.length > 0 && (
+          <div className='flex flex-wrap gap-x-4 gap-y-3 px-1 py-1 text-muted-foreground'>
+            {visibleVitals.map((fieldConfig) => (
               <FormField
                 key={fieldConfig.name}
                 control={form.control}
                 name={fieldConfig.name}
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{fieldConfig.label}</FormLabel>
+                  <div className='flex items-center gap-1.5 min-w-fit'>
+                    <span className='text-[10px] font-bold opacity-60 uppercase tracking-tighter shrink-0'>
+                      {fieldConfig.label}:
+                    </span>
                     <FormControl>
-                      {fieldConfig.inputType === 'date' ? (
-                        <Input
-                          type='date'
-                          {...field}
-                          value={
-                            field.value
-                              ? new Date(field.value as string).toISOString().split('T')[0]
-                              : ''
-                          }
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value ? new Date(e.target.value).toISOString() : null,
-                            )
-                          }
-                        />
-                      ) : (
-                        <Textarea
-                          placeholder={fieldConfig.placeholder}
-                          className='resize-none' // عشان الدكتور ميبوظش شكل الجريد
-                          {...field}
-                          value={(field.value as string) ?? ''}
-                        />
-                      )}
+                      <input
+                        type='number'
+                        placeholder='-'
+                        disabled={isClosed}
+                        className='w-10 bg-transparent border-0 border-b border-transparent hover:border-primary/30 focus:border-primary focus:outline-none text-[11px] font-medium text-foreground transition-all p-0 h-4 text-center appearance-none'
+                        {...field}
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(e.target.value === '' ? null : Number(e.target.value))
+                        }
+                      />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
+                  </div>
                 )}
               />
             ))}
           </div>
+        )}
+
+        <div className='flex items-center gap-2 border-b pb-2'>
+          <Activity className='w-4 h-4 text-muted-foreground' />
+          <h3 className='text-sm font-semibold text-foreground'>التشخيص الطبي</h3>
         </div>
 
-        <div className='flex justify-end'>
-          <Button
-            type='submit'
-            size='lg'
-            className='bg-emerald-600 hover:bg-emerald-700'
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? 'جاري الحفظ...' : 'حفظ البيانات السريرية'}
-          </Button>
+        {/* 2. شريط الكشف (Responsive + Auto-grow) */}
+        <div className='flex flex-col md:flex-row items-stretch bg-card border rounded-lg shadow-sm overflow-hidden focus-within:ring-1 focus-within:ring-primary transition-all duration-200'>
+          <div className='hidden md:flex items-center px-3 text-muted-foreground/30 border-l bg-muted/5'>
+            <FileText className='w-4 h-4' />
+          </div>
+
+          <FormField
+            control={form.control}
+            name='complaint'
+            render={({ field }) => (
+              <FormControl className='flex-1'>
+                <Textarea
+                  placeholder='الشكوى...'
+                  className='min-h-[45px] md:min-h-[40px] max-h-60 border-0 border-b md:border-b-0 focus-visible:ring-0 text-sm bg-transparent resize-none py-3 px-4 leading-relaxed scrollbar-hide'
+                  disabled={isClosed}
+                  rows={1}
+                  onInput={autoGrow}
+                  {...field}
+                  value={field.value ?? ''}
+                />
+              </FormControl>
+            )}
+          />
+
+          <div className='hidden md:block w-px bg-muted/50 opacity-30 self-stretch' />
+
+          <FormField
+            control={form.control}
+            name='diagnosis'
+            render={({ field }) => (
+              <FormControl className='flex-1'>
+                <Textarea
+                  placeholder='التشخيص...'
+                  className='min-h-[45px] md:min-h-[40px] max-h-60 border-0 border-b md:border-b-0 focus-visible:ring-0 text-sm font-bold text-primary bg-transparent resize-none py-3 px-4 leading-relaxed scrollbar-hide'
+                  disabled={isClosed}
+                  rows={1}
+                  onInput={autoGrow}
+                  {...field}
+                  value={field.value ?? ''}
+                />
+              </FormControl>
+            )}
+          />
+
+          <div className='hidden md:block w-px bg-muted/50 opacity-30 self-stretch' />
+
+          <FormField
+            name='notes'
+            control={form.control}
+            render={({ field }) => (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant='ghost'
+                    disabled={isClosed}
+                    className={cn(
+                      'h-11 md:h-auto md:min-h-10 px-4 text-xs gap-2 hover:bg-muted font-normal shrink-0 rounded-none w-full md:w-auto md:border-r self-center',
+                      !field.value && 'text-muted-foreground/50',
+                    )}
+                  >
+                    <CalendarIcon className='h-3.5 w-3.5 opacity-50' />
+                    {field.value && !isNaN(new Date(field.value).getTime())
+                      ? format(new Date(field.value), 'dd/MM/yy', { locale: ar })
+                      : 'الاستشارة'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className='w-auto p-0' align='end'>
+                  <Calendar
+                    mode='single'
+                    selected={field.value ? new Date(field.value) : undefined}
+                    onSelect={(date) => field.onChange(date ? date.toISOString() : null)}
+                    disabled={(date) => isBefore(startOfDay(date), visitDate)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
+          />
         </div>
       </form>
     </Form>
