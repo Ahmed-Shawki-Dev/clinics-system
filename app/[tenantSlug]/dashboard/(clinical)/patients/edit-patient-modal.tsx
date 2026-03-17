@@ -1,7 +1,7 @@
 'use client'
 
 import { valibotResolver } from '@hookform/resolvers/valibot'
-import { Loader2 } from 'lucide-react'
+import { Edit, Loader2 } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -61,6 +61,7 @@ export function EditPatientModal({ patient }: { patient: IPatient }) {
       <DialogTrigger asChild>
         {/* بنستخدمه كـ Div عشان يشتغل جوه الـ DropdownMenu من غير مشاكل */}
         <div className='relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground'>
+          <Edit className='w-4 h-4 ml-2 text-shadow-neutral-300'/>
           تعديل البيانات
         </div>
       </DialogTrigger>

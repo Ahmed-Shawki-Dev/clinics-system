@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Calendar, MoreHorizontalIcon, Phone, User, Eye } from 'lucide-react'
+import { Calendar, MoreHorizontalIcon, Phone, User, Eye, Copy } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
@@ -25,6 +25,7 @@ import { EditPatientModal } from './edit-patient-modal'
 import { IPatient } from '../../../../../types/patient'
 import { PermissionGate } from '../../../../../components/auth/permission-gate'
 import { ROLES } from '../../../../../config/roles'
+import AddSubProfileModal from './AddSubProfileModal'
 
 interface PatientsListProps {
   data: IPatient[]
@@ -86,22 +87,25 @@ export function PatientsList({ data }: PatientsListProps) {
                       {/* زر عرض البروفايل - متاح للجميع */}
                       <Link href={`/${tenantSlug}/dashboard/patients/${patient.id}`}>
                         <DropdownMenuItem>
-                          <Eye className='ml-2 h-4 w-4' />
+                          <Eye className='h-4 w-4' />
                           عرض البروفايل
                         </DropdownMenuItem>
                       </Link>
 
-                      <DropdownMenuItem
-                        onClick={() => navigator.clipboard.writeText(patient.phone)}
-                      >
-                        نسخ الرقم
-                      </DropdownMenuItem>
+                      <AddSubProfileModal parentId={patient.id} parentName={patient.name} tenantSlug={tenantSlug as string}/>
 
                       <PermissionGate
                         allowedRoles={[ROLES.CLINIC_OWNER, ROLES.CLINIC_MANAGER, ROLES.SUPER_ADMIN]}
                       >
                         <EditPatientModal patient={patient} />
                       </PermissionGate>
+
+                      <DropdownMenuItem
+                        onClick={() => navigator.clipboard.writeText(patient.phone)}
+                      >
+                        <Copy className='w-4 h-4'/>
+                        نسخ الرقم
+                      </DropdownMenuItem>
 
                       <DropdownMenuSeparator />
 

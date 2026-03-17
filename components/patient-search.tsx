@@ -21,20 +21,20 @@ import { AddPatientModal } from '../app/[tenantSlug]/dashboard/(clinical)/patien
 
 interface PatientSearchProps {
   tenantSlug: string
-  onSelect: (patientId: string) => void
+  onSelect: (patient: IPatient) => void
   selectedPatientId?: string
 }
 
 export function PatientSearch({ tenantSlug, onSelect, selectedPatientId }: PatientSearchProps) {
   const [open, setOpen] = React.useState(false)
-  const [isAddModalOpen, setIsAddModalOpen] = React.useState(false) // 🔥 State جديدة للمودال
+  const [isAddModalOpen, setIsAddModalOpen] = React.useState(false)
   const [searchTerm, setSearchTerm] = React.useState('')
   const [selectedPatient, setSelectedPatient] = React.useState<IPatient | null>(null)
   const [debouncedTerm] = useDebounce(searchTerm, 500)
 
   const { data, isLoading } = useSWR(
     open ? ['searchPatients', tenantSlug, debouncedTerm] : null,
-    ([, slug, term]) => getPatientsAction(slug, 1, 15, term),
+    ([, slug, term]) => getPatientsAction(slug, 1, 15, term as string),
     { keepPreviousData: true },
   )
 
@@ -48,9 +48,10 @@ export function PatientSearch({ tenantSlug, onSelect, selectedPatientId }: Patie
   }, [selectedPatientId])
 
   const handleNewPatientSuccess = (newId: string, newName: string) => {
-    setSelectedPatient({ id: newId, name: newName, phone: searchTerm } as IPatient)
-    onSelect(newId)
-    setIsAddModalOpen(false) // بنقفل المودال من بره
+    const newPatient = { id: newId, name: newName, phone: searchTerm } as IPatient
+    setSelectedPatient(newPatient)
+    onSelect(newPatient)
+    setIsAddModalOpen(false)
   }
 
   return (
@@ -101,14 +102,13 @@ export function PatientSearch({ tenantSlug, onSelect, selectedPatientId }: Patie
               {!isLoading && patients.length === 0 && (
                 <CommandEmpty className='p-4 text-center'>
                   <p className='text-xs text-muted-foreground mb-3'>لم يتم العثور على نتائج</p>
-                  {/* 🔥 زرار عادي بيفتح المودال بدل ما نبني المودال جواه */}
                   <Button
                     size='sm'
                     variant='secondary'
                     className='h-8 text-xs'
                     onClick={() => {
-                      setOpen(false) // نقفل السيرش
-                      setIsAddModalOpen(true) // نفتح المودال براحته
+                      setOpen(false)
+                      setIsAddModalOpen(true)
                     }}
                   >
                     <UserPlus className='ml-1 h-3.5 w-3.5' />
@@ -125,7 +125,7 @@ export function PatientSearch({ tenantSlug, onSelect, selectedPatientId }: Patie
                       value={patient.id}
                       onSelect={() => {
                         setSelectedPatient(patient)
-                        onSelect(patient.id)
+                        onSelect(patient)
                         setOpen(false)
                       }}
                       className='flex items-center justify-between cursor-pointer py-2.5 min-w-0 gap-2'
@@ -155,7 +155,6 @@ export function PatientSearch({ tenantSlug, onSelect, selectedPatientId }: Patie
         </PopoverContent>
       </Popover>
 
-      {/* 🔥 المودال بقى بره خالص، مستحيل يتقفل إلا لو إنت قفلته بإيدك */}
       <AddPatientModal
         tenantSlug={tenantSlug}
         initialPhone={searchTerm.replace(/\D/g, '')}

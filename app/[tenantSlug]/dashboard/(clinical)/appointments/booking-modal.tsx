@@ -3,7 +3,7 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { format } from 'date-fns'
 import { ar } from 'date-fns/locale'
-import { AlertCircle, CalendarIcon, Loader2 } from 'lucide-react'
+import { AlertCircle, CalendarIcon, Loader2, User, Users } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
@@ -36,15 +36,16 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 import { createBookingAction } from '@/actions/booking/create-booking'
 import { IDoctor } from '@/types/doctor'
+import { IPatient } from '@/types/patient'
 import { CreateBookingInput, createBookingSchema } from '@/validation/booking'
-import { PatientSearch } from '@/components/patient-search' // استيراد الكومبوننت الجديد
+import { PatientSearch } from '@/components/patient-search'
 
 interface Props {
-  // شيلنا patients من هنا لأن السيرش هيجيبهم لوحده
   doctors: IDoctor[]
 }
 
@@ -54,6 +55,9 @@ export function BookingModal({ doctors = [] }: Props) {
 
   const safeDoctors = doctors.filter((doctor) => doctor.isEnabled) || []
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null)
+
+  // 🔥 ستيت حفظ الأكونت لعرض أفراد العائلة
+  const [selectedAccount, setSelectedAccount] = useState<IPatient | null>(null)
 
   const form = useForm<CreateBookingInput>({
     resolver: valibotResolver(createBookingSchema),
@@ -83,6 +87,7 @@ export function BookingModal({ doctors = [] }: Props) {
         setOpen(false)
         form.reset()
         setSelectedDoctorId(null)
+        setSelectedAccount(null)
       } else {
         toast.error(result.message)
       }
@@ -92,33 +97,99 @@ export function BookingModal({ doctors = [] }: Props) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        setOpen(isOpen)
+        if (!isOpen) {
+          form.reset()
+          setSelectedAccount(null)
+        }
+      }}
+    >
       <DialogTrigger asChild>
         <Button>حجز موعد جديد</Button>
       </DialogTrigger>
-      <DialogContent className='sm:max-w-125'>
+      <DialogContent className='sm:max-w-125 max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>حجز موعد جديد</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
-            {/* 1. اختيار المريض (التعديل الجديد هنا) */}
+            {/* 1. المريض واختيار أفراد العائلة */}
             <FormField
               control={form.control}
               name='patientId'
               render={({ field }) => (
-                <FormItem className='flex flex-col'>
-                  <FormLabel>المريض</FormLabel>
-                  <FormControl>
-                    <PatientSearch
-                      tenantSlug={tenantSlug as string}
-                      selectedPatientId={field.value}
-                      onSelect={field.onChange}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                <div className='space-y-3'>
+                  <FormItem className='flex flex-col'>
+                    <FormLabel>المريض (أو ولي الأمر)</FormLabel>
+                    <FormControl>
+                      <PatientSearch
+                        tenantSlug={tenantSlug as string}
+                        selectedPatientId={selectedAccount?.id}
+                        onSelect={(patient) => {
+                          setSelectedAccount(patient)
+                          field.onChange(patient.id)
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+
+                  {/* بلوك أفراد العائلة */}
+                  {selectedAccount &&
+                    selectedAccount.subProfiles &&
+                    selectedAccount.subProfiles.length > 0 && (
+                      <div className='p-4 border rounded-lg bg-muted/10 space-y-3 animate-in fade-in slide-in-from-top-2'>
+                        <h4 className='text-sm font-bold flex items-center gap-2'>
+                          <Users className='w-4 h-4 text-primary' />
+                          الحجز لمن بالظبط؟
+                        </h4>
+                        <div className='grid grid-cols-2 gap-3'>
+                          {/* كارت الأب */}
+                          <div
+                            onClick={() => field.onChange(selectedAccount.id)}
+                            className={cn(
+                              'p-3 border rounded-md cursor-pointer transition-all flex flex-col',
+                              field.value === selectedAccount.id
+                                ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                                : 'hover:border-primary/50 hover:bg-muted/50 bg-background',
+                            )}
+                          >
+                            <span className='font-bold text-sm flex items-center gap-2 truncate'>
+                              <User className='w-4 h-4 shrink-0' /> {selectedAccount.name}
+                            </span>
+                            <Badge variant='secondary' className='w-fit mt-2 text-[10px]'>
+                              صاحب الحساب
+                            </Badge>
+                          </div>
+
+                          {/* كروت التابعين */}
+                          {selectedAccount.subProfiles.map((sub) => (
+                            <div
+                              key={sub.id}
+                              onClick={() => field.onChange(sub.id)}
+                              className={cn(
+                                'p-3 border rounded-md cursor-pointer transition-all flex flex-col',
+                                field.value === sub.id
+                                  ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                                  : 'hover:border-primary/50 hover:bg-muted/50 bg-background',
+                              )}
+                            >
+                              <span className='font-bold text-sm flex items-center gap-2 truncate'>
+                                <User className='w-4 h-4 shrink-0' /> {sub.name}
+                              </span>
+                              <Badge variant='outline' className='w-fit mt-2 text-[10px]'>
+                                {sub.gender === 'Male' ? 'ذكر' : 'أنثى'} • تابع
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                </div>
               )}
             />
 
