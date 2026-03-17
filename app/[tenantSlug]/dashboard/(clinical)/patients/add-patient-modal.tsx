@@ -47,6 +47,8 @@ interface AddPatientModalProps {
   initialPhone?: string
   trigger?: React.ReactNode
   onSuccess?: (patientId: string, patientName: string) => void
+  open?: boolean // 🔥 جديد لاستقبال الـ State
+  onOpenChange?: (open: boolean) => void // 🔥 جديد
 }
 
 export function AddPatientModal({
@@ -54,14 +56,22 @@ export function AddPatientModal({
   initialPhone,
   trigger,
   onSuccess,
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
 }: AddPatientModalProps) {
-  const [open, setOpen] = useState(false)
+  const [internalOpen, setInternalOpen] = useState(false)
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen
+  const setOpen = setControlledOpen || setInternalOpen
+
   const [credentials, setCredentials] = useState<{
     username: string
     password: string
     name: string
     phone: string
   } | null>(null)
+
+  // 🔥 State تحفظ بيانات المريض عشان نبعتها لـ onSuccess وقت الإغلاق
+  const [newPatientData, setNewPatientData] = useState<{ id: string; name: string } | null>(null)
 
   const form = useForm<CreatePatientInput>({
     resolver: valibotResolver(CreatePatientSchema),
@@ -93,8 +103,12 @@ export function AddPatientModal({
           phone: values.phone,
         })
 
-        if (onSuccess && result.data.patient) {
-          onSuccess(result.data.patient.id, result.data.patient.name)
+        // 🔥 مش هننادي onSuccess دلوقتي عشان المودال ميقفلش
+        if (result.data.patient) {
+          setNewPatientData({
+            id: result.data.patient.id,
+            name: result.data.patient.name,
+          })
         }
       } else {
         toast.error(result.message)
@@ -106,11 +120,9 @@ export function AddPatientModal({
     }
   }
 
-  // 🔥 دالة إرسال الواتساب مع إضافة رابط العيادة
   const handleSendWhatsApp = () => {
     if (!credentials) return
 
-    // تظبيط رقم التليفون
     let phone = credentials.phone
     if (phone.startsWith('0')) {
       phone = '20' + phone.substring(1)
@@ -118,7 +130,6 @@ export function AddPatientModal({
       phone = phone.replace(/\+/g, '')
     }
 
-    // 👈 توليد رابط العيادة لصفحة دخول المرضى
     const clinicLink = `${window.location.origin}/${tenantSlug}/patient/login`
 
     const message = `أهلاً بك أ. ${credentials.name} في العيادة \n\nبيانات الدخول الخاصة بك لتطبيق المرضى هي:\nاسم المستخدم: *${credentials.username}*\nكلمة المرور: *${credentials.password}*\n\nيمكنك الدخول لمتابعة حسابك المباشر عبر الرابط التالي:\n${clinicLink}\n\nنتمنى لك دوام الصحة والعافية.`
@@ -130,9 +141,16 @@ export function AddPatientModal({
 
   const handleClose = () => {
     setOpen(false)
+
+    // 🔥 لما الدكتور يدوس إغلاق، ساعتها بس نبلغ الـ Search يختار المريض
+    if (onSuccess && newPatientData) {
+      onSuccess(newPatientData.id, newPatientData.name)
+    }
+
     setTimeout(() => {
       form.reset()
       setCredentials(null)
+      setNewPatientData(null)
     }, 200)
   }
 
@@ -144,14 +162,18 @@ export function AddPatientModal({
         else setOpen(true)
       }}
     >
-      <DialogTrigger asChild>
-        {trigger || (
-          <Button>
-            <UserPlus className='mr-2 h-4 w-4' />
-            مريض جديد
-          </Button>
-        )}
-      </DialogTrigger>
+      {/* مش هنعرض الـ Trigger لو إحنا متحكمين فيه من بره */}
+      {controlledOpen === undefined && (
+        <DialogTrigger asChild>
+          {trigger || (
+            <Button>
+              <UserPlus className='mr-2 h-4 w-4' />
+              مريض جديد
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
+
       <DialogContent className='sm:max-w-125'>
         {credentials ? (
           <div className='flex flex-col items-center justify-center py-6 space-y-6'>
