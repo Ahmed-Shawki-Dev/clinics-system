@@ -4,11 +4,16 @@ import withSerwistInit from '@serwist/next'
 const withSerwist = withSerwistInit({
   swSrc: 'app/sw.ts',
   swDest: 'public/sw.js',
+  // ضيف السطر ده عشان توقف الـ Warning بتاع التيربو باك
   disable: process.env.NODE_ENV === 'development',
 })
 
 
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  webpack: (config) => {
+    return config;
+  },
   images: {
     remotePatterns: [
       {
@@ -22,8 +27,8 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https', 
-        hostname: '**', 
+        protocol: 'https',
+        hostname: '**',
       },
     ],
   },
