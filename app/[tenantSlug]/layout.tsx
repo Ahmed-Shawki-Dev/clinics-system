@@ -46,10 +46,11 @@ export async function generateMetadata({
 
   return {
     title: clinic.clinicName,
+    // 👇 السطر اللي أنت نسيته: إجبار الصفحة تقرأ المانيسفت الخاص بالعيادة
+    manifest: `/${tenantSlug}/manifest.json`,
     openGraph: {
       title: clinic.clinicName,
       siteName: clinic.clinicName,
-      // تأكدنا إننا مش بنبعت string فاضي للـ OpenGraph
       images: absoluteLogoUrl ? [{ url: absoluteLogoUrl, alt: `لوجو ${clinic.clinicName}` }] : [],
       type: 'website',
     },
