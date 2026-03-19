@@ -15,27 +15,31 @@ import { useParams, useRouter } from 'next/navigation'
 import { usePatientAuthStore } from '../../store/usePatientAuthStore'
 import { useTenantStore } from '../../store/useTenantStore'
 import { PatientLogoutButton } from '../auth/PatientLogoutButton'
+import { getFullImageUrl } from '@/lib/utils' // 👈 استدعاء الدالة السحرية بتاعتنا
 
 export function PatientHeader() {
   const router = useRouter()
   const params = useParams()
   const tenantSlug = params.tenantSlug as string
 
-  // جلب الداتا من الـ Stores
   const { config } = useTenantStore()
-  const { user, activeProfileId } = usePatientAuthStore() // شيلنا الـ logout من هنا
 
-  // تحديد اسم المريض الحالي (لو عنده Profiles فرعية بنجيب اسم الـ Profile النشط)
+  // 🔴 التعديل الجذري: بنقرأ الداتا من سجل العيادة الحالية
+  const authData = usePatientAuthStore((state) => state.tenants[tenantSlug])
+
+  // استخراج الداتا بـ Optional Chaining عشان لو مفيش تسجيل دخول ميضربش
+  const user = authData?.user
+  const activeProfileId = authData?.activeProfileId
+
   const activeProfile = user?.profiles?.find((p) => p.id === activeProfileId)
   const displayName = activeProfile?.name || user?.displayName || user?.username || 'مريض'
 
   return (
     <header className='sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b h-14 flex items-center justify-between px-4 shadow-sm'>
-      {/* 1. اسم العيادة واللوجو */}
       <div className='flex items-center gap-2'>
         <div className='relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-background border'>
           <ClinicImage
-            src={config?.logoUrl}
+            src={getFullImageUrl(config?.logoUrl)} // 👈 تأمين مسار الصورة
             alt={config?.name || 'Clinic Logo'}
             fill
             fallbackType='logo'
@@ -47,7 +51,6 @@ export function PatientHeader() {
         </h1>
       </div>
 
-      {/* 2. أفتار المريض والدروب داون */}
       <div className='flex items-center gap-3'>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -59,7 +62,7 @@ export function PatientHeader() {
             </Avatar>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align='end' className='w-56' >
+          <DropdownMenuContent align='end' className='w-56'>
             <DropdownMenuLabel className='font-normal'>
               <div className='flex flex-col space-y-1'>
                 <p className='text-sm font-medium leading-none truncate'>{displayName}</p>
@@ -81,7 +84,6 @@ export function PatientHeader() {
 
             <DropdownMenuSeparator />
 
-            {/* 👇 الكومبوننت المخصص لتسجيل الخروج */}
             <PatientLogoutButton />
           </DropdownMenuContent>
         </DropdownMenu>

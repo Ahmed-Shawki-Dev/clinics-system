@@ -1,43 +1,60 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { ILogin } from '../types/auth' // التايب بتاعك
+import { ILogin } from '../types/auth'
 
-interface PatientAuthState {
+// فصلنا الداتا بتاعة المريض لوحدها
+interface TenantAuthData {
   user: ILogin['user'] | null
-  token: string | null // 👈 ضفنا التوكن هنا
+  token: string | null
   activeProfileId: string | null
   isAuthenticated: boolean
-  setPatientAuth: (data: ILogin) => void
-  setActiveProfile: (profileId: string) => void
-  logout: () => void
+}
+
+interface PatientAuthState {
+  // 🔴 الستيت بقت عبارة عن سجل (Record) مفتاحه هو الـ tenantSlug
+  tenants: Record<string, TenantAuthData>
+  setPatientAuth: (tenantSlug: string, data: ILogin) => void
+  setActiveProfile: (tenantSlug: string, profileId: string) => void
+  logout: (tenantSlug: string) => void
 }
 
 export const usePatientAuthStore = create<PatientAuthState>()(
   persist(
     (set) => ({
-      user: null,
-      token: null, 
-      activeProfileId: null,
-      isAuthenticated: false,
+      tenants: {}, // الستيت الابتدائية فاضية
 
-      setPatientAuth: (data) => {
+      setPatientAuth: (tenantSlug, data) => {
         const defaultProfile = data.user.profiles?.find((p) => p.isDefault)
-        set({
-          user: data.user,
-          token: data.token, 
-          activeProfileId: defaultProfile?.id || data.user.profiles?.[0]?.id || null,
-          isAuthenticated: true,
-        })
+        set((state) => ({
+          tenants: {
+            ...state.tenants,
+            [tenantSlug]: {
+              // بنحفظ الداتا جوه مفتاح العيادة
+              user: data.user,
+              token: data.token,
+              activeProfileId: defaultProfile?.id || data.user.profiles?.[0]?.id || null,
+              isAuthenticated: true,
+            },
+          },
+        }))
       },
 
-      setActiveProfile: (profileId) => set({ activeProfileId: profileId }),
+      setActiveProfile: (tenantSlug, profileId) =>
+        set((state) => ({
+          tenants: {
+            ...state.tenants,
+            [tenantSlug]: {
+              ...state.tenants[tenantSlug],
+              activeProfileId: profileId,
+            },
+          },
+        })),
 
-      logout: () =>
-        set({
-          user: null,
-          token: null, // 👈 امسح التوكن في الخروج
-          activeProfileId: null,
-          isAuthenticated: false,
+      logout: (tenantSlug) =>
+        set((state) => {
+          const newTenants = { ...state.tenants }
+          delete newTenants[tenantSlug] // بنمسح داتا العيادة دي بس من اللوكال ستوريدج
+          return { tenants: newTenants }
         }),
     }),
     { name: 'patient-auth-storage' },

@@ -37,16 +37,20 @@ export async function proxy(request: NextRequest) {
 
   const firstSegment = segments[0]
   const tenantSlug = firstSegment
+
   let staffToken = request.cookies.get('token')?.value
   const refreshToken = request.cookies.get('refreshToken')?.value
-  const patientToken = request.cookies.get('patient_token')?.value
+
+  // 🔴 التعديل السحري 1: قراءة الكوكي المعزول الخاص بالعيادة الحالية
+  const patientCookieName = `patient_token_${tenantSlug}`
+  const patientToken = request.cookies.get(patientCookieName)?.value
 
   let tokensRefreshed = false
   let newTokens: { token: string; refreshToken: string } | null = null
   const requestHeaders = new Headers(request.headers)
 
   // ==========================================
-  // منطقة الريفرش: بتشتغل بس لو التوكن بيموت
+  // منطقة الريفرش
   // ==========================================
   if (staffToken && refreshToken && isTokenExpired(staffToken)) {
     try {
@@ -63,10 +67,9 @@ export async function proxy(request: NextRequest) {
         const result = await refreshRes.json()
         if (result.success && result.data) {
           newTokens = result.data
-          staffToken = newTokens!.token // تحديث التوكن في الذاكرة عشان باقي اللوجيك يشتغل صح
+          staffToken = newTokens!.token
           tokensRefreshed = true
 
-          // حقن التوكن الجديد في الهيدر للـ Server Components
           const currentCookies = request.cookies.getAll()
           const updatedCookies = currentCookies
             .map((c) => {
@@ -79,7 +82,6 @@ export async function proxy(request: NextRequest) {
         } else throw new Error('Refresh failed')
       } else throw new Error('Refresh failed')
     } catch (error) {
-      // لو فشل تماماً، اطرده على شاشة تسجيل الدخول
       const redirectUrl = new URL(
         `/${tenantSlug === 'admin' ? 'admin' : tenantSlug}/login`,
         request.url,
@@ -92,7 +94,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // ==========================================
-  // مسار الأدمن (Platform Admin)
+  // مسار الأدمن
   // ==========================================
   let response: NextResponse | null = null
 
@@ -103,14 +105,16 @@ export async function proxy(request: NextRequest) {
     } else {
       response = NextResponse.next({ request: { headers: requestHeaders } })
     }
+    return response // 🔴 إضافة return بدري هنا عشان ميكملش تحت للعيادات لو هو أدمن
   }
+
   // ==========================================
-  // مسارات العيادات (Tenants)
+  // مسارات العيادات
   // ==========================================
-  else if (['404', 'suspended'].includes(tenantSlug)) {
+  if (['404', 'suspended'].includes(tenantSlug)) {
     response = NextResponse.next({ request: { headers: requestHeaders } })
   } else {
-    // 🔥 الحارس الحديدي: فحص اختراق العيادات (Cross-Tenant Access Prevention)
+    // 🔥 الحارس الحديدي: فحص اختراق العيادات للـ Staff
     if (staffToken && !response) {
       const payload = decodeJwt(staffToken)
       if (payload?.tenantSlug && payload.tenantSlug !== tenantSlug) {
@@ -118,6 +122,7 @@ export async function proxy(request: NextRequest) {
       }
     }
 
+    // 🔴 التعديل 2: فحص اختراق العيادات للمريض (احتياطي زيادة رغم إن البراوزر بيحميه)
     if (patientToken && !response) {
       const payload = decodeJwt(patientToken)
       if (payload?.tenantSlug && payload.tenantSlug !== tenantSlug) {
@@ -125,11 +130,13 @@ export async function proxy(request: NextRequest) {
       }
     }
 
-    // منطق التوجيه العادي لو معداش في أي سكة من اللي فوق
     if (!response) {
       const isLandingPage = segments.length === 1
       const isAuthPage = pathname.endsWith('/login') || pathname.endsWith('/register')
+
+      // 🔴 التعديل 3: تأكيد إننا في قسم المريض جوه العيادة (زي /rahma/patient/...)
       const isPatientSection = segments[1] === 'patient'
+      const isDashboardSection = segments[1] === 'dashboard'
 
       if (isLandingPage) {
         if (staffToken)
@@ -143,22 +150,22 @@ export async function proxy(request: NextRequest) {
         else if (!patientToken && !isAuthPage)
           response = NextResponse.redirect(new URL(`/${tenantSlug}/patient/login`, request.url))
         else response = NextResponse.next({ request: { headers: requestHeaders } })
+      } else if (isDashboardSection) {
+        // حماية مسار الداشبورد
+        if (!staffToken && !isAuthPage)
+          response = NextResponse.redirect(new URL(`/${tenantSlug}/login`, request.url))
+        else response = NextResponse.next({ request: { headers: requestHeaders } })
       } else {
+        // صفحة اللوجين بتاعة الموظفين (مثال: /rahma/login)
         if (staffToken && isAuthPage)
           response = NextResponse.redirect(new URL(`/${tenantSlug}/dashboard`, request.url))
-        else if (!staffToken && !isAuthPage)
-          response = NextResponse.redirect(new URL(`/${tenantSlug}/login`, request.url))
         else response = NextResponse.next({ request: { headers: requestHeaders } })
       }
     }
   }
 
-  // Fallback آمن عشان التايبسكريبت ميعيطش
   if (!response) response = NextResponse.next({ request: { headers: requestHeaders } })
 
-  // ==========================================
-  // زراعة الكوكيز الجديدة في المتصفح بعد ما التوجيه يخلص
-  // ==========================================
   if (tokensRefreshed && newTokens) {
     const cookieOptions = {
       httpOnly: true,

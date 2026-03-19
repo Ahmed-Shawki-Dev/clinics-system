@@ -53,15 +53,17 @@ export async function patientLoginAction(
   // ✅ التوكن سليم وموثوق أنه مريض
   const cookieStore = await cookies()
 
+  const cookieName = `patient_token_${tenantSlug}`
+
   // 🔴 تنظيف احترافي: مسح توكن الموظف من الـ Root ومن مسار العيادة عشان نضمن تدميره
   cookieStore.delete('token')
   cookieStore.delete({ name: 'token', path: `/${tenantSlug}` })
 
-  cookieStore.set('patient_token', result.data.token, {
+  cookieStore.set(cookieName, result.data.token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    path: `/`, // عزل صارم
+    path: `/${tenantSlug}`, // 👈 الكوكي ده مش هيتبعت لأي عيادة تانية
     maxAge: 24 * 60 * 60 * 365,
   })
 

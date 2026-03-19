@@ -33,13 +33,13 @@ export async function GET(
   const manifest = {
     name: clinic.clinicName || 'عيادة طبية',
     short_name: clinic.clinicName || 'عيادة',
-    description: `نظام إدارة عيادة ${clinic.clinicName}`,
+    description: `نظام إدارة عيادة ${clinic.clinicName}` || 'نظام إدارة عيادات',
 
-    // 👇 التعديل الجراحي هنا 👇
-    id: `/${tenantSlug}`, // بيعرف الموبايل إن ده تطبيق مستقل
-    scope: `/${tenantSlug}/`, // بيقفل التطبيق على روابط العيادة بس وميخرجش براها
-    start_url: `/${tenantSlug}`,
-    // 👆 👆 👆
+    // 🔴 التعديل السحري هنا لفصل التطبيقات
+    id: `/${tenantSlug}-medora-pwa`, // بندي ID مستحيل يتشابه مع عيادة تانية
+    start_url: `/${tenantSlug}/?source=pwa`, // بنضيف Query عشان الرابط يبقى مميز وميكييش
+    scope: `/${tenantSlug}/`, // 🔴 السلاش الأخيرة دي حياة أو موت، دي اللي بتقفل التطبيق على مسار العيادة بس
+    // ---------------------------------
 
     display: 'standalone',
     background_color: '#ffffff',

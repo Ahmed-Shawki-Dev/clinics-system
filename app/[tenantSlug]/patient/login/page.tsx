@@ -1,12 +1,12 @@
 'use client'
 
 import { valibotResolver } from '@hookform/resolvers/valibot'
-import { KeyRound, Loader2, UserRound, ArrowRight } from 'lucide-react'
+import { ArrowRight, KeyRound, Loader2, UserRound } from 'lucide-react'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
-import Link from 'next/link'
-import { useParams } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -38,12 +38,9 @@ export default function PatientLoginPage() {
       const result = await patientLoginAction(values, tenantSlug as string)
       if (!result.success || !result.data) throw new Error(result.message)
 
-      usePatientAuthStore.getState().setPatientAuth(result.data)
-
-      document.cookie = `patient_token=${result.data.token}; path=/; max-age=31536000; SameSite=Lax`
+      usePatientAuthStore.getState().setPatientAuth(tenantSlug as string, result.data)
 
       toast.success('تم تسجيل الدخول بنجاح')
-
       window.location.href = `/${tenantSlug}/patient`
     } catch (error) {
       if (error instanceof Error) toast.error(error.message || 'خطأ في الدخول')

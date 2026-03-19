@@ -1,7 +1,7 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { usePatientAuthStore } from '@/store/usePatientAuthStore' // 👈 ستور المريض
+import { usePatientAuthStore } from '@/store/usePatientAuthStore'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import { LogOut } from 'lucide-react'
 import { patientLogoutAction } from '../../actions/auth/patient-logout'
@@ -11,10 +11,12 @@ export function PatientLogoutButton() {
   const logoutFromStore = usePatientAuthStore((state) => state.logout)
 
   const handleLogout = async () => {
-    logoutFromStore() // امسح من Zustand
-
     const slug = typeof tenantSlug === 'string' ? tenantSlug : ''
-    await patientLogoutAction(slug) // امسح الكوكيز ووجه لصفحة دخول المرضى
+
+    // 🔴 التعديل هنا: بنحددله يمسح داتا العيادة دي بس
+    logoutFromStore(slug)
+
+    await patientLogoutAction(slug)
   }
 
   return (
