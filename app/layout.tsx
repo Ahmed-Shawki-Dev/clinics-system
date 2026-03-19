@@ -36,7 +36,7 @@ export const metadata: Metadata = {
   description:
     'نظام Medora السحابي لإدارة العيادات الطبية بكفاءة، يشمل حجوزات، تقارير مالية، وروشتات إلكترونية.',
   applicationName: 'Medora',
-  manifest: '/manifest.json', // هيقرا من الـ manifest.ts اللي عملناه
+  // manifest: '/manifest.json', // هيقرا من الـ manifest.ts اللي عملناه
   openGraph: {
     type: 'website',
     locale: 'ar_EG',

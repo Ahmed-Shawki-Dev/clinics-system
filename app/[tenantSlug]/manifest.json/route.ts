@@ -30,27 +30,34 @@ export async function GET(
   const logoUrl = getFullImageUrl(clinic.logoUrl) || '/icon-512x512.png' // لو مفيش لوجو نرجع للأساسي بتاع ميدورا
 
   // 3. بناء الـ Manifest الخاص بالعيادة
-const manifest = {
-  name: clinic.clinicName || 'عيادة طبية',
-  short_name: clinic.clinicName || 'عيادة',
-  start_url: `/${tenantSlug}`,
-  display: 'standalone',
-  background_color: '#ffffff',
-  theme_color: '#0f172a',
-  icons: [
-    {
-      src: logoUrl,
-      sizes: 'any', // 🔴 السر هنا: بنقول للمتصفح اقبل الصورة بأي مقاس العيادة رافعاه
-      type: 'image/png',
-      purpose: 'any maskable', // 🔴 عشان الأندرويد يقصها جوه دايرة أو مربع شيك ومتبقاش مقطوشة
-    },
-    {
-      src: '/icon-512x512.png', // Fallback لبراند Medora عشان الـ Lighthouse ميزعلش
-      sizes: '512x512',
-      type: 'image/png',
-    },
-  ],
-}
+  const manifest = {
+    name: clinic.clinicName || 'عيادة طبية',
+    short_name: clinic.clinicName || 'عيادة',
+    description: `نظام إدارة عيادة ${clinic.clinicName}`,
+
+    // 👇 التعديل الجراحي هنا 👇
+    id: `/${tenantSlug}`, // بيعرف الموبايل إن ده تطبيق مستقل
+    scope: `/${tenantSlug}/`, // بيقفل التطبيق على روابط العيادة بس وميخرجش براها
+    start_url: `/${tenantSlug}`,
+    // 👆 👆 👆
+
+    display: 'standalone',
+    background_color: '#ffffff',
+    theme_color: '#0f172a',
+    icons: [
+      {
+        src: logoUrl,
+        sizes: 'any', // 🔴 السر هنا: بنقول للمتصفح اقبل الصورة بأي مقاس العيادة رافعاه
+        type: 'image/png',
+        purpose: 'any maskable', // 🔴 عشان الأندرويد يقصها جوه دايرة أو مربع شيك ومتبقاش مقطوشة
+      },
+      {
+        src: '/icon-512x512.png', // Fallback لبراند Medora عشان الـ Lighthouse ميزعلش
+        sizes: '512x512',
+        type: 'image/png',
+      },
+    ],
+  }
 
   // 4. إرجاع النتيجة كـ JSON عشان المتصفح يفهمها
   return Response.json(manifest)
