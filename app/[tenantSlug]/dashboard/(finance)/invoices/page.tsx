@@ -28,7 +28,7 @@ export default async function InvoicesPage({
 
   return (
     <DashboardShell>
-      <DashboardHeader heading='الفواتير والمدفوعات' text='إدارة مستحقات العيادة والتحصيلات'>
+      <DashboardHeader heading='الخزنة والتحصيل' text='إدارة مستحقات العيادة والتحصيلات'>
         <PeriodFilter />
       </DashboardHeader>
 

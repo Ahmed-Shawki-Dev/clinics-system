@@ -31,7 +31,7 @@ export default async function AppointmentsPage({ params, searchParams }: PagePro
   // هنباصي الداتا كلها مش بس الـ items عشان الباجينيشن يشتغل
   return (
     <DashboardShell>
-      <DashboardHeader heading='إدارة الحجوزات' text='عرض وجدولة المواعيد الخاصة بالعيادة.'>
+      <DashboardHeader heading='أجندة المواعيد' text='عرض وجدولة المواعيد الخاصة بالعيادة.'>
         <BookingModal doctors={doctorsList} />
       </DashboardHeader>
 

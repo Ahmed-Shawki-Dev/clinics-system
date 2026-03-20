@@ -21,7 +21,7 @@ export default function DoctorsSection({ doctors }: { doctors: IPublicDoctor[] }
   return (
     <section
       id='doctors'
-      className='py-24 md:py-32 relative overflow-hidden bg-background'
+      className='py-24 md:py-32 relative overflow-hidden bg-muted/30'
       dir='rtl'
     >
       {/* إضاءة خلفية ناعمة */}

@@ -2,16 +2,14 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { ILogin } from '../types/auth'
 
-// فصلنا الداتا بتاعة المريض لوحدها
+// 🔴 البيانات اللي محتاجينها فعلاً في الكلاينت (UI فقط)
 interface TenantAuthData {
   user: ILogin['user'] | null
-  token: string | null
   activeProfileId: string | null
   isAuthenticated: boolean
 }
 
 interface PatientAuthState {
-  // 🔴 الستيت بقت عبارة عن سجل (Record) مفتاحه هو الـ tenantSlug
   tenants: Record<string, TenantAuthData>
   setPatientAuth: (tenantSlug: string, data: ILogin) => void
   setActiveProfile: (tenantSlug: string, profileId: string) => void
@@ -21,7 +19,7 @@ interface PatientAuthState {
 export const usePatientAuthStore = create<PatientAuthState>()(
   persist(
     (set) => ({
-      tenants: {}, // الستيت الابتدائية فاضية
+      tenants: {},
 
       setPatientAuth: (tenantSlug, data) => {
         const defaultProfile = data.user.profiles?.find((p) => p.isDefault)
@@ -29,9 +27,7 @@ export const usePatientAuthStore = create<PatientAuthState>()(
           tenants: {
             ...state.tenants,
             [tenantSlug]: {
-              // بنحفظ الداتا جوه مفتاح العيادة
               user: data.user,
-              token: data.token,
               activeProfileId: defaultProfile?.id || data.user.profiles?.[0]?.id || null,
               isAuthenticated: true,
             },
@@ -53,7 +49,7 @@ export const usePatientAuthStore = create<PatientAuthState>()(
       logout: (tenantSlug) =>
         set((state) => {
           const newTenants = { ...state.tenants }
-          delete newTenants[tenantSlug] // بنمسح داتا العيادة دي بس من اللوكال ستوريدج
+          delete newTenants[tenantSlug]
           return { tenants: newTenants }
         }),
     }),

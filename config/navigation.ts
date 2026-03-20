@@ -13,7 +13,7 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react'
-import { UserRole } from './roles' // تأكد من مسار الـ UserRole عندك
+import { UserRole } from './roles'
 
 export type NavItem = {
   title: string
@@ -28,30 +28,30 @@ export type NavCategory = {
 }
 
 export const SIDEBAR_NAVIGATION: NavCategory[] = [
-  // 1. مساحة عمل الطبيب (حصرية للدكتور فقط بسبب الـ Self-Scoped APIs)
+  // 1. مساحة عمل الطبيب
   {
-    label: 'مساحة عمل الطبيب',
+    label: 'شاشة الطبيب', // بدل مساحة عمل الطبيب
     items: [
       {
-        title: 'طابور الكشف',
+        title: 'كشوفات اليوم', // بدل طابور الكشف (لأن الطابور كلمة مش احترافية للمرضى)
         href: '/doctor/queue',
         icon: Activity,
         roles: ['Doctor'],
       },
       {
-        title: 'زياراتي',
+        title: 'سجل الكشوفات', // بدل زياراتي
         href: '/doctor/visits',
         icon: CalendarDays,
         roles: ['Doctor'],
       },
       {
-        title: 'سجل مرضاي',
+        title: 'ملفات المرضى', // بدل سجل مرضاي
         href: '/doctor/patients',
         icon: Users,
         roles: ['Doctor'],
       },
       {
-        title: 'الإعدادات',
+        title: 'إعدادات الكشف', // مخصصة أكتر للدكتور
         href: '/doctor/settings',
         icon: Settings,
         roles: ['Doctor'],
@@ -59,30 +59,30 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
     ],
   },
 
-  // 2. التشغيل والاستقبال (Front-desk)
+  // 2. التشغيل والاستقبال
   {
-    label: 'العيادة والاستقبال',
+    label: 'الاستقبال والحجوزات', // مصطلح تجاري دقيق
     items: [
       {
-        title: 'لوحة التحكم',
+        title: 'الرئيسية', // أسهل وأسرع للعين
         href: '/',
         icon: LayoutDashboard,
         roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
       },
       {
-        title: 'الطابور المجمع',
+        title: 'العيادة الآن', // بتدي انطباع إن دي شاشة الـ Live للمرضى اللي حاضرين
         href: '/queue',
         icon: Clock,
         roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
       },
       {
-        title: 'المواعيد والحجوزات',
+        title: 'أجندة المواعيد', // المصطلح الأوقع في العيادات
         href: '/appointments',
         icon: CalendarDays,
         roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
       },
       {
-        title: 'قاعدة المرضى',
+        title: 'سجل المرضى',
         href: '/patients',
         icon: Users,
         roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
@@ -92,59 +92,59 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
 
   // 3. الإدارة المالية
   {
-    label: 'الماليات',
+    label: 'الحسابات والماليات',
     items: [
       {
-        title: 'الفواتير والمدفوعات',
+        title: 'الخزنة والتحصيل', // ده اللي الريسبشن بيعمله فعلاً
         href: '/invoices',
         icon: Receipt,
-        roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'], // الريسبشن بيكريت فواتير
+        roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
       },
       {
-        title: 'المصروفات',
+        title: 'المصروفات والعهد', // مصطلح مالي أصح
         href: '/expenses',
         icon: Banknote,
-        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'], // المصروفات للإدارة بس
+        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
       },
       {
-        title: 'التقارير المالية',
+        title: 'حركة الخزنة والتقارير', // بيفهم صاحب العيادة إن هنا الفلوس
         href: '/reports',
         icon: PieChart,
         roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
       },
-      {
-        title: 'التعاقدات',
-        href: '/contracts',
-        icon: Handshake ,
-        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
-      },
+      // {
+      //   title: 'تعاقدات الشركات', // أوضح من كلمة تعاقدات مبهمة
+      //   href: '/contracts',
+      //   icon: Handshake,
+      //   roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
+      // },
     ],
   },
 
   // 4. الإدارة والتشغيل
   {
-    label: 'الإدارة والإعدادات',
+    label: 'الإدارة والتشغيل',
     items: [
       {
-        title: 'الأطباء',
+        title: 'إدارة الأطباء',
         href: '/doctors',
         icon: Stethoscope,
         roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
       },
       {
-        title: 'الموظفين',
+        title: 'شئون العاملين', // مصطلح HR مظبوط
         href: '/staff',
         icon: ClipboardList,
         roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
       },
       {
-        title: 'الخدمات والأسعار',
+        title: 'لائحة الأسعار', // الكلمة السحرية في أي عيادة للخدمات
         href: '/services',
         icon: Banknote,
-        roles: ['ClinicOwner', 'SuperAdmin'], // المدير ملوش يغير أسعار
+        roles: ['ClinicOwner', 'SuperAdmin'],
       },
       {
-        title: 'إعدادات العيادة',
+        title: 'بيانات المنشأة', // أشيك من "إعدادات العيادة"
         href: '/settings',
         icon: Settings,
         roles: ['ClinicOwner', 'SuperAdmin'],

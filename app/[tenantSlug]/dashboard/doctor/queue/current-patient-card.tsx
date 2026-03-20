@@ -14,12 +14,12 @@ import { ICreateTicketResponse, IQueueTicket } from '@/types/queue'
 import {
   ArrowRight,
   CheckCircle2,
+  ClipboardList,
   Clock,
   FastForward,
   Loader2,
   PlayCircle,
   Stethoscope,
-  ClipboardList,
 } from 'lucide-react'
 import { useParams, useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -71,28 +71,28 @@ export function CurrentPatientCard({ currentTicket, waitingTickets, isPending, o
   }
 
   return (
-    <Card className='border shadow-sm bg-card'>
-      <CardContent className='p-6 sm:p-8'>
+    <Card className='border border-border/60 shadow-sm bg-card overflow-hidden'>
+      <CardContent className='p-5 sm:p-8'>
         {currentTicket ? (
           <div className='space-y-6'>
-            {/* الجزء الأول: بيانات المريض والبادجات */}
-            <div className='flex items-start justify-between'>
-              <div>
-                <h2 className='text-3xl font-bold tracking-tight text-foreground'>
+            {/* Header: Responsive Layout */}
+            <div className='flex flex-col sm:flex-row sm:items-start justify-between gap-4'>
+              <div className='space-y-1.5'>
+                <h2 className='text-2xl sm:text-3xl font-bold tracking-tight text-foreground'>
                   {currentTicket.patientName}
                 </h2>
-                <div className='flex items-center gap-3 mt-2 text-sm text-muted-foreground'>
-                  <span className='font-mono font-medium text-foreground bg-muted px-2 py-0.5 rounded'>
+                <div className='flex flex-wrap items-center gap-y-2 gap-x-3 text-sm text-muted-foreground'>
+                  <span className='font-mono font-bold text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/10'>
                     #{currentTicket.ticketNumber}
                   </span>
-                  <span>•</span>
+                  <span className='hidden sm:inline opacity-40'>•</span>
                   <span className='flex items-center gap-1.5'>
-                    <Stethoscope className='w-4 h-4' />
+                    <Stethoscope className='w-4 h-4 opacity-70' />
                     {currentTicket.serviceName || 'كشف عام'}
                   </span>
-                  <span>•</span>
+                  <span className='hidden sm:inline opacity-40'>•</span>
                   <span className='flex items-center gap-1.5'>
-                    <Clock className='w-4 h-4' />
+                    <Clock className='w-4 h-4 opacity-70' />
                     {new Date(currentTicket.calledAt!).toLocaleTimeString('ar-EG', {
                       hour: '2-digit',
                       minute: '2-digit',
@@ -101,48 +101,53 @@ export function CurrentPatientCard({ currentTicket, waitingTickets, isPending, o
                 </div>
               </div>
 
-              <div className='flex gap-2'>
+              <div className='flex items-center gap-2'>
                 {currentTicket.isUrgent && (
-                  <Badge variant='destructive' className='px-3 py-1'>
-                    طارئ
+                  <Badge variant='destructive' className='px-2.5 py-0.5 rounded-md font-bold'>
+                    حالة طارئة
                   </Badge>
                 )}
                 {currentTicket.status === 'InVisit' && (
-                  <Badge className='bg-emerald-600 hover:bg-emerald-700 px-3 py-1'>قيد الكشف</Badge>
+                  <Badge
+                    variant='secondary'
+                    className='bg-primary/10 text-primary border-primary/20 px-2.5 py-0.5 rounded-md font-bold'
+                  >
+                    قيد الكشف الآن
+                  </Badge>
                 )}
               </div>
             </div>
 
-            {/* الجزء المفقود اللي رجعناه: ملاحظات الاستقبال (الفحص المبدئي) */}
+            {/* Notes Section: Cleaner Design */}
             {currentTicket.notes && (
-              <div className='bg-muted/30 border-r-4 border-primary/50 p-4 rounded-l-lg'>
-                <div className='flex items-center gap-2 mb-1.5'>
-                  <ClipboardList className='w-4 h-4 text-primary/70' />
-                  <span className='text-sm font-semibold text-foreground'>
-                    ملاحظات الاستقبال / الفحص:
+              <div className='bg-muted/40 border-r-4 border-primary p-4 rounded-l-xl'>
+                <div className='flex items-center gap-2 mb-2'>
+                  <ClipboardList className='w-4 h-4 text-primary' />
+                  <span className='text-xs font-bold uppercase tracking-wider text-foreground/70'>
+                    ملاحظات الفحص المبدئي
                   </span>
                 </div>
-                <p className='text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed'>
+                <p className='text-sm text-foreground/80 font-medium leading-relaxed'>
                   {currentTicket.notes}
                 </p>
               </div>
             )}
 
-            {/* الإجراءات (الأزرار بحجم احترافي مش مبالغ فيه) */}
-            <div className='flex items-center gap-3 pt-4 border-t'>
+            {/* Actions: Full width on mobile, auto on desktop */}
+            <div className='flex flex-wrap items-center gap-3 pt-6 border-t border-border/60'>
               {currentTicket.status === 'Called' && (
                 <>
                   <Button
                     variant='outline'
-                    className='h-11 px-6 font-medium'
+                    className='flex-1 sm:flex-none h-12 px-6 font-bold rounded-xl'
                     disabled={isPending}
                     onClick={() => onAction(skipTicketAction, currentTicket.id)}
                   >
-                    <FastForward className='w-4 h-4 ml-2 opacity-70' /> تخطي
+                    <FastForward className='w-4 h-4 ml-2 opacity-60' /> تخطي المريض
                   </Button>
 
                   <Button
-                    className='h-11 px-8 font-medium bg-primary'
+                    className='flex-1 sm:flex-none h-12 px-8 font-bold rounded-xl shadow-lg shadow-primary/20'
                     disabled={isPending}
                     onClick={() => onAction(startVisitAction, currentTicket.id)}
                   >
@@ -155,7 +160,7 @@ export function CurrentPatientCard({ currentTicket, waitingTickets, isPending, o
                 <>
                   <Button
                     variant='outline'
-                    className='h-11 px-6 font-medium text-primary border-primary/30 hover:bg-primary/5'
+                    className='flex-1 sm:flex-none h-12 px-6 font-bold rounded-xl'
                     disabled={isPending || isReturning}
                     onClick={handleReturnToVisit}
                   >
@@ -168,29 +173,30 @@ export function CurrentPatientCard({ currentTicket, waitingTickets, isPending, o
                   </Button>
 
                   <Button
-                    className='h-11 px-8 font-medium bg-emerald-600 hover:bg-emerald-700'
+                    className='flex-1 sm:flex-none h-12 px-8 font-bold rounded-xl shadow-lg shadow-primary/20'
                     disabled={isPending || isReturning}
                     onClick={() => onAction(finishTicketAction, currentTicket.id)}
                   >
-                    <CheckCircle2 className='w-5 h-5 ml-2' /> إنهاء الكشف
+                    <CheckCircle2 className='w-5 h-5 ml-2' /> إنهاء الزيارة
                   </Button>
                 </>
               )}
             </div>
           </div>
         ) : (
-          /* حالة الفراغ - ملمومة وصغيرة جداً */
-          <div className='flex flex-col items-center justify-center py-12 text-center'>
-            <h3 className='text-xl font-bold text-foreground mb-1'>الغرفة فارغة</h3>
-            <p className='text-sm text-muted-foreground mb-6'>
-              لا يوجد مريض حالياً. يمكنك نداء المريض التالي.
+          /* Empty State: Focused & Minimal */
+          <div className='flex flex-col items-center justify-center py-10 text-center'>
+            <h3 className='text-xl font-bold text-foreground mb-1'>لا يوجد مريض حالياً</h3>
+            <p className='text-sm text-muted-foreground mb-8 max-w-62.5'>
+              غرفة الكشف فارغة، يمكنك مناداة المريض التالي من قائمة الانتظار.
             </p>
             <Button
-              className='h-11 px-8'
+              className='h-12 px-10 font-bold rounded-xl shadow-md'
               variant={waitingTickets.length > 0 ? 'default' : 'secondary'}
               disabled={waitingTickets.length === 0 || isPending}
               onClick={() => onAction(callTicketAction, waitingTickets[0]?.id)}
             >
+              <PlayCircle className='w-5 h-5 ml-2' />
               {waitingTickets.length > 0 ? 'نداء المريض التالي' : 'قائمة الانتظار فارغة'}
             </Button>
           </div>

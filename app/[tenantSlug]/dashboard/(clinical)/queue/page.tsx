@@ -18,7 +18,7 @@ export default async function QueuePage({ params }: { params: Promise<{ tenantSl
 
   return (
     <DashboardShell>
-      <DashboardHeader heading='إدارة الطابور' text={`مراقبة العيادات وإصدار التذاكر.`}>
+      <DashboardHeader heading='كشوفات اليوم' text={`مراقبة العيادات وإصدار التذاكر.`}>
         <QueueActions tenantSlug={tenantSlug} doctors={doctors} initialBoardRes={boardRes} />
       </DashboardHeader>
 

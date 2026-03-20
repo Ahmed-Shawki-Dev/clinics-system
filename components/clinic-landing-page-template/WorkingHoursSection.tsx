@@ -7,7 +7,6 @@ import { DAY_ORDER, DAYS_AR, IPublicWorkingHour } from '@/types/public'
 import { formatTime } from '../../lib/formatTime'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
-import { CalendarClock, Clock } from 'lucide-react'
 
 export default function WorkingHoursSection({
   workingHours,
@@ -21,101 +20,85 @@ export default function WorkingHoursSection({
   )
 
   return (
-    <section className='py-20 md:py-32 relative overflow-hidden bg-background' dir='rtl'>
-
-
+    <section className='py-24 md:py-32 relative overflow-hidden bg-background' dir='rtl'>
       <motion.div
-        className='container px-4 md:px-6 max-w-4xl mx-auto relative z-10'
+        className='container px-4 md:px-6 max-w-2xl mx-auto relative z-10'
         variants={staggerContainer}
         initial='hidden'
         whileInView='visible'
         viewport={{ once: true, margin: '-100px' }}
       >
         {/* العناوين */}
-        <div className='flex flex-col items-center text-center space-y-4 mb-12'>
-
+        <div className='flex flex-col items-center text-center space-y-4 mb-14'>
           <motion.div variants={fadeInUp}>
-            <Typography variant='h2' className='text-3xl md:text-5xl font-black text-foreground'>
-              مواعيد{' '}
-              <span className='text-transparent bg-clip-text bg-linear-to-r from-primary to-primary/60'>
-                العيادة
-              </span>
+            <Typography
+              variant='h2'
+              className='text-3xl md:text-5xl font-bold tracking-tight text-foreground w-full'
+            >
+              مواعيد <span className='text-primary'>العيادة</span>
+            </Typography>
+          </motion.div>
+          <motion.div variants={fadeInUp}>
+            <Typography variant='p' className='text-muted-foreground text-lg'>
+              نحن هنا لخدمتك في الأوقات التالية
             </Typography>
           </motion.div>
         </div>
 
-        {/* كارت المواعيد الزجاجي */}
-        <motion.div
-          variants={fadeInUp}
-          className='rounded-4xl border border-border/50 bg-card/60 backdrop-blur-xl shadow-2xl shadow-primary/5 overflow-hidden p-2 md:p-4'
-        >
-          <div className='flex flex-col'>
-            {sortedHours.map((wh, index) => {
-              const isActive = wh.isActive
-              const dayName = DAYS_AR[wh.dayOfWeek] ?? wh.dayOfWeek
+        {/* قائمة المواعيد (بدون ستايل الجدول) */}
+        <div className='flex flex-col gap-3'>
+          {sortedHours.map((wh, index) => {
+            const isActive = wh.isActive
+            const dayName = DAYS_AR[wh.dayOfWeek] ?? wh.dayOfWeek
 
-              return (
-                <motion.div
-                  key={wh.dayOfWeek}
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.05 }} // تأخير متدرج لكل يوم
-                  className={cn(
-                    'group flex items-center justify-between px-4 md:px-6 py-4 md:py-5 text-base rounded-2xl transition-all duration-300 hover:bg-muted/50',
-                    !isActive && 'opacity-70 grayscale-50',
-                  )}
-                >
-                  <div className='flex items-center gap-3 md:gap-4 font-bold'>
-                    {/* أيقونة اليوم بتظهر وتختفي في الهوفر */}
-                    <div
-                      className={cn(
-                        'p-2 rounded-lg transition-colors',
-                        isActive
-                          ? 'bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground'
-                          : 'bg-muted text-muted-foreground',
-                      )}
-                    >
-                      <Clock className='w-4 h-4 md:w-5 md:h-5' />
-                    </div>
-                    <span className='min-w-24 md:min-w-32 text-foreground text-sm md:text-lg'>
-                      {dayName}
-                    </span>
-
-                    {!isActive && (
-                      <Badge
-                        variant='outline'
-                        className='text-xs border-destructive/30 text-destructive bg-destructive/5 px-3 py-0.5'
-                      >
-                        مغلق
-                      </Badge>
+            return (
+              <motion.div
+                key={wh.dayOfWeek}
+                variants={fadeInUp}
+                custom={index} // عشان نعمل تأخير متدرج في الأنيميشن لو حابب
+                className={cn(
+                  // 🔴 كبسولة منفصلة بدون بوردر، بتعتمد على لون خلفية خفيف جداً
+                  'group flex flex-row items-center justify-between gap-4 px-6 py-4 rounded-2xl transition-colors hover:bg-muted/50',
+                  isActive ? 'bg-muted/20' : 'bg-transparent opacity-70',
+                )}
+              >
+                <div className='flex items-center gap-4'>
+                  <span
+                    className={cn(
+                      'text-base md:text-lg font-semibold tracking-wide',
+                      isActive ? 'text-foreground' : 'text-muted-foreground',
                     )}
-                  </div>
+                  >
+                    {dayName}
+                  </span>
 
-                  {isActive ? (
-                    <div className='flex items-center gap-3 md:gap-6 font-bold text-foreground bg-background/50 px-4 py-2 rounded-xl border border-border/50 shadow-sm'>
-                      <span className='tracking-wide text-sm md:text-base'>
-                        {formatTime(wh.startTime)}
-                      </span>
-                      <span className='text-primary opacity-50'>–</span>
-                      <span className='tracking-wide text-sm md:text-base'>
-                        {formatTime(wh.endTime)}
-                      </span>
-                    </div>
-                  ) : (
-                    <div className='text-muted-foreground text-sm font-medium px-4 py-2 bg-muted/30 rounded-xl'>
-                      عطلة أسبوعية
-                    </div>
+                  {!isActive && (
+                    <Badge
+                      variant='secondary'
+                      className='text-xs font-medium bg-muted text-muted-foreground'
+                    >
+                      مغلق
+                    </Badge>
                   )}
-                </motion.div>
-              )
-            })}
-          </div>
-        </motion.div>
+                </div>
 
-        {/* نص الملاحظة السفلية */}
+                {isActive ? (
+                  <div className='flex items-center gap-2 font-medium text-foreground text-sm md:text-base'>
+                    <span>{formatTime(wh.startTime)}</span>
+                    <span className='text-muted-foreground/50 mx-1'>-</span>
+                    <span>{formatTime(wh.endTime)}</span>
+                  </div>
+                ) : (
+                  <div className='text-sm font-medium text-muted-foreground'>عطلة أسبوعية</div>
+                )}
+              </motion.div>
+            )
+          })}
+        </div>
+
+        {/* الملاحظة السفلية */}
         <motion.div variants={fadeInUp}>
-          <p className='text-center text-sm text-muted-foreground mt-8 bg-muted/30 border border-border/50 py-3 px-6 rounded-full w-fit mx-auto'>
+          <p className='text-center text-sm font-medium text-muted-foreground mt-8'>
             المواعيد قابلة للتعديل في الأعياد والمناسبات الرسمية. يُفضَّل الحجز المسبق.
           </p>
         </motion.div>

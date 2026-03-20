@@ -172,34 +172,33 @@ function Sidebar({
     )
   }
 
-if (isMobile) {
-  return (
-    <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-      <SheetContent
-        data-sidebar='sidebar'
-        data-slot='sidebar'
-        data-mobile='true'
-        className='bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden'
-        style={
-          {
-            '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
-            // 🔥 السحر الهندسي هنا: إجبار الدخول والخروج من ناحية اليمين
-            '--tw-enter-translate-x': '100%',
-            '--tw-exit-translate-x': '100%',
-          } as React.CSSProperties
-        }
-        // سايبين دي عشان يفضل ثابت في مكانه الصح
-        side={side === 'right' ? 'left' : 'right'}
-      >
-        <SheetHeader className='sr-only'>
-          <SheetTitle>Sidebar</SheetTitle>
-          <SheetDescription>Displays the mobile sidebar.</SheetDescription>
-        </SheetHeader>
-        <div className='flex h-full w-full flex-col'>{children}</div>
-      </SheetContent>
-    </Sheet>
-  )
-}
+  if (isMobile) {
+    return (
+      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+        <SheetContent
+          data-sidebar='sidebar'
+          data-slot='sidebar'
+          data-mobile='true'
+          className='bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden'
+          style={
+            {
+              '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
+              // ❌ شيلنا الـ translate-x اليدوي اللي كان بيبوظ الدنيا
+            } as React.CSSProperties
+          }
+          // ✅ السحر هنا: في الـ RTL لو عايزه يمين بتسيبه right
+          // الـ Radix UI بيفهم الـ Direction لوحده
+          side={side}
+        >
+          <SheetHeader className='sr-only'>
+            <SheetTitle>Sidebar</SheetTitle>
+            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
+          </SheetHeader>
+          <div className='flex h-full w-full flex-col'>{children}</div>
+        </SheetContent>
+      </Sheet>
+    )
+  }
 
   return (
     <div

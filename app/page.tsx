@@ -2,9 +2,9 @@ import { CTASection } from '../components/landing/cta-section'
 import { DashboardPreview } from '../components/landing/DashboardPreview'
 import FAQSection from '../components/landing/FAQSection'
 import { FeaturesSection } from '../components/landing/features-section'
-import LandingFinanceSection from '../components/landing/FinanceSection'
 import { Footer } from '../components/landing/footer'
 import HeroSection from '../components/landing/hero-section'
+import { LandingFinanceSection } from '../components/landing/LandingFinanceSection'
 import { Navbar } from '../components/landing/navbar'
 
 export default function HomePage() {
@@ -13,9 +13,8 @@ export default function HomePage() {
       <Navbar />
       <HeroSection />
       <FeaturesSection />
-      <DashboardPreview />
       <LandingFinanceSection />
-      {/* <PrescriptionSection/> */}
+      <DashboardPreview />
       <FAQSection />
       <CTASection />
       <Footer />

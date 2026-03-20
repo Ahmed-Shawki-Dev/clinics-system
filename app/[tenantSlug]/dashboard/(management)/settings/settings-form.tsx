@@ -124,12 +124,50 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
         <Tabs defaultValue='general' className='w-full'>
-          <TabsList className='mb-8'>
-            <TabsTrigger value='general'>البيانات الأساسية</TabsTrigger>
-            <TabsTrigger value='contact'>أرقام التواصل</TabsTrigger>
-            <TabsTrigger value='booking'>إعدادات الحجز</TabsTrigger>
-            <TabsTrigger value='workingHours'>أوقات العمل</TabsTrigger>
-          </TabsList>
+          <div className='relative w-full overflow-hidden'>
+            <TabsList
+              className='
+              mb-8 
+              w-full 
+              justify-start 
+              h-auto 
+              p-1 
+              bg-muted/50 
+              overflow-x-auto 
+              flex-nowrap 
+              whitespace-nowrap 
+              scrollbar-hide 
+              [-ms-overflow-style:none] 
+              [scrollbar-width:none] 
+              [&::-webkit-scrollbar]:hidden
+            '
+            >
+              <TabsTrigger
+                value='general'
+                className='py-2.5 px-4 rounded-md data-[state=active]:shadow-sm'
+              >
+                البيانات الأساسية
+              </TabsTrigger>
+              <TabsTrigger
+                value='contact'
+                className='py-2.5 px-4 rounded-md data-[state=active]:shadow-sm'
+              >
+                أرقام التواصل
+              </TabsTrigger>
+              <TabsTrigger
+                value='booking'
+                className='py-2.5 px-4 rounded-md data-[state=active]:shadow-sm'
+              >
+                إعدادات الحجز
+              </TabsTrigger>
+              <TabsTrigger
+                value='workingHours'
+                className='py-2.5 px-4 rounded-md data-[state=active]:shadow-sm'
+              >
+                أوقات العمل
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value='general'>
             <Card>

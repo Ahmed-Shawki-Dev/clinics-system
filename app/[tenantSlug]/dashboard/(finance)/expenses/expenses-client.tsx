@@ -1,6 +1,6 @@
 'use client'
 
-import { IExpense } from '@/types/expense'
+import { GenericPagination } from '@/components/shared/pagination'
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { GenericPagination } from '@/components/shared/pagination' // راجع مسار الباجينيشن بتاعك
+import { IExpense } from '@/types/expense'
 import { AddExpenseDialog } from './add-expense-dialog'
 
 interface ExpensesClientProps {
@@ -26,7 +26,6 @@ interface ExpensesClientProps {
 export function ExpensesClient({ initialExpenses, tenantSlug, pagination }: ExpensesClientProps) {
   return (
     <div className='space-y-4'>
-      {/* زرار الإضافة في وش الجدول */}
       <div className='flex justify-end'>
         <AddExpenseDialog tenantSlug={tenantSlug} />
       </div>
@@ -45,8 +44,12 @@ export function ExpensesClient({ initialExpenses, tenantSlug, pagination }: Expe
           <TableBody>
             {initialExpenses.map((exp) => (
               <TableRow key={exp.id}>
-                <TableCell className='font-mono'>
-                  {new Date(exp.expenseDate).toLocaleDateString('ar-EG')}
+                <TableCell>
+                  {new Date(exp.expenseDate).toLocaleDateString('ar-EG-u-nu-latn', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
                 </TableCell>
                 <TableCell className='font-bold'>{exp.category}</TableCell>
                 <TableCell className='font-bold text-destructive'>{exp.amount} ج.م</TableCell>
