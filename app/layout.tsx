@@ -3,13 +3,14 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { DirectionProvider } from '@/components/ui/direction'
 import { Toaster } from '@/components/ui/sonner'
 import type { Metadata, Viewport } from 'next'
-import { Cairo, Tajawal } from 'next/font/google'
+import { IBM_Plex_Sans_Arabic, Tajawal } from 'next/font/google'
 import './globals.css'
 
-const cairo = Cairo({
+const ibm = IBM_Plex_Sans_Arabic({
   subsets: ['arabic'],
-  variable: '--font-cairo',
+  variable: '--font-ibm',
   display: 'swap',
+  weight:['100','200','300','400','500','600','700']
 })
 
 const tajawal = Tajawal({
@@ -60,7 +61,7 @@ export default function RootLayout({
   return (
     <html lang='ar' dir='rtl' suppressHydrationWarning>
       <body
-        className={`${cairo.variable} ${tajawal.variable} font-sans antialiased`}
+        className={`${ibm.variable} ${tajawal.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
         <DirectionProvider direction='rtl' dir={'rtl'}>

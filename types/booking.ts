@@ -11,15 +11,15 @@ export interface IBooking {
   bookingTime: string // HH:mm
   status: 'Confirmed' | 'Cancelled' | 'Rescheduled' | 'Completed'
   notes?: string | null
-  queueTicketId?: string | null // 👈 عشان لو الحجز اتربط بتذكرة في الطابور
-  cancelledAt?: string | null // 👈 تاريخ ووقت الإلغاء
-  cancellationReason?: string | null // 👈 سبب الإلغاء
+  queueTicketId?: string | null
+  cancelledAt?: string | null
+  cancellationReason?: string | null
+
+  // الحقول الجديدة اللي ظهرت في السواجر
+  isOperationalNow: boolean // هل الحجز ده شغال دلوقتي؟
+  operationalPurpose: string // ده اللي غالباً شايل "كشف" أو "استشارة" في مرحلة الحجز
+
   createdAt: string
 }
 
-export interface BookingsResponse {
-  items: IBooking[]
-  totalCount: number
-  pageNumber: number
-  pageSize: number
-}
+

@@ -29,3 +29,12 @@ export interface ICreatePatientResponse {
   password?: string
   initialPassword?: string
 }
+
+export interface IChronicConditions {
+  diabetes: boolean
+  hypertension: boolean
+  cardiacDisease: boolean
+  asthma: boolean
+  other: boolean
+  otherNotes?: string
+}

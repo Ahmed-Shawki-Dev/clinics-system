@@ -36,7 +36,7 @@
   --sidebar-accent-foreground: #0284c7;
   --sidebar-border: #e2e8f0;
   --sidebar-ring: #0ea5e9;
-  --font-sans: Cairo, ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'IBM Plex Sans Arabic', sans-serif;
   --font-serif: Tajawal, ui-sans-serif, system-ui, sans-serif;
   --font-mono: JetBrains Mono, monospace;
   --radius: 1rem;
@@ -193,6 +193,6 @@
 }
 
 [cmdk-list] {
-    scrollbar-width: thin;
-    scrollbar-color: var(--primary) transparent;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
 }

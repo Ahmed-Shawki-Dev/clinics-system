@@ -1,43 +1,32 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
 import { BaseApiResponse } from '@/types/api'
 import { IPatient } from '@/types/patient'
-import { CreatePatientInput } from '../../validation/patient'
-import { getToken } from '../auth/getToken'
+import { UpdatePatientInput } from '@/validation/patient' // استخدمنا سكيما التعديل
+import { revalidatePath } from 'next/cache'
+import { fetchApi } from '../../lib/fetchApi'
 
+/**
+ * تحديث بيانات المريض الأساسية
+ */
 export async function updatePatientAction(
   id: string,
-  data: CreatePatientInput,
+  data: UpdatePatientInput,
   tenantSlug: string,
 ): Promise<BaseApiResponse<IPatient>> {
-  const token = await getToken()
+  // 🔴 استخدمنا الـ fetchApi عشان هي اللي بتهندل التوكن والـ X-Tenant
+  const result = await fetchApi<IPatient>(`/api/clinic/patients/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+    tenantSlug,
+    authType: 'staff', //
+  })
 
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/clinic/patients/${id}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-        'X-Tenant': tenantSlug,
-      },
-      body: JSON.stringify(data),
-    })
-
-    const result = await res.json()
-
-    if (result.success) {
-      revalidatePath(`/${tenantSlug}/dashboard/patients`)
-    }
-
-    return result as BaseApiResponse<IPatient>
-  } catch (error) {
-    return {
-      success: false,
-      message: 'حدث خطأ أثناء تحديث بيانات المريض',
-      data: {} as IPatient,
-      errors: [],
-      meta: { timestamp: new Date().toISOString(), requestId: '' },
-    }
+  // لو العملية نجحت، بنعمل Revalidate عشان البيانات تتحدث في الـ Client
+  if (result.success) {
+    revalidatePath(`/${tenantSlug}/dashboard/patients`)
+    revalidatePath(`/${tenantSlug}/dashboard/patients/${id}`)
   }
+
+  return result
 }

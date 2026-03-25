@@ -1,12 +1,23 @@
-export interface IServiceItem {
-  serviceName: string
-  price: number
-  durationMinutes?: number
-  isActive?: boolean
+export interface IClinicService {
+  id: string
+  name: string
+  description: string | null
+  defaultPrice: number
+  defaultDurationMinutes: number
+  isActive: boolean
+  createdAt: string
 }
 
-export interface UpdateDoctorServicesPayload {
-  services: IServiceItem[]
+
+
+export interface IDoctorServiceLink {
+  linkId: string
   doctorId: string
-  tenantSlug: string
+  clinicServiceId: string
+  serviceName: string
+  effectivePrice: number
+  effectiveDurationMinutes: number
+  overridePrice: number | null // لو الدكتور غير السعر الافتراضي
+  overrideDurationMinutes: number | null // لو الدكتور بيطول أو بيقصر في الكشف ده
+  isActive: boolean
 }

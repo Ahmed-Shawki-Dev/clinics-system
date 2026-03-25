@@ -7,7 +7,6 @@ export type TicketStatus =
   | 'NoShow'
   | 'Cancelled'
 
-// 2. تذكرة المريض (QueueTicketDto)
 export interface IQueueTicket {
   id: string
   sessionId: string
@@ -20,14 +19,21 @@ export interface IQueueTicket {
   ticketNumber: number
   status: TicketStatus
   isUrgent: boolean
+  urgentAccepted?: boolean // <-- جديد
   issuedAt: string
   calledAt?: string | null
   visitStartedAt?: string | null
   completedAt?: string | null
   notes?: string | null
+
+  // <-- حقول الـ Rich Status الجديدة -->
+  myQueueNumber?: number
+  currentServingNumber?: number
+  patientsAheadCount?: number
+  estimatedWaitMinutes?: number
+  estimatedWaitText?: string
 }
 
-// 3. الشِفت بتاع الدكتور (QueueSessionDto)
 export interface IQueueSession {
   id: string
   doctorId: string
@@ -42,10 +48,9 @@ export interface IQueueSession {
   createdAt: string
 }
 
-// 4. طابور الدكتور جوه شاشة المراقبة (QueueBoardSessionDto)
 export interface IQueueBoardSession {
   sessionId: string
-  doctorId?: string // الباك إند بيرجعها في الـ my-queue
+  doctorId?: string
   doctorName: string
   isActive: boolean
   waitingCount: number
@@ -60,8 +65,7 @@ export interface IQueueBoard {
   sessions: IQueueBoardSession[]
 }
 
-
 export interface ICreateTicketResponse {
-  ticket: IQueueTicket; // بنعيد استخدام التايب بتاعك هنا
-  visitId: string;      // الحتة الزيادة اللي الباك بعتها
+  ticket: IQueueTicket
+  visitId: string
 }

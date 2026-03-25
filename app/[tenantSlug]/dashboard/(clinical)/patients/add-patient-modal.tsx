@@ -5,15 +5,15 @@ import { format } from 'date-fns'
 import { ar } from 'date-fns/locale'
 import { CalendarIcon, CheckCircle2, Loader2, MessageCircle, UserPlus } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Path, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
+import { Checkbox } from '@/components/ui/checkbox' // تأكد من وجود المكون ده عندك
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -22,6 +22,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -36,10 +37,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch' // أو Switch لليوزبيليتي
 import { Textarea } from '@/components/ui/textarea'
 
 import { cn } from '@/lib/utils'
 import { createPatientAction } from '../../../../../actions/patient/createPatient'
+import { updateChronicConditionsAction } from '../../../../../actions/patient/updateChronicConditions'
 import { CreatePatientInput, CreatePatientSchema } from '../../../../../validation/patient'
 
 interface AddPatientModalProps {
@@ -47,8 +50,8 @@ interface AddPatientModalProps {
   initialPhone?: string
   trigger?: React.ReactNode
   onSuccess?: (patientId: string, patientName: string) => void
-  open?: boolean // 🔥 جديد لاستقبال الـ State
-  onOpenChange?: (open: boolean) => void // 🔥 جديد
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 export function AddPatientModal({
@@ -70,31 +73,71 @@ export function AddPatientModal({
     phone: string
   } | null>(null)
 
-  // 🔥 State تحفظ بيانات المريض عشان نبعتها لـ onSuccess وقت الإغلاق
   const [newPatientData, setNewPatientData] = useState<{ id: string; name: string } | null>(null)
 
-  const form = useForm<CreatePatientInput>({
+  const chronicItems: { id: Path<CreatePatientInput>; label: string }[] = [
+    { id: 'diabetes', label: 'سكر' },
+    { id: 'hypertension', label: 'ضغط' },
+    { id: 'cardiacDisease', label: 'قلب' },
+    { id: 'asthma', label: 'حساسية صدر' },
+  ]
+
+  // 🔴 State لإظهار أو إخفاء قسم الأمراض المزمنة في الـ UI
+  const [showChronicFields, setShowChronicFields] = useState(false)
+
+  const form = useForm({
     resolver: valibotResolver(CreatePatientSchema),
     defaultValues: {
       name: '',
       phone: initialPhone || '',
       address: '',
       notes: '',
+      gender: 'Male',
+      // القيم الافتراضية للتايبس الجديدة
+      diabetes: false,
+      hypertension: false,
+      cardiacDisease: false,
+      asthma: false,
+      otherChronic: '',
     },
   })
 
   useEffect(() => {
-    if (initialPhone) {
-      form.setValue('phone', initialPhone)
-    }
+    if (initialPhone) form.setValue('phone', initialPhone)
   }, [initialPhone, form])
 
   const onSubmit = async (values: CreatePatientInput) => {
     try {
+      // 1. إنشاء المريض الأساسي
       const result = await createPatientAction(values, tenantSlug)
 
       if (result.success && result.data) {
-        toast.success('تمت إضافة المريض بنجاح')
+        const patientId = result.data.patient.id
+
+        // 🛑 المنطق الذكي: لو اختار أمراض، اضرب الريكوست التاني
+        const hasChronicData =
+          values.diabetes ||
+          values.hypertension ||
+          values.cardiacDisease ||
+          values.asthma ||
+          values.otherChronic
+
+        if (hasChronicData) {
+          await updateChronicConditionsAction(
+            patientId,
+            {
+              diabetes: values.diabetes || false,
+              hypertension: values.hypertension || false,
+              cardiacDisease: values.cardiacDisease || false,
+              asthma: values.asthma || false,
+              other: !!values.otherChronic,
+              otherNotes: values.otherChronic || '',
+            },
+            tenantSlug,
+          )
+        }
+
+        toast.success('تم إنشاء ملف المريض بنجاح')
 
         setCredentials({
           username: result.data.username || '',
@@ -103,109 +146,77 @@ export function AddPatientModal({
           phone: values.phone,
         })
 
-        // 🔥 مش هننادي onSuccess دلوقتي عشان المودال ميقفلش
-        if (result.data.patient) {
-          setNewPatientData({
-            id: result.data.patient.id,
-            name: result.data.patient.name,
-          })
-        }
+        setNewPatientData({
+          id: result.data.patient.id,
+          name: result.data.patient.name,
+        })
       } else {
         toast.error(result.message)
       }
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message || 'حدث خطأ غير متوقع')
-      }
+      toast.error('حدث خطأ أثناء حفظ البيانات')
     }
   }
 
   const handleSendWhatsApp = () => {
     if (!credentials) return
-
-    let phone = credentials.phone
-    if (phone.startsWith('0')) {
-      phone = '20' + phone.substring(1)
-    } else {
-      phone = phone.replace(/\+/g, '')
-    }
-
+    const phone = credentials.phone.startsWith('0')
+      ? '20' + credentials.phone.substring(1)
+      : credentials.phone.replace(/\+/g, '')
     const clinicLink = `${window.location.origin}/${tenantSlug}/patient/login`
-
-    const message = `أهلاً بك أ. ${credentials.name} في العيادة \n\nبيانات الدخول الخاصة بك لتطبيق المرضى هي:\nاسم المستخدم: *${credentials.username}*\nكلمة المرور: *${credentials.password}*\n\nيمكنك الدخول لمتابعة حسابك المباشر عبر الرابط التالي:\n${clinicLink}\n\nنتمنى لك دوام الصحة والعافية.`
-    const encodedMessage = encodeURIComponent(message)
-    const whatsappUrl = `https://wa.me/${phone}?text=${encodedMessage}`
-
-    window.open(whatsappUrl, '_blank')
+    const message = `بيانات دخولك للعيادة:\nالمستخدم: *${credentials.username}*\nكلمة المرور: *${credentials.password}*\nالرابط: ${clinicLink}`
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank')
   }
 
   const handleClose = () => {
     setOpen(false)
-
-    // 🔥 لما الدكتور يدوس إغلاق، ساعتها بس نبلغ الـ Search يختار المريض
-    if (onSuccess && newPatientData) {
-      onSuccess(newPatientData.id, newPatientData.name)
-    }
-
+    if (onSuccess && newPatientData) onSuccess(newPatientData.id, newPatientData.name)
     setTimeout(() => {
       form.reset()
       setCredentials(null)
       setNewPatientData(null)
+      setShowChronicFields(false)
     }, 200)
   }
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(isOpen) => {
-        if (!isOpen) handleClose()
-        else setOpen(true)
-      }}
-    >
-      {/* مش هنعرض الـ Trigger لو إحنا متحكمين فيه من بره */}
+    <Dialog open={open} onOpenChange={(isOpen) => (!isOpen ? handleClose() : setOpen(true))}>
       {controlledOpen === undefined && (
         <DialogTrigger asChild>
           {trigger || (
             <Button>
-              <UserPlus className='mr-2 h-4 w-4' />
-              مريض جديد
+              <UserPlus className='mr-2 h-4 w-4' /> مريض جديد
             </Button>
           )}
         </DialogTrigger>
       )}
 
-      <DialogContent className='sm:max-w-125'>
+      <DialogContent className='sm:max-w-137.5 max-h-[90vh] overflow-y-auto'>
         {credentials ? (
           <div className='flex flex-col items-center justify-center py-6 space-y-6'>
             <div className='flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100'>
               <CheckCircle2 className='h-10 w-10 text-emerald-600' />
             </div>
-            <div className='text-center space-y-1'>
-              <DialogTitle className='text-xl'>تم تسجيل المريض بنجاح</DialogTitle>
-              <DialogDescription>برجاء إرسال بيانات الدخول التالية للمريض</DialogDescription>
-            </div>
-
+            <DialogTitle>تم التسجيل بنجاح</DialogTitle>
             <div className='w-full bg-muted/50 p-4 rounded-lg space-y-3 border'>
-              <div className='flex justify-between items-center'>
-                <span className='text-sm text-muted-foreground'>اسم المستخدم:</span>
-                <span className='font-mono font-bold select-all'>{credentials.username}</span>
+              <div className='flex justify-between'>
+                <span className='text-muted-foreground'>اسم المستخدم:</span>
+                <b>{credentials.username}</b>
               </div>
-              <div className='flex justify-between items-center'>
-                <span className='text-sm text-muted-foreground'>كلمة المرور:</span>
-                <span className='font-mono font-bold select-all'>{credentials.password}</span>
+              <div className='flex justify-between'>
+                <span className='text-muted-foreground'>كلمة المرور:</span>
+                <b>{credentials.password}</b>
               </div>
             </div>
-
-            <div className='flex w-full gap-3 pt-4'>
-              <Button onClick={handleClose} variant='outline' className='flex-1 font-bold'>
+            <div className='flex w-full gap-3'>
+              <Button onClick={handleClose} variant='outline' className='flex-1'>
                 إغلاق
               </Button>
               <Button
                 onClick={handleSendWhatsApp}
-                className='flex-1 bg-green-600 hover:bg-green-700 text-white font-bold shadow-md'
+                className='flex-1 bg-green-600 hover:bg-green-500'
               >
-                <MessageCircle className='mr-2 h-4 w-4' />
-                إرسال عبر واتساب
+                <MessageCircle className='mr-2 h-4 w-4' /> واتساب
               </Button>
             </div>
           </div>
@@ -213,25 +224,21 @@ export function AddPatientModal({
           <>
             <DialogHeader>
               <DialogTitle className='flex items-center gap-2'>
-                <UserPlus className='h-5 w-5 text-primary' />
-                إضافة ملف مريض جديد
+                <UserPlus className='h-5 w-5 text-primary' /> إضافة مريض
               </DialogTitle>
-              <DialogDescription>
-                أدخل البيانات الأساسية للمريض لإنشاء ملف جديد في العيادة.
-              </DialogDescription>
             </DialogHeader>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+              <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5'>
                 <div className='grid grid-cols-2 gap-4'>
                   <FormField
                     control={form.control}
                     name='name'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>اسم المريض</FormLabel>
+                        <FormLabel>الاسم</FormLabel>
                         <FormControl>
-                          <Input placeholder='الاسم ثلاثي' {...field} />
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -242,9 +249,9 @@ export function AddPatientModal({
                     name='phone'
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>رقم الهاتف</FormLabel>
+                        <FormLabel>الهاتف</FormLabel>
                         <FormControl>
-                          <Input placeholder='01xxxxxxxxx' {...field} />
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -262,7 +269,7 @@ export function AddPatientModal({
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder='اختر النوع' />
+                              <SelectValue />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -270,44 +277,40 @@ export function AddPatientModal({
                             <SelectItem value='Female'>أنثى</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
-
                   <FormField
                     control={form.control}
                     name='dateOfBirth'
                     render={({ field }) => (
                       <FormItem className='flex flex-col'>
-                        <FormLabel className='mb-2.5'>تاريخ الميلاد</FormLabel>
+                        <FormLabel className='mb-2'>تاريخ الميلاد</FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant={'outline'}
-                                className={cn(
-                                  'w-full pl-3 text-right font-normal',
-                                  !field.value && 'text-muted-foreground',
-                                )}
-                              >
-                                {field.value ? (
-                                  format(field.value, 'PPP', { locale: ar })
-                                ) : (
-                                  <span>يوم / شهر / سنة</span>
-                                )}
-                                <CalendarIcon className='mr-auto h-4 w-4 opacity-50' />
-                              </Button>
-                            </FormControl>
+                            <Button
+                              variant='outline'
+                              className={cn(
+                                'w-full text-right',
+                                !field.value && 'text-muted-foreground',
+                              )}
+                            >
+                              {field.value
+                                ? format(field.value, 'PPP', { locale: ar })
+                                : 'اختر التاريخ'}
+                              <CalendarIcon className='mr-auto h-4 w-4 opacity-50' />
+                            </Button>
                           </PopoverTrigger>
-                          <PopoverContent className='w-auto p-0' align='start'>
+                          <PopoverContent className='w-auto p-0'>
                             <Calendar
                               mode='single'
                               selected={field.value}
                               onSelect={field.onChange}
-                              captionLayout='dropdown'
+                              // 🔴 السطرين دول هم السحر
+                              captionLayout='dropdown' 
                               fromYear={1900}
                               toYear={new Date().getFullYear()}
+                              // ---------------------------
                               disabled={(date) =>
                                 date > new Date() || date < new Date('1900-01-01')
                               }
@@ -316,52 +319,95 @@ export function AddPatientModal({
                             />
                           </PopoverContent>
                         </Popover>
-                        <FormMessage />
                       </FormItem>
                     )}
                   />
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name='address'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>العنوان (اختياري)</FormLabel>
-                      <FormControl>
-                        <Input placeholder='المنطقة، الشارع، رقم العمارة' {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                {/* 🔴 قسم الأمراض المزمنة المطور */}
+                <div className='space-y-4 border-t pt-4'>
+                  <div className='flex items-center justify-between'>
+                    <div className='space-y-0.5'>
+                      <FormLabel className='text-base'>التاريخ الطبي</FormLabel>
+                      <FormDescription>هل يعاني المريض من أمراض مزمنة؟</FormDescription>
+                    </div>
+                    <Switch
+                      checked={showChronicFields}
+                      onCheckedChange={setShowChronicFields}
+                      dir='ltr'
+                    />
+                  </div>
+
+                  {showChronicFields && (
+                    <div className='grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300'>
+                      {chronicItems.map((item) => (
+                        <FormField
+                          key={item.id}
+                          control={form.control}
+                          name={item.id}
+                          render={({ field }) => (
+                            <FormItem className='flex flex-row items-center space-x-reverse space-x-3 space-y-0'>
+                              <FormControl>
+                                <Checkbox
+                                  checked={!!field.value}
+                                  onCheckedChange={field.onChange}
+                                />
+                              </FormControl>
+                              <FormLabel className='text-sm font-medium cursor-pointer'>
+                                {item.label}
+                              </FormLabel>
+                            </FormItem>
+                          )}
+                        />
+                      ))}
+
+                      {/* خانة "أخرى" بنوعها المظبوط برضه */}
+                      <div className='col-span-2 pt-2 border-t mt-2'>
+                        <FormField
+                          control={form.control}
+                          name='otherChronic'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className='text-xs text-muted-foreground'>
+                                أمراض أو تنبيهات أخرى
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  placeholder='مثلاً: غدة درقية، سيولة..'
+                                  className='h-8 text-xs'
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
                   )}
-                />
+                </div>
 
                 <FormField
                   control={form.control}
                   name='notes'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>ملاحظات طبية (اختياري)</FormLabel>
+                      <FormLabel>ملاحظات إضافية</FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder='أي ملاحظات مبدئية عن حالة المريض...'
-                          className='resize-none'
-                          {...field}
-                        />
+                        <Textarea {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
 
-                <DialogFooter className='gap-2 sm:gap-0 mt-6'>
-                  <Button type='button' variant='outline' onClick={() => setOpen(false)}>
-                    إلغاء
-                  </Button>
-                  <Button type='submit' disabled={form.formState.isSubmitting}>
+                <DialogFooter className='mt-6'>
+                  <Button
+                    type='submit'
+                    disabled={form.formState.isSubmitting}
+                    className='w-full sm:w-auto'
+                  >
                     {form.formState.isSubmitting && (
                       <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    )}
+                    )}{' '}
                     حفظ البيانات
                   </Button>
                 </DialogFooter>
