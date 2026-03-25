@@ -28,7 +28,7 @@ export async function getExpensesAction(
 
 export async function addExpenseAction(
   tenantSlug: string,
-  payload: ExpenseInput, 
+  payload: ExpenseInput,
 ): Promise<BaseApiResponse<IExpense>> {
   const result = await fetchApi<IExpense>('/api/clinic/expenses', {
     method: 'POST',
@@ -41,4 +41,23 @@ export async function addExpenseAction(
     revalidatePath(`/${tenantSlug}/dashboard/expenses`)
   }
   return result
+}
+
+export async function updateExpenseAction(tenantSlug: string, id: string, data: ExpenseInput) {
+  const res = await fetchApi<IExpense>(`/api/clinic/expenses/${id}`, {
+    method: 'PUT',
+    tenantSlug,
+    body: JSON.stringify(data),
+  })
+  if (res.success) revalidatePath(`/${tenantSlug}/dashboard/finance/expenses`)
+  return res
+}
+
+export async function deleteExpenseAction(tenantSlug: string, id: string) {
+  const res = await fetchApi(`/api/clinic/expenses/${id}`, {
+    method: 'DELETE',
+    tenantSlug,
+  })
+  if (res.success) revalidatePath(`/${tenantSlug}/dashboard/finance/expenses`)
+  return res
 }

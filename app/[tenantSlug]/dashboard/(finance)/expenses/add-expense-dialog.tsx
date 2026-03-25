@@ -24,8 +24,8 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 
-import { addExpenseAction } from '@/actions/finance/expenses'
 import { ExpenseInput, ExpenseSchema } from '../../../../../validation/expense'
+import { addExpenseAction } from '../../../../../actions/finance/expenses'
 
 export function AddExpenseDialog({ tenantSlug }: { tenantSlug: string }) {
   const [open, setOpen] = useState(false)
