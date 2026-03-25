@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { CalendarIcon, FileText, Activity } from 'lucide-react'
 import { updateVisit } from '../../../../../../actions/visit/update-visit'
 import { vitalsFields } from '../../../../../../constants/vitals-fields'
-import { IDoctor } from '../../../../../../types/doctor'
+import { IDoctor, IDoctorVisitConfig } from '../../../../../../types/doctor'
 import { ClinicalFormInput, clinicalSchema } from '../../../../../../validation/visit'
 
 import { Button } from '@/components/ui/button'
@@ -74,7 +74,7 @@ export function ClinicalTab({ tenantSlug, visit, doctor, isClosed }: ClinicalTab
   }
 
   const visibleVitals = vitalsFields.filter(
-    (fieldConfig) => !doctor?.visitFieldConfig || doctor?.visitFieldConfig[fieldConfig.configKey],
+    (fieldConfig) => !doctor?.visitFieldConfig || doctor?.visitFieldConfig[fieldConfig.configKey as keyof IDoctorVisitConfig],
   )
 
   const visitDate = visit.startedAt ? startOfDay(new Date(visit.startedAt)) : startOfDay(new Date())

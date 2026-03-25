@@ -39,8 +39,6 @@ export const vitalsFields: {
   },
 ]
 
-
-
 export const notesFields: {
   name: keyof ClinicalFormInput
   label: string
