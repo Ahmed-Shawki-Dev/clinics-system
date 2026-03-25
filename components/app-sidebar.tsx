@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 import {
   Sidebar,
@@ -30,6 +31,17 @@ export function AppSidebar() {
   const user = useAuthStore((state) => state.user)
   const tenantConfig = useTenantStore((state) => state.config)
 
+  const [isMounted, setIsMounted] = useState(false)
+
+  // 🔴 الحل السحري لتخطي تحذير الـ Cascading Render
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsMounted(true)
+    }, 0)
+
+    return () => clearTimeout(timeout)
+  }, [])
+
   const getFullUrl = (href: string) => `/${tenantSlug}/dashboard${href === '/' ? '' : href}`
 
   const filteredConfig = SIDEBAR_NAVIGATION.map((category) => ({
@@ -37,11 +49,12 @@ export function AppSidebar() {
     items: category.items.filter((item) => user && item.roles.includes(user.role)),
   })).filter((category) => category.items.length > 0)
 
+  const isLoading = !isMounted || !user
+
   return (
     <Sidebar collapsible='icon' side='right'>
-      {/* الهيدر الديناميكي مع تظبيط اللوجو في النص وقت الإغلاق */}
       <SidebarHeader className='flex h-16 shrink-0 flex-row items-center border-b px-4 group-data-[collapsible=icon]:px-0 overflow-hidden'>
-        {tenantConfig ? (
+        {tenantConfig && isMounted ? (
           <div className='flex items-center gap-2 w-full group-data-[collapsible=icon]:justify-center'>
             <div className='relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-md bg-background'>
               <ClinicImage
@@ -65,49 +78,66 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {filteredConfig.map((category) => (
-          <SidebarGroup key={category.label}>
-            {/* إخفاء عنوان الجروب لو السايدبار مقفول */}
-            <SidebarGroupLabel className='text-xs font-bold text-muted-foreground/70 uppercase tracking-widest group-data-[collapsible=icon]:hidden'>
-              {category.label}
+        {isLoading ? (
+          <SidebarGroup>
+            <SidebarGroupLabel className='group-data-[collapsible=icon]:hidden'>
+              <Skeleton className='h-3 w-16 mb-2' />
             </SidebarGroupLabel>
-
             <SidebarGroupContent>
               <SidebarMenu>
-                {category.items.map((item) => {
-                  const fullUrl = getFullUrl(item.href)
-
-                  // حل مشكلة اللينكين اللي بينوروا مع بعض
-                  const isExactOnly = item.href === '/' || item.href === '/doctor'
-                  const isActive = isExactOnly
-                    ? pathname === fullUrl
-                    : pathname === fullUrl || pathname.startsWith(`${fullUrl}/`)
-
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive}
-                        tooltip={item.title}
-                        className='transition-all duration-200 hover:bg-primary/5 data-[active=true]:bg-primary/10'
-                      >
-                        <Link
-                          href={fullUrl}
-                          onClick={() => {
-                            if (isMobile) setOpenMobile(false)
-                          }}
-                        >
-                          <item.icon className='h-4 w-4 shrink-0' />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )
-                })}
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <SidebarMenuItem key={i}>
+                    <SidebarMenuButton disabled className='flex items-center gap-2'>
+                      <Skeleton className='h-4 w-4 shrink-0' />
+                      <Skeleton className='h-4 w-full max-w-[120px] group-data-[collapsible=icon]:hidden' />
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
-        ))}
+        ) : (
+          filteredConfig.map((category) => (
+            <SidebarGroup key={category.label}>
+              <SidebarGroupLabel className='text-xs font-bold text-muted-foreground/70 uppercase tracking-widest group-data-[collapsible=icon]:hidden'>
+                {category.label}
+              </SidebarGroupLabel>
+
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {category.items.map((item) => {
+                    const fullUrl = getFullUrl(item.href)
+                    const isExactOnly = item.href === '/' || item.href === '/doctor'
+                    const isActive = isExactOnly
+                      ? pathname === fullUrl
+                      : pathname === fullUrl || pathname.startsWith(`${fullUrl}/`)
+
+                    return (
+                      <SidebarMenuItem key={item.title}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive}
+                          tooltip={item.title}
+                          className='transition-all duration-200 hover:bg-primary/5 data-[active=true]:bg-primary/10'
+                        >
+                          <Link
+                            href={fullUrl}
+                            onClick={() => {
+                              if (isMobile) setOpenMobile(false)
+                            }}
+                          >
+                            <item.icon className='h-4 w-4 shrink-0' />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    )
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))
+        )}
       </SidebarContent>
     </Sidebar>
   )

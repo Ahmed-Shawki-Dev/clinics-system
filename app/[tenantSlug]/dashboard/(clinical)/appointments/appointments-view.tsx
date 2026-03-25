@@ -1,6 +1,20 @@
 'use client'
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { format } from 'date-fns'
+import { ar } from 'date-fns/locale'
+import {
+  Activity,
+  Calendar,
+  CalendarDays,
+  Clock,
+  Layout,
+  Phone,
+  Stethoscope,
+  User,
+} from 'lucide-react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+
+import { Badge } from '@/components/ui/badge'
 import {
   Table,
   TableBody,
@@ -9,17 +23,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { CalendarDays, Layout, Phone, Stethoscope, User, Calendar, Clock } from 'lucide-react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { format } from 'date-fns'
-import { ar } from 'date-fns/locale'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import { AppointmentsCalendar } from './appointments-calendar'
-import { BookingRowActions } from './BookingRowActions' // 👈 أكشنز كل صف
+import { GenericPagination } from '@/components/shared/pagination'
+import { cn } from '@/lib/utils'
 import { IPaginatedData } from '@/types/api'
 import { IBooking } from '@/types/booking'
-import { GenericPagination } from '../../../../../components/shared/pagination'
+import { AppointmentsCalendar } from './appointments-calendar'
+import { BookingRowActions } from './BookingRowActions'
 
 interface AppointmentsViewProps {
   paginatedData: IPaginatedData<IBooking> | null
@@ -36,11 +47,11 @@ export function AppointmentsView({ paginatedData, currentView }: AppointmentsVie
   const handleViewChange = (value: string) => {
     const params = new URLSearchParams(searchParams)
     params.set('view', value)
-    params.set('page', '1') // دايما رجعه لأول صفحة لما يغير الفيو
+    params.set('page', '1')
     router.replace(`${pathname}?${params.toString()}`, { scroll: false })
   }
 
-  // دالة صغيرة لترجمة وتلوين الحالة
+  // 1. هندلة الحالة الأساسية للحجز
   const getStatusBadge = (status: string) => {
     const config: Record<
       string,
@@ -51,18 +62,43 @@ export function AppointmentsView({ paginatedData, currentView }: AppointmentsVie
       Completed: { label: 'مكتمل', variant: 'secondary' },
       Rescheduled: { label: 'مؤجل', variant: 'outline' },
     }
+
     const { label, variant } = config[status] || { label: status, variant: 'outline' }
-    return <Badge variant={variant}>{label}</Badge>
+    return (
+      <Badge variant={variant} className='whitespace-nowrap'>
+        {label}
+      </Badge>
+    )
+  }
+
+  // 🔴 2. هندلة الغرض من العملية (كشف / استشارة / موعد قادم / في الطابور)
+  const getOperationalBadge = (purpose: string) => {
+    const config: Record<string, { label: string}> = {
+      FutureAppointment: {
+        label: 'موعد قادم',
+      },
+      QueueBridged: {
+        label: 'في الطابور',
+      },
+    }
+
+    const match = config[purpose]
+
+    return (
+      <Badge
+        variant='secondary'
+        className={cn('h-4 text-[9px] px-1.5 rounded-sm whitespace-nowrap')}
+      >
+        {match ? match.label : purpose}
+      </Badge>
+    )
   }
 
   return (
     <Tabs value={currentView} onValueChange={handleViewChange} className='w-full' dir='rtl'>
       <div className='flex items-center justify-between mb-6'>
         <TabsList className='grid w-75 grid-cols-2'>
-          <TabsTrigger
-            value='table'
-            className='flex items-center gap-2 text-sm font-medium cursor-pointer'
-          >
+          <TabsTrigger value='table' className='flex items-center gap-2 text-sm font-medium'>
             <Layout className='h-4 w-4' /> الجدول
           </TabsTrigger>
           <TabsTrigger value='calendar' className='flex items-center gap-2 text-sm font-medium'>
@@ -72,97 +108,101 @@ export function AppointmentsView({ paginatedData, currentView }: AppointmentsVie
       </div>
 
       <TabsContent value='table' className='mt-0 outline-none'>
-          {/* 🔥 الجدول الـ Native النظيف 🔥 */}
-          <div className='overflow-x-auto rounded-3xl border'>
-            <Table>
-              <TableHeader className='bg-muted/50'>
+        <div className='overflow-x-auto rounded-xl border '>
+          <Table>
+            <TableHeader className='bg-muted/50'>
+              <TableRow>
+                <TableHead className='text-right'>المريض</TableHead>
+                <TableHead className='text-right'>الطبيب والخدمة</TableHead>
+                <TableHead className='text-right'>الميعاد</TableHead>
+                <TableHead className='text-right'>الحالة</TableHead>
+                <TableHead className='text-left w-20'>الإجراءات</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {bookingsList.length === 0 ? (
                 <TableRow>
-                  <TableHead className='text-right'>المريض</TableHead>
-                  <TableHead className='text-right'>الدكتور</TableHead>
-                  <TableHead className='text-right'>الميعاد</TableHead>
-                  <TableHead className='text-right'>الحالة</TableHead>
-                  <TableHead className='text-left w-20'>الإجراءات</TableHead>
+                  <TableCell colSpan={5} className='h-32 text-center text-muted-foreground'>
+                    لا يوجد حجوزات حالياً.
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {bookingsList.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className='h-32 text-center text-muted-foreground'>
-                      لا يوجد حجوزات حالياً.
+              ) : (
+                bookingsList.map((booking) => (
+                  <TableRow key={booking.id} className='hover:bg-muted/30 transition-colors'>
+                    <TableCell>
+                      <div className='flex flex-col gap-1 text-right'>
+                        <span className='font-bold flex items-center gap-2 text-sm'>
+                          <User className='h-3.5 w-3.5 text-muted-foreground shrink-0' />
+                          {booking.patientName}
+                        </span>
+                        <span className='text-[11px] text-muted-foreground flex items-center gap-1'>
+                          <Phone className='h-3 w-3 shrink-0' />
+                          <span dir='ltr'>{booking.patientPhone}</span>
+                        </span>
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <div className='flex flex-col gap-1 text-right'>
+                        <div className='flex items-center gap-2 text-sm font-medium'>
+                          <Stethoscope className='h-3.5 w-3.5 text-primary shrink-0' />
+                          {booking.doctorName}
+                        </div>
+                        <div className='flex items-center gap-2 mr-5 text-[11px] text-muted-foreground'>
+                          {booking.serviceName && <span>{booking.serviceName}</span>}
+                          {/* 🔴 عرض نوع العملية أو حالة الطابور */}
+                          {booking.operationalPurpose &&
+                            getOperationalBadge(booking.operationalPurpose)}
+                        </div>
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <div className='flex flex-col gap-1 text-right'>
+                        <div className='flex items-center gap-1.5 text-sm'>
+                          <Calendar className='h-3.5 w-3.5 text-muted-foreground shrink-0' />
+                          {format(new Date(booking.bookingDate), 'PPP', { locale: ar })}
+                        </div>
+                        <div className='flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground'>
+                          <Clock className='h-3.5 w-3.5 shrink-0' />
+                          {booking.bookingTime}
+                        </div>
+                      </div>
+                    </TableCell>
+
+                    <TableCell>
+                      <div className='flex items-center gap-2'>
+                        {getStatusBadge(booking.status)}
+                        {/* 🔴 نبض التنبيه لو الكشف شغال حالياً */}
+                        {booking.isOperationalNow && (
+                          <span className='flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full animate-pulse whitespace-nowrap'>
+                            <Activity className='w-3 h-3' />
+                            جارِ الكشف
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+
+                    <TableCell className='text-left'>
+                      <BookingRowActions booking={booking} />
                     </TableCell>
                   </TableRow>
-                ) : (
-                  bookingsList.map((booking) => (
-                    <TableRow key={booking.id} className='hover:bg-muted/30 transition-colors'>
-                      {/* 1. المريض */}
-                      <TableCell>
-                        <div className='flex flex-col gap-1 text-right'>
-                          <span className='font-semibold flex items-center gap-2 text-sm'>
-                            <User className='h-3.5 w-3.5 text-muted-foreground shrink-0' />
-                            {booking.patientName}
-                          </span>
-                          <span
-                            className='text-[11px] text-muted-foreground  flex items-center gap-1'
-                          >
-                            {booking.patientPhone}
-                          </span>
-                        </div>
-                      </TableCell>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
 
-                      {/* 2. الدكتور والخدمة */}
-                      <TableCell>
-                        <div className='flex flex-col gap-1 text-right'>
-                          <div className='flex items-center gap-2 text-sm'>
-                            <Stethoscope className='h-3.5 w-3.5 text-primary shrink-0' />
-                            <span className='font-medium'>{booking.doctorName}</span>
-                          </div>
-                          {booking.serviceName && (
-                            <span className='text-[11px] text-muted-foreground mr-5'>
-                              {booking.serviceName}
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
-
-                      {/* 3. الميعاد */}
-                      <TableCell>
-                        <div className='flex flex-col gap-1 text-right'>
-                          <div className='flex items-center gap-1.5 text-sm'>
-                            <Calendar className='h-3.5 w-3.5 text-muted-foreground shrink-0' />
-                            {format(new Date(booking.bookingDate), 'PPP', { locale: ar })}
-                          </div>
-                          <div className='flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground'>
-                            <Clock className='h-3.5 w-3.5 shrink-0' />
-                            {booking.bookingTime}
-                          </div>
-                        </div>
-                      </TableCell>
-
-                      {/* 4. الحالة */}
-                      <TableCell>{getStatusBadge(booking.status)}</TableCell>
-
-                      {/* 5. الإجراءات (الـ 3 نقط) */}
-                      <TableCell className='text-left'>
-                        <BookingRowActions booking={booking} />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+        {paginatedData && paginatedData.totalPages > 1 && (
+          <div className='p-4 border-t bg-muted/10 mt-4 rounded-xl border'>
+            <GenericPagination
+              currentPage={paginatedData.pageNumber}
+              totalPages={paginatedData.totalPages}
+              hasNextPage={paginatedData.hasNextPage}
+              hasPreviousPage={paginatedData.hasPreviousPage}
+            />
           </div>
-
-          {/* الباجينيشن */}
-          {paginatedData && paginatedData.totalPages > 1 && (
-            <div className='p-4 border-t bg-muted/10'>
-              <GenericPagination
-                currentPage={paginatedData.pageNumber}
-                totalPages={paginatedData.totalPages}
-                hasNextPage={paginatedData.hasNextPage}
-                hasPreviousPage={paginatedData.hasPreviousPage}
-              />
-            </div>
-          )}
+        )}
       </TabsContent>
 
       <TabsContent value='calendar' className='mt-0 outline-none'>

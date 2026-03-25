@@ -100,13 +100,17 @@ export function BookingRowActions({ booking }: Props) {
           </DropdownMenuItem>
           <DropdownMenuSeparator />
 
-          <DropdownMenuItem onSelect={() => setIsRescheduleOpen(true)}>
+          <DropdownMenuItem
+            onSelect={() => setIsRescheduleOpen(true)}
+            disabled={booking.isOperationalNow}
+          >
             تغيير الموعد
           </DropdownMenuItem>
 
           <DropdownMenuItem
             className='text-destructive focus:text-destructive font-medium'
             onSelect={() => setIsCancelOpen(true)}
+            disabled={booking.isOperationalNow}
           >
             إلغاء الحجز
           </DropdownMenuItem>

@@ -17,9 +17,6 @@ export interface IBooking {
 
   // الحقول الجديدة اللي ظهرت في السواجر
   isOperationalNow: boolean // هل الحجز ده شغال دلوقتي؟
-  operationalPurpose: string // ده اللي غالباً شايل "كشف" أو "استشارة" في مرحلة الحجز
-
+  operationalPurpose: 'FutureAppointment' | 'QueueBridged' | string
   createdAt: string
 }
-
-

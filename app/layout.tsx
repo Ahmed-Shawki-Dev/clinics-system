@@ -3,14 +3,14 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { DirectionProvider } from '@/components/ui/direction'
 import { Toaster } from '@/components/ui/sonner'
 import type { Metadata, Viewport } from 'next'
-import { IBM_Plex_Sans_Arabic, Tajawal } from 'next/font/google'
+import { Alexandria, Tajawal } from 'next/font/google'
 import './globals.css'
 
-const ibm = IBM_Plex_Sans_Arabic({
+const alex = Alexandria({
   subsets: ['arabic'],
   variable: '--font-ibm',
   display: 'swap',
-  weight:['100','200','300','400','500','600','700']
+  weight: ['200', '300', '400', '700', '800', '900', '100', '600'],
 })
 
 const tajawal = Tajawal({
@@ -61,7 +61,7 @@ export default function RootLayout({
   return (
     <html lang='ar' dir='rtl' suppressHydrationWarning>
       <body
-        className={`${ibm.variable} ${tajawal.variable} font-sans antialiased`}
+        className={`${alex.variable} ${tajawal.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
         <DirectionProvider direction='rtl' dir={'rtl'}>
