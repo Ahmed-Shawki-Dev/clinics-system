@@ -20,13 +20,14 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { IInvoice } from '@/types/visit'
-import { MoreHorizontal, Pencil, Plus, Printer, Search } from 'lucide-react'
+import { Calculator, MoreHorizontal, Plus, Search, Undo2 } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { GenericPagination } from '../../../../../components/shared/pagination'
-import { EditInvoiceDialog } from './edit-invoice-modal'
+import { InvoiceAdjustmentDialog } from './invoice-adjustment-modal'
 import { InvoiceDetailsAction } from './invoice-details-modal'
 import { PaymentDialog } from './payment-modal'
+import { RefundInvoiceDialog } from './refund-invoice-modal'
 
 interface InvoicesClientProps {
   initialInvoices: IInvoice[]
@@ -44,50 +45,23 @@ export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: Invo
   const searchParams = useSearchParams()
   const [searchQuery, setSearchQuery] = useState(searchParams.get('invoiceNumber') || '')
 
-  const [editingInvoice, setEditingInvoice] = useState<IInvoice | null>(null)
+  const [adjustingInvoice, setAdjustingInvoice] = useState<IInvoice | null>(null)
   const [payingInvoice, setPayingInvoice] = useState<IInvoice | null>(null)
+  const [refundingInvoice, setRefundingInvoice] = useState<IInvoice | null>(null)
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     const params = new URLSearchParams(searchParams.toString())
-    if (searchQuery.trim()) {
-      params.set('invoiceNumber', searchQuery.trim())
-    } else {
-      params.delete('invoiceNumber')
-    }
+    if (searchQuery.trim()) params.set('invoiceNumber', searchQuery.trim())
+    else params.delete('invoiceNumber')
+
     params.set('page', '1')
     router.push(`?${params.toString()}`)
   }
 
-  const handlePrint = (invoice: IInvoice) => {
-    // الطباعة بتفضل hardcoded كـ HTML عشان البراوزر بيفصلها عن الـ React
-    const printContent = `
-      <div dir="rtl" style="font-family: Arial; padding: 20px;">
-        <h2 style="text-align: center;">إيصال استلام نقدية</h2>
-        <p style="text-align: center; color: #666;">رقم الفاتورة: #${invoice.invoiceNumber}</p>
-        <hr />
-        <p><strong>المريض:</strong> ${invoice.patientName} ${invoice.patientPhone ? `(${invoice.patientPhone})` : ''}</p>
-        <p><strong>الطبيب:</strong> ${invoice.doctorName}</p>
-        <p><strong>الإجمالي:</strong> ${invoice.amount} ج.م</p>
-        <p><strong>المدفوع:</strong> ${invoice.paidAmount} ج.م</p>
-        <p><strong>المتبقي:</strong> ${invoice.remainingAmount} ج.م</p>
-        ${invoice.creditAmount > 0 ? `<p style="color: red;"><strong>رصيد مستحق للمريض:</strong> ${invoice.creditAmount} ج.م</p>` : ''}
-        <hr />
-        <p style="text-align: center; font-size: 12px;">تم الإصدار من النظام الآلي</p>
-      </div>
-    `
-    const printWindow = window.open('', '', 'width=600,height=600')
-    if (printWindow) {
-      printWindow.document.write(printContent)
-      printWindow.document.close()
-      printWindow.focus()
-      printWindow.print()
-      printWindow.close()
-    }
-  }
-
   return (
     <div className='space-y-4'>
+      {/* Search Form */}
       <form onSubmit={handleSearch} className='flex items-center gap-2 max-w-sm'>
         <div className='relative flex-1'>
           <Search className='absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
@@ -101,100 +75,92 @@ export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: Invo
         <Button type='submit' variant='secondary'>
           بحث
         </Button>
-        {searchParams.get('invoiceNumber') && (
-          <Button
-            type='button'
-            variant='ghost'
-            onClick={() => {
-              setSearchQuery('')
-              const params = new URLSearchParams(searchParams.toString())
-              params.delete('invoiceNumber')
-              params.set('page', '1')
-              router.push(`?${params.toString()}`)
-            }}
-          >
-            مسح
-          </Button>
-        )}
       </form>
 
-      <div className='border rounded-md overflow-hidden shadow-sm'>
+      {/* Table */}
+      <div className='border rounded-md overflow-hidden shadow-sm '>
         <Table>
           <TableHeader className='bg-muted/50 h-12'>
             <TableRow>
               <TableHead className='font-bold text-muted-foreground'>رقم الفاتورة</TableHead>
               <TableHead className='font-bold text-muted-foreground'>التاريخ</TableHead>
               <TableHead className='font-bold text-muted-foreground'>المريض</TableHead>
-              <TableHead className='font-bold text-muted-foreground'>الطبيب</TableHead>
               <TableHead className='font-bold text-muted-foreground'>الإجمالي</TableHead>
               <TableHead className='font-bold text-muted-foreground'>المتبقي</TableHead>
               <TableHead className='font-bold text-muted-foreground'>الحالة</TableHead>
-              <TableHead className='font-bold text-center text-muted-foreground w-16'>
+              <TableHead className='font-bold text-center w-16 text-muted-foreground'>
                 إجراءات
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {initialInvoices.map((inv) => (
-              <TableRow key={inv.id}>
-                <TableCell className='text-xs text-muted-foreground font-bold'>
-                  {inv.invoiceNumber}
-                </TableCell>
-                <TableCell className='text-sm whitespace-nowrap'>
-                  {inv.createdAt ? new Date(inv.createdAt).toLocaleDateString() : '—'}
-                </TableCell>
-                <TableCell className='font-bold text-foreground'>{inv.patientName}</TableCell>
-                <TableCell className='text-muted-foreground text-sm'>د. {inv.doctorName}</TableCell>
-                <TableCell className='font-bold'>{inv.amount} ج.م</TableCell>
-                <TableCell className='font-bold text-destructive'>
-                  {inv.remainingAmount} ج.م
-                </TableCell>
-                <TableCell>
-                  <StatusBadge status={inv.status} />
-                </TableCell>
-                <TableCell className='text-center'>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant='ghost' size='icon' className='h-8 w-8 hover:bg-muted'>
-                        <MoreHorizontal className='h-4 w-4 text-muted-foreground' />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align='end' className='w-40'>
-                      <DropdownMenuLabel className='text-xs text-muted-foreground'>
-                        خيارات الفاتورة
-                      </DropdownMenuLabel>
-                      <DropdownMenuSeparator />
+            {initialInvoices.length > 0 ? (
+              initialInvoices.map((inv) => (
+                <TableRow key={inv.id}>
+                  <TableCell className='text-xs text-muted-foreground font-bold'>
+                    {inv.invoiceNumber}
+                  </TableCell>
+                  <TableCell className='text-sm whitespace-nowrap'>
+                    {new Date(inv.createdAt).toLocaleDateString('ar-EG')}
+                  </TableCell>
+                  <TableCell className='font-bold'>{inv.patientName}</TableCell>
+                  <TableCell className='font-bold'>{inv.amount} ج.م</TableCell>
+                  <TableCell className='font-bold text-destructive'>
+                    {inv.remainingAmount} ج.م
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={inv.status} />
+                  </TableCell>
+                  <TableCell className='text-center'>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant='ghost' size='icon'>
+                          <MoreHorizontal className='h-4 w-4' />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align='end' className='w-48' >
+                        <DropdownMenuLabel className='text-xs'>خيارات الفاتورة</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
 
-                      <InvoiceDetailsAction invoiceId={inv.id} tenantSlug={tenantSlug} />
+                        <InvoiceDetailsAction invoiceId={inv.id} tenantSlug={tenantSlug} />
 
-                      <DropdownMenuItem onClick={() => handlePrint(inv)} className='cursor-pointer'>
-                        <Printer className='h-4 w-4 ml-2 text-primary' /> طباعة الإيصال
-                      </DropdownMenuItem>
-
-                      <DropdownMenuItem
-                        onClick={() => setEditingInvoice(inv)}
-                        className='cursor-pointer'
-                      >
-                        <Pencil className='h-4 w-4 ml-2 text-primary' /> تعديل الإجمالي
-                      </DropdownMenuItem>
-
-                      {inv.status !== 'Paid' && (
                         <DropdownMenuItem
-                          onClick={() => setPayingInvoice(inv)}
-                          className='cursor-pointer font-bold text-primary focus:text-primary/80'
+                          onClick={() => setAdjustingInvoice(inv)}
+                          className='cursor-pointer'
                         >
-                          <Plus className='h-4 w-4 ml-2' /> تسجيل دفعة
+                          <Calculator className='h-4 w-4 ml-2 text-primary' /> تسوية 
                         </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-            {initialInvoices.length === 0 && (
+
+                        {inv.status !== 'Paid' && (
+                          <DropdownMenuItem
+                            onClick={() => setPayingInvoice(inv)}
+                            className='cursor-pointer font-bold text-primary focus:text-primary/80 focus:bg-primary/10'
+                          >
+                            <Plus className='h-4 w-4 ml-2' /> تسجيل دفعة
+                          </DropdownMenuItem>
+                        )}
+
+                        {/* 👈 زرار الـ Refund اللي كان ناقص (يظهر لو فيه مبلغ مدفوع) */}
+                        {inv.paidAmount > 0 && (
+                          <DropdownMenuItem
+                            onClick={() => setRefundingInvoice(inv)}
+                            className='cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/10'
+                          >
+                            <Undo2 className='h-4 w-4 ml-2' /> استرداد مبلغ
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
               <TableRow>
-                <TableCell colSpan={8} className='h-32 text-center text-muted-foreground'>
-                  لا توجد فواتير
+                <TableCell
+                  colSpan={7}
+                  className='h-32 text-center text-muted-foreground font-medium'
+                >
+                  لا توجد فواتير لعرضها
                 </TableCell>
               </TableRow>
             )}
@@ -202,19 +168,22 @@ export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: Invo
         </Table>
       </div>
 
-      <GenericPagination
-        currentPage={pagination.pageNumber}
-        totalPages={pagination.totalPages}
-        hasNextPage={pagination.hasNextPage}
-        hasPreviousPage={pagination.hasPreviousPage}
-      />
+      {initialInvoices.length > 0 && (
+        <GenericPagination
+          currentPage={pagination.pageNumber}
+          totalPages={pagination.totalPages}
+          hasNextPage={pagination.hasNextPage}
+          hasPreviousPage={pagination.hasPreviousPage}
+        />
+      )}
 
-      {editingInvoice && (
-        <EditInvoiceDialog
-          invoice={editingInvoice}
+      {/* Modals */}
+      {adjustingInvoice && (
+        <InvoiceAdjustmentDialog
+          invoice={adjustingInvoice}
           tenantSlug={tenantSlug}
-          open={!!editingInvoice}
-          setOpen={(open) => !open && setEditingInvoice(null)}
+          open={!!adjustingInvoice}
+          setOpen={(open) => !open && setAdjustingInvoice(null)}
         />
       )}
       {payingInvoice && (
@@ -223,6 +192,14 @@ export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: Invo
           tenantSlug={tenantSlug}
           open={!!payingInvoice}
           setOpen={(open) => !open && setPayingInvoice(null)}
+        />
+      )}
+      {refundingInvoice && (
+        <RefundInvoiceDialog
+          invoice={refundingInvoice}
+          tenantSlug={tenantSlug}
+          open={!!refundingInvoice}
+          setOpen={(open) => !open && setRefundingInvoice(null)}
         />
       )}
     </div>
@@ -240,7 +217,6 @@ function StatusBadge({ status }: { status: string }) {
   return (
     <Badge
       variant='destructive'
-      className='bg-destructive/10 text-destructive hover:bg-destructive/20'
     >
       غير مدفوعة
     </Badge>

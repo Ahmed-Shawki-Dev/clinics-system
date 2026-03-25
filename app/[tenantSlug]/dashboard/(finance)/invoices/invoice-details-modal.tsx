@@ -23,9 +23,9 @@ import {
   Eye,
   Loader2,
   ReceiptText,
+  Stethoscope,
   UserCircle,
   Wallet,
-  AlertTriangle,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -64,7 +64,11 @@ export function InvoiceDetailsAction({
         </div>
       </DialogTrigger>
 
-      <DialogContent className='max-w-3xl p-0 gap-0 overflow-hidden bg-background sm:rounded-xl'>
+      <DialogContent
+        className='max-w-3xl p-0 gap-0 overflow-hidden bg-background sm:rounded-xl'
+        dir='rtl'
+      >
+        {/* الهيدر والملخص (كما هو في كودك) */}
         <div className='bg-muted/50 px-6 py-4 border-b border-border'>
           <DialogHeader>
             <div className='flex items-center justify-between'>
@@ -75,11 +79,6 @@ export function InvoiceDetailsAction({
                   <span className='text-muted-foreground font-mono font-medium text-sm mr-2'>
                     #{invoice.invoiceNumber}
                   </span>
-                )}
-                {!loading && invoice && !invoice.isServiceRendered && (
-                  <Badge variant='outline' className='mr-2 text-destructive border-destructive/50'>
-                    لم يتم تقديم الخدمة
-                  </Badge>
                 )}
               </DialogTitle>
               {!loading && invoice && <StatusBadge status={invoice.status} />}
@@ -100,6 +99,7 @@ export function InvoiceDetailsAction({
             </div>
           ) : (
             <div className='space-y-8'>
+              {/* بيانات المريض والطبيب */}
               <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                 <div className='flex flex-col justify-center p-4 rounded-lg border bg-card'>
                   <div className='flex items-center gap-2 mb-1 text-muted-foreground'>
@@ -107,15 +107,10 @@ export function InvoiceDetailsAction({
                     <span className='text-xs font-semibold'>المريض</span>
                   </div>
                   <p className='text-base font-bold text-foreground pr-6'>{invoice.patientName}</p>
-                  {invoice.patientPhone && (
-                    <p className='text-sm text-muted-foreground pr-6 font-mono'>
-                      {invoice.patientPhone}
-                    </p>
-                  )}
                 </div>
                 <div className='flex flex-col justify-center p-4 rounded-lg border bg-card'>
                   <div className='flex items-center gap-2 mb-1 text-muted-foreground'>
-                    <UserCircle className='w-4 h-4' />
+                    <Stethoscope className='w-4 h-4' />
                     <span className='text-xs font-semibold'>الطبيب المعالج</span>
                   </div>
                   <p className='text-base font-bold text-foreground pr-6'>
@@ -124,6 +119,46 @@ export function InvoiceDetailsAction({
                 </div>
               </div>
 
+              {/* الخدمات المضافة (Line Items) - جديد 🔥 */}
+              {invoice.lineItems && invoice.lineItems.length > 0 && (
+                <div className='space-y-3'>
+                  <h3 className='font-bold text-sm flex items-center gap-2 text-foreground px-1'>
+                    <ReceiptText className='w-4 h-4 text-muted-foreground' /> تفاصيل الخدمات
+                  </h3>
+                  <div className='border rounded-lg overflow-hidden bg-card'>
+                    <Table>
+                      <TableHeader className='bg-muted/50'>
+                        <TableRow>
+                          <TableHead className='font-semibold text-xs text-muted-foreground'>
+                            الخدمة / الصنف
+                          </TableHead>
+                          <TableHead className='font-semibold text-xs text-muted-foreground'>
+                            الكمية
+                          </TableHead>
+                          <TableHead className='font-semibold text-xs text-muted-foreground'>
+                            الإجمالي
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {invoice.lineItems.map((item) => (
+                          <TableRow key={item.id}>
+                            <TableCell className='font-bold text-sm'>{item.itemName}</TableCell>
+                            <TableCell>
+                              {item.quantity} × {item.unitPrice}
+                            </TableCell>
+                            <TableCell className='font-bold text-primary'>
+                              {item.totalPrice} ج.م
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              )}
+
+              {/* الملخص المالي وسجل الدفعات (كما هو في كودك) */}
               <div className='rounded-lg border bg-card overflow-hidden'>
                 <div className='px-4 py-3 bg-muted/50 border-b flex items-center gap-2'>
                   <Wallet className='w-4 h-4 text-muted-foreground' />
@@ -144,21 +179,20 @@ export function InvoiceDetailsAction({
                       {invoice.remainingAmount} ج.م
                     </span>
                   </div>
-
-                  {invoice.creditAmount > 0 && (
-                    <div className='flex justify-between items-center px-4 py-3 bg-destructive/10'>
-                      <div className='flex items-center gap-2 text-destructive'>
-                        <AlertTriangle className='w-4 h-4' />
-                        <span className='text-sm font-bold'>
-                          رصيد مستحق للمريض (تم قفل الجلسة بدون كشف)
-                        </span>
-                      </div>
-                      <span className='font-bold text-destructive'>{invoice.creditAmount} ج.م</span>
+                  {invoice.pendingSettlementAmount > 0 && (
+                    <div className='flex justify-between items-center px-4 py-3 bg-orange-500/10'>
+                      <span className='text-sm font-bold text-orange-600'>
+                        مبلغ معلق (خدمات إضافية)
+                      </span>
+                      <span className='font-bold text-orange-600'>
+                        {invoice.pendingSettlementAmount} ج.م
+                      </span>
                     </div>
                   )}
                 </div>
               </div>
 
+              {/* سجل الدفعات */}
               <div className='space-y-3'>
                 <h3 className='font-bold text-sm flex items-center gap-2 text-foreground px-1'>
                   <CreditCard className='w-4 h-4 text-muted-foreground' /> سجل الدفعات
@@ -166,31 +200,39 @@ export function InvoiceDetailsAction({
                 <div className='border rounded-lg overflow-hidden bg-card'>
                   <Table>
                     <TableHeader className='bg-muted/50'>
-                      <TableRow className='hover:bg-transparent'>
-                        <TableHead className='font-semibold text-xs text-muted-foreground h-10'>
+                      <TableRow>
+                        <TableHead className='font-semibold text-xs text-muted-foreground'>
                           التاريخ
                         </TableHead>
-                        <TableHead className='font-semibold text-xs text-muted-foreground h-10'>
+                        <TableHead className='font-semibold text-xs text-muted-foreground'>
                           المبلغ
                         </TableHead>
-                        <TableHead className='font-semibold text-xs text-muted-foreground h-10'>
-                          طريقة الدفع
+                        <TableHead className='font-semibold text-xs text-muted-foreground'>
+                          النوع
                         </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {invoice.payments && invoice.payments.length > 0 ? (
                         invoice.payments.map((payment) => (
-                          <TableRow key={payment.id} className='hover:bg-muted/10'>
-                            <TableCell className='text-xs whitespace-nowrap font-mono'>
+                          <TableRow
+                            key={payment.id}
+                            className={payment.isRefund ? 'bg-destructive/5' : ''}
+                          >
+                            <TableCell className='text-xs font-mono'>
                               {new Date(payment.createdAt).toLocaleString('ar-EG')}
                             </TableCell>
-                            <TableCell className='font-bold text-sm text-foreground'>
+                            <TableCell
+                              className={`font-bold text-sm ${payment.isRefund ? 'text-destructive' : 'text-foreground'}`}
+                            >
                               {payment.amount} ج.م
                             </TableCell>
                             <TableCell>
-                              <Badge variant='outline' className='text-xs font-medium'>
-                                {payment.paymentMethod}
+                              <Badge
+                                variant={payment.isRefund ? 'destructive' : 'outline'}
+                                className='text-xs'
+                              >
+                                {payment.isRefund ? 'استرداد (Refund)' : payment.paymentMethod}
                               </Badge>
                             </TableCell>
                           </TableRow>
@@ -199,9 +241,9 @@ export function InvoiceDetailsAction({
                         <TableRow>
                           <TableCell
                             colSpan={3}
-                            className='text-center text-muted-foreground py-10 text-sm'
+                            className='text-center text-muted-foreground py-10'
                           >
-                            لا توجد أي عمليات دفع مسجلة.
+                            لا توجد أي عمليات دفع
                           </TableCell>
                         </TableRow>
                       )}
@@ -220,16 +262,13 @@ export function InvoiceDetailsAction({
 function StatusBadge({ status }: { status: string }) {
   if (status === 'Paid')
     return (
-      <Badge variant='secondary' className='bg-primary/10 text-primary hover:bg-primary/20'>
+      <Badge variant='secondary' className='bg-primary/10 text-primary'>
         مدفوعة
       </Badge>
     )
   if (status === 'PartiallyPaid') return <Badge variant='secondary'>دفع جزئي</Badge>
   return (
-    <Badge
-      variant='destructive'
-      className='bg-destructive/10 text-destructive hover:bg-destructive/20'
-    >
+    <Badge variant='destructive' className='bg-destructive/10 text-destructive'>
       غير مدفوعة
     </Badge>
   )

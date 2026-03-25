@@ -22,19 +22,17 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 
-export function PaymentDialog({
-  invoice,
-  tenantSlug,
-  open,
-  setOpen,
-}: {
+interface Props {
   invoice: IInvoice
   tenantSlug: string
   open: boolean
   setOpen: (open: boolean) => void
-}) {
+}
+
+export function PaymentDialog({ invoice, tenantSlug, open, setOpen }: Props) {
   const [amount, setAmount] = useState<string>('')
   const [method, setMethod] = useState<string>('Cash')
+  const [referenceNumber, setReferenceNumber] = useState<string>('')
   const [loading, setLoading] = useState(false)
 
   const handlePayment = async () => {
@@ -44,6 +42,9 @@ export function PaymentDialog({
     }
     if (numericAmount > invoice.remainingAmount) {
       return toast.error('المبلغ يتجاوز المتبقي من الفاتورة')
+    }
+    if (method !== 'Cash' && !referenceNumber.trim()) {
+      return toast.error('رقم المرجع (رقم الإيصال) إجباري للدفع الإلكتروني')
     }
 
     setLoading(true)
@@ -58,6 +59,7 @@ export function PaymentDialog({
     if (res.success) {
       toast.success('تم تسجيل الدفعة بنجاح')
       setAmount('')
+      setReferenceNumber('')
       setOpen(false)
     } else {
       toast.error(res.message || 'حدث خطأ')
@@ -75,29 +77,44 @@ export function PaymentDialog({
             <span>المتبقي للدفع:</span>
             <span className='text-destructive'>{invoice.remainingAmount} ج.م</span>
           </div>
-          <div className='space-y-2'>
-            <label className='text-xs font-bold'>المبلغ (ج.م)</label>
-            <Input
-              type='number'
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder='أدخل المبلغ'
-              disabled={loading}
-            />
+
+          <div className='grid grid-cols-2 gap-4'>
+            <div className='space-y-2'>
+              <label className='text-xs font-bold'>المبلغ (ج.م)</label>
+              <Input
+                type='number'
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder='0.00'
+                disabled={loading}
+              />
+            </div>
+            <div className='space-y-2'>
+              <label className='text-xs font-bold'>طريقة الدفع</label>
+              <Select value={method} onValueChange={setMethod} disabled={loading} dir='rtl'>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='Cash'>كاش</SelectItem>
+                  <SelectItem value='Visa'>فيزا</SelectItem>
+                  <SelectItem value='Transfer'>تحويل بنكي</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div className='space-y-2'>
-            <label className='text-xs font-bold'>طريقة الدفع</label>
-            <Select value={method} onValueChange={setMethod} disabled={loading} dir='rtl'>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='Cash'>كاش</SelectItem>
-                <SelectItem value='Visa'>فيزا</SelectItem>
-                <SelectItem value='Transfer'>تحويل بنكي</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+
+          {method !== 'Cash' && (
+            <div className='space-y-2 animate-in fade-in zoom-in duration-200'>
+              <label className='text-xs font-bold text-primary'>رقم المرجع / الإيصال</label>
+              <Input
+                value={referenceNumber}
+                onChange={(e) => setReferenceNumber(e.target.value)}
+                placeholder='أدخل رقم إيصال الماكينة أو التحويل'
+                disabled={loading}
+              />
+            </div>
+          )}
         </div>
         <DialogFooter className='gap-2 sm:gap-0'>
           <Button variant='outline' onClick={() => setOpen(false)} disabled={loading}>

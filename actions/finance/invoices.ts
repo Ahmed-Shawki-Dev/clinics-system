@@ -11,7 +11,7 @@ export async function getInvoicesAction(
   pageSize: number = 10,
   from?: string,
   to?: string,
-  invoiceNumber?: string, // 👈 1. ضفنا الباراميتر هنا
+  invoiceNumber?: string,
 ) {
   let url = `/api/clinic/invoices?pageNumber=${pageNumber}&pageSize=${pageSize}`
 
@@ -67,4 +67,78 @@ export async function getInvoiceByIdAction(tenantSlug: string, invoiceId: string
     authType: 'staff',
     cache: 'no-store',
   })
+}
+
+export async function addInvoiceLineItemAction(
+  tenantSlug: string,
+  invoiceId: string,
+  payload: {
+    clinicServiceId: string
+    itemName: string
+    unitPrice: number
+    quantity: number
+    notes?: string
+  },
+): Promise<BaseApiResponse<IInvoice>> {
+  const result = await fetchApi<IInvoice>(`/api/clinic/invoices/${invoiceId}/line-items`, {
+    method: 'POST',
+    tenantSlug,
+    authType: 'staff',
+    body: JSON.stringify(payload),
+  })
+
+  if (result.success) {
+    revalidatePath(`/${tenantSlug}/dashboard/invoices`)
+  }
+  return result
+}
+
+// 2. عمل خصم أو رسوم إضافية (Adjustments)
+export async function addInvoiceAdjustmentAction(
+  tenantSlug: string,
+  invoiceId: string,
+  payload: {
+    extraAmount: number // موجب للزيادة، سالب للخصم
+    reason: string
+  },
+): Promise<BaseApiResponse<IInvoice>> {
+  const result = await fetchApi<IInvoice>(`/api/clinic/invoices/${invoiceId}/adjustments`, {
+    method: 'POST',
+    tenantSlug,
+    authType: 'staff',
+    body: JSON.stringify(payload),
+  })
+
+  if (result.success) {
+    revalidatePath(`/${tenantSlug}/dashboard/invoices`)
+  }
+  return result
+}
+
+// 3. استرداد مبلغ (Refund)
+export async function refundInvoiceAction(
+  tenantSlug: string,
+  invoiceId: string,
+  payload: {
+    amount: number
+    reason: string
+    referenceNumber?: string // اختياري لو كاش، بس إجباري تبعت String فاضي لو مفيش
+  },
+): Promise<BaseApiResponse<IPayment>> {
+  // لاحظ إن دي بترجع بيانات الدفعة مش الفاتورة كلها
+  const result = await fetchApi<IPayment>(`/api/clinic/invoices/${invoiceId}/refund`, {
+    method: 'POST',
+    tenantSlug,
+    authType: 'staff',
+    body: JSON.stringify({
+      amount: payload.amount,
+      reason: payload.reason,
+      referenceNumber: payload.referenceNumber || '',
+    }),
+  })
+
+  if (result.success) {
+    revalidatePath(`/${tenantSlug}/dashboard/invoices`)
+  }
+  return result
 }
