@@ -3,14 +3,14 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { DirectionProvider } from '@/components/ui/direction'
 import { Toaster } from '@/components/ui/sonner'
 import type { Metadata, Viewport } from 'next'
-import { Alexandria, Tajawal } from 'next/font/google'
+import { Cairo, Tajawal } from 'next/font/google'
 import './globals.css'
 
-const alex = Alexandria({
+const cairo = Cairo({
   subsets: ['arabic'],
-  variable: '--font-ibm',
+  variable: '--font-alex',
   display: 'swap',
-  weight: ['200', '300', '400', '700', '800', '900', '100', '600'],
+  weight: ['200', '300', '400', '700', '800', '900', '600'],
 })
 
 const tajawal = Tajawal({
@@ -61,7 +61,7 @@ export default function RootLayout({
   return (
     <html lang='ar' dir='rtl' suppressHydrationWarning>
       <body
-        className={`${alex.variable} ${tajawal.variable} font-sans antialiased`}
+        className={`${cairo.variable} ${tajawal.variable} font-sans antialiased`}
         suppressHydrationWarning
       >
         <DirectionProvider direction='rtl' dir={'rtl'}>
