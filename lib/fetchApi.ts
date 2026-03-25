@@ -20,7 +20,7 @@ export async function fetchApi<T>(
     ...restOptions
   } = options
 
-  const token = await getToken(authType)
+  const token = await getToken(authType, tenantSlug)
   const headers = new Headers(customHeaders)
 
   // هندلة الـ Content-Type بناءً على نوع الـ Body (عشان رفع الصور يشتغل)

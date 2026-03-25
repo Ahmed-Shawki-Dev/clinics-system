@@ -1,14 +1,18 @@
-// actions/auth/getToken.ts
 'use server'
 
 import { cookies } from 'next/headers'
 
-// حددنا النوع إجباري عشان مفيش دالة تندهها وتنسى هي بتكلم مين
-export async function getToken(role: 'staff' | 'patient' = 'staff') {
+// ضفنا tenantSlug عشان نقرأ التوكن الخاص بالعيادة المحددة للـ PWA
+export async function getToken(role: 'staff' | 'patient' = 'staff', tenantSlug?: string) {
   const cookieStore = await cookies()
 
   if (role === 'patient') {
-    return cookieStore.get('patient_token')?.value
+    // لو مفيش عيادة متحددة، مش هنعرف نجيب التوكن
+    if (!tenantSlug) return undefined
+
+    // بناء اسم الكوكي ديناميكياً
+    const cookieName = `patient_token_${tenantSlug}`
+    return cookieStore.get(cookieName)?.value
   }
 
   if (role === 'staff') {

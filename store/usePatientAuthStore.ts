@@ -22,13 +22,15 @@ export const usePatientAuthStore = create<PatientAuthState>()(
       tenants: {},
 
       setPatientAuth: (tenantSlug, data) => {
-        const defaultProfile = data.user.profiles?.find((p) => p.isDefault)
+        const profiles = data.user.profiles || []
+        const defaultProfile = profiles.find((p) => p.isDefault)
+
         set((state) => ({
           tenants: {
             ...state.tenants,
             [tenantSlug]: {
               user: data.user,
-              activeProfileId: defaultProfile?.id || data.user.profiles?.[0]?.id || null,
+              activeProfileId: defaultProfile?.id || profiles[0]?.id || null,
               isAuthenticated: true,
             },
           },
