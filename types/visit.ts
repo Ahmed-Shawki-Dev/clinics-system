@@ -1,4 +1,4 @@
-export type VisitStatus = 'Open' | 'Completed' | string
+export type VisitStatus = 'Open' | 'Completed' 
 export type VisitType = 'Exam' | 'Consultation' | string
 export type LifecycleState = 'Draft' | string
 export type FinancialState = 'NotStarted' | string

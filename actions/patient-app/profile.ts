@@ -74,7 +74,7 @@ export async function getPatientCreditBalanceAction(tenantSlug: string, patientI
   return await fetchApi<ICreditBalance>(`/api/clinic/patient-credits/${patientId}/balance`, {
     method: 'GET',
     tenantSlug,
-    authType: 'patient', // في الغالب دي كمان بتستخدم توكن المريض عشان يعرض رصيده
+  authType: 'patient', // في الغالب دي كمان بتستخدم توكن المريض عشان يعرض رصيده
     cache: 'no-store',
   })
 }
