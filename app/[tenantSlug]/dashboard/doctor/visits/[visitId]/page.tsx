@@ -10,11 +10,13 @@ export default async function Page({
   params: Promise<{ visitId: string; tenantSlug: string }>
 }) {
   const { visitId, tenantSlug } = await params
-
+  console.log(visitId)
+  // 1. جلب بيانات ة
   // 1. جلب بيانات الزيارة
   const visitResponse = await getVisitAction(tenantSlug, visitId)
 
-  if (!visitResponse.success || !visitResponse.data) {
+  // 🔥 التعديل هنا: ضفنا ? عشان لو راجع null ميضربش
+  if (!visitResponse?.success || !visitResponse?.data) {
     return (
       <div className='flex h-full w-full items-center justify-center text-muted-foreground font-bold'>
         الزيارة غير موجودة أو تم حذفها.

@@ -10,7 +10,7 @@ interface Props {
 }
 
 export function WaitingQueueList({ waitingTickets, waitingCount }: Props) {
-  if (waitingTickets.length === 0) return null // لو مفيش مرضى، مفيش داعي نعرض مساحة فاضية كبيرة تحت
+  if (waitingTickets.length === 0) return null
 
   return (
     <div className='mt-8'>
@@ -57,7 +57,8 @@ export function WaitingQueueList({ waitingTickets, waitingCount }: Props) {
                   )}
                   <span className='flex items-center gap-1'>
                     <Clock className='w-3.5 h-3.5' />
-                    {new Date(ticket.calledAt!).toLocaleTimeString('ar-EG', {
+                    {/* 🔥 التعديل هنا: استخدمنا issuedAt بدل calledAt لأن المريض لسه في الانتظار */}
+                    {new Date(ticket.issuedAt).toLocaleTimeString('ar-EG', {
                       hour: '2-digit',
                       minute: '2-digit',
                     })}
