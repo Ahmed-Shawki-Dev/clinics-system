@@ -53,7 +53,7 @@ export async function OverviewTab({
             <ActivityIcon className='w-4 h-4 text-muted-foreground' />
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-black'>{report.totalRevenue} ج.م</div>
+            <div className='text-2xl font-black'>{report.totalPaid} ج.م</div>
             <p className='text-xs text-muted-foreground mt-1'>شامل المديونيات</p>
           </CardContent>
         </Card>
@@ -66,7 +66,7 @@ export async function OverviewTab({
             <WalletIcon className='w-4 h-4 text-primary' />
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-black text-primary'>{report.totalPaid} ج.م</div>
+            <div className='text-2xl font-black text-primary'>{report.totalRevenue} ج.م</div>
             <p className='text-xs text-muted-foreground mt-1'>من {report.invoiceCount} فاتورة</p>
           </CardContent>
         </Card>

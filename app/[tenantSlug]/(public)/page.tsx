@@ -1,15 +1,14 @@
 import { IPublicClinic, IPublicDoctor, IPublicWorkingHour } from '@/types/public'
 import { notFound } from 'next/navigation'
-import { fetchApi } from '../../../lib/fetchApi'
-import { Navbar } from '../../../components/clinic-landing-page-template/navbar'
-import Hero from '../../../components/clinic-landing-page-template/Hero'
 import AboutClinicSection from '../../../components/clinic-landing-page-template/AboutClinicSection'
-import ClinicStandardsSection from '../../../components/clinic-landing-page-template/ClinicStandardsSection' // <-- الجديد
 import AboutDoctorSection from '../../../components/clinic-landing-page-template/AboutDoctorSection'
+import ClinicStandardsSection from '../../../components/clinic-landing-page-template/ClinicStandardsSection' // <-- الجديد
 import DoctorsSection from '../../../components/clinic-landing-page-template/DoctorsSection'
-import WorkingHoursSection from '../../../components/clinic-landing-page-template/WorkingHoursSection'
 import Footer from '../../../components/clinic-landing-page-template/Footer'
-import FinalCtaSection from '../../../components/clinic-landing-page-template/FinalCtaSection'
+import Hero from '../../../components/clinic-landing-page-template/Hero'
+import { Navbar } from '../../../components/clinic-landing-page-template/navbar'
+import WorkingHoursSection from '../../../components/clinic-landing-page-template/WorkingHoursSection'
+import { fetchApi } from '../../../lib/fetchApi'
 
 interface PageProps {
   params: Promise<{ tenantSlug: string }>
@@ -56,7 +55,7 @@ export default async function Page({ params }: PageProps) {
       {/* الكول تو أكشن الختامي قبل الفوتر مباشرة */}
       {/* <FinalCtaSection tenantSlug={tenantSlug} /> */}
 
-      <Footer clinic={clinic} tenantSlug={tenantSlug}/>
+      <Footer clinic={clinic} tenantSlug={tenantSlug} />
     </main>
   )
 }

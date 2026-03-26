@@ -36,11 +36,10 @@ interface DoctorQueueCardProps {
 export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
   // 1. الداتا بتتعرض زي ما الباك إند باعتها بدون أي تلاعب في الترتيب
   const waitlist = session.waitingTickets || []
-
   // 2. متغيرات حالة الطابور عشان الـ Force Close
   const isPatientInVisit = !!session.currentTicket
   const hasWaitingPatients = waitlist.length > 0
-
+  
   const handleCloseSession = async () => {
     // الإنهاء الإجباري بيتبعت بس لو فيه مريض لسه بيكشف جوه الأوضة
     const res = await closeQueueSession(tenantSlug, session.sessionId)
@@ -51,7 +50,7 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
       toast.error(res.message)
     }
   }
-
+  
   const handleUrgent = async (ticketId: string) => {
     const res = await markTicketUrgent(tenantSlug, ticketId)
     if (res.success) {
@@ -61,7 +60,7 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
       toast.error(res.message)
     }
   }
-
+  
   const handleCancel = async (ticketId: string) => {
     const res = await cancelTicket(tenantSlug, ticketId)
     if (res.success) {
@@ -71,6 +70,7 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
       toast.error(res.message)
     }
   }
+  
 
   return (
     <div className='flex flex-col h-full'>

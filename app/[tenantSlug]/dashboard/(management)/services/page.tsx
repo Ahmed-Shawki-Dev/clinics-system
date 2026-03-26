@@ -3,6 +3,7 @@ import { getClinicServicesAction } from '@/actions/service/clinic-services'
 import { getDoctorLinksAction } from '@/actions/service/doctor-services'
 import { DashboardHeader, DashboardShell } from '@/components/shell'
 import { ServicesMasterView } from './services-master-view'
+import { AddServiceModal } from './add-service-modal'
 
 interface Props {
   params: Promise<{ tenantSlug: string }>
@@ -30,7 +31,9 @@ export default async function ServicesPage({ params, searchParams }: Props) {
       <DashboardHeader
         heading='إدارة الخدمات'
         text='تحكم في الكتالوج المركزي للعيادة، وقم بتخصيص أسعار الأطباء من مكان واحد.'
-      />
+      >
+        <AddServiceModal tenantSlug={tenantSlug}/>
+      </DashboardHeader>
 
       {/* 🔴 ده الكومبوننت اللي هيلم الليلة كلها */}
       <ServicesMasterView

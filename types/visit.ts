@@ -1,4 +1,4 @@
-export type VisitStatus = 'Open' | 'Completed' 
+export type VisitStatus = 'Open' | 'Completed'
 export type VisitType = 'Exam' | 'Consultation' | string
 export type LifecycleState = 'Draft' | string
 export type FinancialState = 'NotStarted' | string
@@ -64,7 +64,7 @@ export interface IInvoice {
   amount: number
   paidAmount: number
   remainingAmount: number
-  status: 'Unpaid' | 'PartiallyPaid' | 'Paid' | string
+  status: 'Unpaid' | 'PartiallyPaid' | 'Paid' | 'Refunded' | string
   isServiceRendered: boolean
 
   // <-- جديد: تفاصيل مالية دقيقة -->
@@ -140,15 +140,14 @@ export interface IVisit {
   createdAt: string
 }
 
-
 export interface DoctorVisitFieldConfig {
-  bloodPressure?: boolean;
-  heartRate?: boolean;
-  temperature?: boolean;
-  weight?: boolean;
-  height?: boolean;
-  bmi?: boolean;
-  bloodSugar?: boolean;
-  oxygenSaturation?: boolean;
-  respiratoryRate?: boolean;
+  bloodPressure?: boolean
+  heartRate?: boolean
+  temperature?: boolean
+  weight?: boolean
+  height?: boolean
+  bmi?: boolean
+  bloodSugar?: boolean
+  oxygenSaturation?: boolean
+  respiratoryRate?: boolean
 }

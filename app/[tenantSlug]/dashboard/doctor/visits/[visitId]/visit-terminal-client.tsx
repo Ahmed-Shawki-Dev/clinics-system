@@ -198,6 +198,10 @@ export function VisitTerminalClient({
           <div className='flex items-center gap-4 w-full sm:w-auto'>
             <div className='space-y-1.5'>
               <h2 className='text-xl font-bold leading-none text-right'>{visit.patientName}</h2>
+              <p className='text-xl font-bold leading-none text-right'>
+                {visit.patientDateOfBirth}
+              </p>
+
               <div className='flex flex-wrap gap-2 pt-1 justify-start'>
                 <Badge variant='outline' className='whitespace-nowrap'>
                   زيارة كشف

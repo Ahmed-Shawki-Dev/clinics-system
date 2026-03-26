@@ -1,6 +1,7 @@
 'use client'
 
 import { createTicket } from '@/actions/queue/tickets'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -27,7 +28,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { IDoctor } from '@/types/doctor'
 import { IPatient } from '@/types/patient'
@@ -61,6 +61,8 @@ export function CutTicketDialog({ tenantSlug, activeSessions, doctors }: CutTick
       paymentMethod: 'Cash',
       // تأكدنا إن الـ doctorServiceId بيبدأ فاضي عشان نجبره يختار
       doctorServiceId: '',
+      visitType: 'Exam',
+      paidAmount: undefined,
     },
   })
 
@@ -82,8 +84,10 @@ export function CutTicketDialog({ tenantSlug, activeSessions, doctors }: CutTick
     const service = selectedDoctor?.services?.find((s) => s.id === serviceId)
     if (service && service.price) {
       form.setValue('paymentAmount', Number(service.price))
+      form.setValue('paidAmount', Number(service.price)) // 👈 بينزل أوتوماتيك زي السعر
     } else {
       form.setValue('paymentAmount', 0)
+      form.setValue('paidAmount', 0)
     }
   }
 
@@ -299,6 +303,30 @@ export function CutTicketDialog({ tenantSlug, activeSessions, doctors }: CutTick
 
               <FormField
                 control={form.control}
+                name='visitType'
+                render={({ field }) => (
+                  <FormItem className='md:col-span-1'>
+                    <FormLabel>
+                      نوع الزيارة <span className='text-destructive'>*</span>
+                    </FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className='h-11 bg-background'>
+                          <SelectValue placeholder='اختر النوع...' />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value='Exam'>كشف جديد (Exam)</SelectItem>
+                        <SelectItem value='Consultation'>استشارة (Consultation)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
                 name='isUrgent'
                 render={({ field }) => (
                   <FormItem className='flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-destructive/5 border-destructive/10 md:col-span-1 h-11 mt-8'>
@@ -321,21 +349,42 @@ export function CutTicketDialog({ tenantSlug, activeSessions, doctors }: CutTick
 
             {/* 4. تفاصيل الدفع */}
             {selectedServiceId && (
-              <div className='grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-xl border border-muted'>
+              <div className='grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/30 rounded-xl border border-muted'>
+                {/* إجمالي تكلفة الخدمة */}
                 <FormField
                   control={form.control}
                   name='paymentAmount'
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>المبلغ المدفوع (جنيه)</FormLabel>
+                      <FormLabel>المدفوع الآن (جنيه)</FormLabel>
                       <FormControl>
                         <Input
                           type='number'
-                          className='h-11 font-bold'
+                          className='h-11 font-bold border-primary/50 focus-visible:ring-primary'
                           value={field.value ?? ''}
                           onChange={(e) =>
                             field.onChange(e.target.value ? Number(e.target.value) : undefined)
                           }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* 👈 المبلغ المدفوع فعلياً (الجديد) */}
+                <FormField
+                  control={form.control}
+                  name='paidAmount'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>تكلفة الخدمة</FormLabel>
+                      <FormControl>
+                        <Input
+                          type='number'
+                          disabled // 👈 مقفول عشان ده بييجي من الباك إند
+                          className='h-11 font-bold bg-muted/50 cursor-not-allowed'
+                          value={field.value ?? ''}
                         />
                       </FormControl>
                       <FormMessage />

@@ -213,7 +213,9 @@ function StatusBadge({ status }: { status: string }) {
         مدفوعة
       </Badge>
     )
+
   if (status === 'PartiallyPaid') return <Badge variant='secondary'>دفع جزئي</Badge>
+  if (status === 'Refunded') return <Badge variant='secondary'>مرتجع</Badge>
   return (
     <Badge
       variant='destructive'
@@ -221,4 +223,8 @@ function StatusBadge({ status }: { status: string }) {
       غير مدفوعة
     </Badge>
   )
+
+
+
+  
 }

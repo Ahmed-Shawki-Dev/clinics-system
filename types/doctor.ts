@@ -35,6 +35,7 @@ export interface IDoctor {
   isEnabled: boolean
   bio?: string
   urgentCaseMode: UrgentCaseMode
+  urgentInsertAfterCount: number
   supportsUrgent: boolean // <-- جديد
   avgVisitDurationMinutes: number
   services: IDoctorService[]

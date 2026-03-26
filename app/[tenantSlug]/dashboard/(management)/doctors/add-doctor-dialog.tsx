@@ -34,7 +34,7 @@ import { Textarea } from '@/components/ui/textarea'
 
 import { createDoctorAction } from '@/actions/doctor/create-doctor'
 import { uploadDoctorPhotoAction } from '@/actions/doctor/upload-photo'
-import { ClinicImage } from '@/components/shared/clinic-image' // 👈 المكون السحري بتاعنا
+import { ClinicImage } from '@/components/shared/clinic-image'
 import { MEDICAL_SPECIALTIES } from '@/constants/specialties'
 import { CreateDoctorInput, CreateDoctorSchema } from '@/validation/doctor'
 
@@ -54,7 +54,7 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
       password: '',
       phone: '',
       specialty: '',
-      urgentCaseMode: 0,
+      urgentInsertAfterCount: 0, // 👈 التعديل هنا
       avgVisitDurationMinutes: 15,
       bio: '',
     },
@@ -65,7 +65,6 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
     if (file) {
       if (file.size > 2 * 1024 * 1024) return toast.error('حجم الصورة يجب أن لا يتعدى 2 ميجا')
 
-      // مسح الـ ObjectURL القديم عشان ميسحبش ميموري (Performance tip)
       if (previewUrl) URL.revokeObjectURL(previewUrl)
 
       const objectUrl = URL.createObjectURL(file)
@@ -85,13 +84,11 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
   const onSubmit = async (values: CreateDoctorInput) => {
     setIsSubmitting(true)
     try {
-      // 1. إنشاء الدكتور أولاً
       const res = await createDoctorAction(values, tenantSlug)
 
       if (res.success && res.data) {
         const newDoctorId = res.data.id
 
-        // 2. رفع الصورة لو موجودة
         if (selectedFile) {
           const formData = new FormData()
           formData.append('file', selectedFile)
@@ -121,23 +118,21 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
       }}
     >
       <DialogTrigger asChild>
-        <Button>
-          <Plus className='ml-2 h-4 w-4' /> طبيب جديد
+        <Button className='gap-2 shadow-sm'>
+          <Plus className='h-4 w-4' /> طبيب جديد
         </Button>
       </DialogTrigger>
 
-      <DialogContent className='max-w-2xl max-h-[95vh] overflow-y-auto'>
+      <DialogContent className='sm:max-w-2xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
-          <DialogTitle>بيانات الطبيب الجديد</DialogTitle>
+          <DialogTitle className='text-xl font-bold'>بيانات الطبيب الجديد</DialogTitle>
         </DialogHeader>
 
-        {/* دمج الـ ClinicImage في الـ Preview */}
         <div className='flex flex-col items-center justify-center gap-2 py-4'>
           <div
-            className='relative h-24 w-24 rounded-full border-2 border-dashed border-primary/30 flex items-center justify-center bg-muted overflow-hidden group cursor-pointer hover:border-primary transition-all'
+            className='relative h-24 w-24 rounded-full border-2 border-dashed border-primary/40 flex items-center justify-center bg-muted/50 overflow-hidden group cursor-pointer hover:border-primary transition-all shadow-sm'
             onClick={() => fileInputRef.current?.click()}
           >
-            {/* 👈 استخدام ClinicImage يضمن إن لو مفيش صورة يظهر الـ Fallback الموحد للسيستم */}
             <ClinicImage
               src={previewUrl}
               alt='Doctor Preview'
@@ -146,7 +141,7 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
               className='object-cover'
             />
 
-            <div className='absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'>
+            <div className='absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity'>
               <Camera className='text-white w-6 h-6' />
             </div>
           </div>
@@ -157,12 +152,12 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
             onChange={handleFileChange}
             accept='image/*'
           />
-          <span className='text-xs text-muted-foreground'>اضغط لرفع صورة تعريفية</span>
+          <span className='text-xs font-medium text-muted-foreground'>اضغط لرفع صورة تعريفية</span>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4' autoComplete='off'>
-            <div className='grid grid-cols-2 gap-4'>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5' autoComplete='off'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <FormField
                 control={form.control}
                 name='name'
@@ -170,7 +165,7 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
                   <FormItem>
                     <FormLabel>الاسم ثلاثي</FormLabel>
                     <FormControl>
-                      <Input placeholder='د. محمد أحمد' {...field} />
+                      <Input placeholder='د. محمد أحمد' className='h-11' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -183,7 +178,7 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
                   <FormItem>
                     <FormLabel>رقم الهاتف</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder='01xxxxxxxxx' />
+                      <Input className='h-11' placeholder='01xxxxxxxxx' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -191,7 +186,7 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
               />
             </div>
 
-            <div className='grid grid-cols-2 gap-4'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
               <FormField
                 control={form.control}
                 name='username'
@@ -199,7 +194,7 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
                   <FormItem>
                     <FormLabel>اسم المستخدم</FormLabel>
                     <FormControl>
-                      <Input placeholder='dr_mohamed' {...field} />
+                      <Input placeholder='dr_mohamed' className='h-11' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -212,7 +207,7 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
                   <FormItem>
                     <FormLabel>كلمة المرور</FormLabel>
                     <FormControl>
-                      <Input type='password' placeholder='******' {...field} />
+                      <Input type='password' placeholder='******' className='h-11' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -228,11 +223,11 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
                   <FormLabel>التخصص</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className='h-11'>
                         <SelectValue placeholder='اختر التخصص' />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className='max-h-40'>
+                    <SelectContent className='max-h-52'>
                       {MEDICAL_SPECIALTIES.map((spec) => (
                         <SelectItem key={spec} value={spec}>
                           {spec}
@@ -253,8 +248,8 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
                   <FormLabel>النبذة التعريفية</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder='خبرات الطبيب...'
-                      className='resize-none h-20'
+                      placeholder='خبرات الطبيب ومؤهلاته...'
+                      className='resize-none h-20 bg-background'
                       {...field}
                     />
                   </FormControl>
@@ -263,19 +258,20 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
               )}
             />
 
-            <div className='grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg border'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/20 p-5 rounded-xl border border-border/50'>
               <FormField
                 control={form.control}
                 name='avgVisitDurationMinutes'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className='flex items-center gap-2'>
-                      <Clock className='w-4 h-4' /> مدة الكشف (دقيقة)
+                      <Clock className='w-4 h-4 text-primary' /> مدة الكشف التقريبية (دقيقة)
                     </FormLabel>
                     <FormControl>
                       <Input
                         type='number'
-                        {...field} // 1. نفك الـ props الأول
+                        className='h-11 bg-background'
+                        {...field}
                         value={(field.value as number) ?? ''}
                         onChange={(e) => field.onChange(e.target.valueAsNumber || 0)}
                       />
@@ -286,39 +282,46 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
               />
               <FormField
                 control={form.control}
-                name='urgentCaseMode'
+                name='urgentInsertAfterCount'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className='flex items-center gap-2'>
-                      <AlertCircle className='w-4 h-4' /> الطوارئ
+                      <AlertCircle className='w-4 h-4 text-destructive' /> نظام إدراج الطوارئ
                     </FormLabel>
                     <Select
                       onValueChange={(val) => field.onChange(Number(val))}
                       defaultValue={String(field.value)}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className='h-11 bg-background border-destructive/20 focus:ring-destructive/30'>
                           <SelectValue />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value='0'>Next (الدور على مين؟)</SelectItem>
-                        <SelectItem value='1'>Bucket (أول واحد يخلص)</SelectItem>
-                        <SelectItem value='2'>Front (يدخل أول واحد)</SelectItem>
+                        {/* 👈 التعديل هنا للقِيَم الجديدة بوضوح */}
+                        <SelectItem value='0'>مباشرة (أول الطابور)</SelectItem>
+                        <SelectItem value='1'>بعد مريض واحد</SelectItem>
+                        <SelectItem value='2'>بعد مريضين</SelectItem>
+                        <SelectItem value='3'>بعد 3 مرضى</SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            <Button type='submit' className='w-full h-12 text-lg' disabled={isSubmitting}>
+            <Button
+              type='submit'
+              className='w-full h-12 text-base font-bold shadow-lg shadow-primary/20 mt-2'
+              disabled={isSubmitting}
+            >
               {isSubmitting ? (
                 <>
-                  <Loader2 className='animate-spin ml-2' /> جاري الحفظ...
+                  <Loader2 className='animate-spin w-5 h-5 ml-2' /> جاري الإضافة...
                 </>
               ) : (
-                'إضافة الطبيب'
+                'حفظ وإضافة الطبيب'
               )}
             </Button>
           </form>

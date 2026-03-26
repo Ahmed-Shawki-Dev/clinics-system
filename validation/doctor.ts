@@ -1,47 +1,28 @@
 import * as v from 'valibot'
 
 export const CreateDoctorSchema = v.object({
-  name: v.pipe(v.string(), v.nonEmpty('يجب إدخال الاسم'), v.minLength(3, 'الاسم قصير جداً')),
-  username: v.pipe(
-    v.string(),
-    v.nonEmpty('يجب إدخال اسم المستخدم'),
-    v.regex(/^[a-zA-Z0-9_]+$/, 'إنجليزية وأرقام و _ فقط'),
-  ),
-  password: v.pipe(
-    v.string(),
-    v.nonEmpty('يجب إدخال كلمة المرور'),
-    v.minLength(6, '6 أحرف على الأقل'),
-  ),
-  specialty: v.pipe(v.string(), v.nonEmpty('يجب اختيار التخصص')),
-  phone: v.pipe(v.string(), v.regex(/^01[0125][0-9]{8}$|^$/, 'رقم مصري غير صحيح')),
-  urgentCaseMode: v.pipe(
-    v.unknown(),
-    v.transform((input) => Number(input)),
-    v.number(),
-    v.minValue(0),
-    v.maxValue(2),
-  ),
-  avgVisitDurationMinutes: v.pipe(
-    v.unknown(),
-    v.transform((input) => Number(input)),
-    v.number(),
-    v.integer(),
-    v.minValue(1),
-    v.maxValue(120),
-  ),
+  name: v.string('الاسم مطلوب'),
+  username: v.string('اسم المستخدم مطلوب'),
+  password: v.string('كلمة المرور مطلوبة'),
+  phone: v.optional(v.string()),
+  specialty: v.string('التخصص مطلوب'),
   bio: v.optional(v.string()),
+  avgVisitDurationMinutes: v.number('مدة الكشف مطلوبة'),
+  // 🔥 التعديل هنا: شلنا urgentCaseMode وحطينا الجديد
+  urgentInsertAfterCount: v.number('نظام الطوارئ مطلوب'),
 })
 
-export type CreateDoctorInput = v.InferInput<typeof CreateDoctorSchema>
+export type CreateDoctorInput = v.InferOutput<typeof CreateDoctorSchema>
 
 export const UpdateDoctorSchema = v.object({
   name: v.optional(v.string()),
   phone: v.optional(v.string()),
   specialty: v.optional(v.string()),
   bio: v.optional(v.string()),
-  photoUrl: v.optional(v.string()),
-  urgentCaseMode: v.optional(v.number()),
   avgVisitDurationMinutes: v.optional(v.number()),
+  // 🔥 التعديل هنا كمان
+  urgentInsertAfterCount: v.optional(v.number()),
+  photoUrl: v.optional(v.string()),
 })
 
-export type UpdateDoctorInput = v.InferInput<typeof UpdateDoctorSchema>
+export type UpdateDoctorInput = v.InferOutput<typeof UpdateDoctorSchema>

@@ -50,14 +50,14 @@ export default async function OwnerDashboard({ tenantSlug,  }: OwnerDashboardPro
   const statCards = [
     {
       title: 'إجمالي الدخل (اليوم)',
-      value: `${totalRevenue.toLocaleString()} ج.م`,
+      value: `${totalPaid.toLocaleString()} ج.م`,
       icon: Banknote,
       colorClass: 'text-primary',
       bgClass: 'bg-primary/10',
     },
     {
       title: 'المحصل (في الخزنة)',
-      value: `${totalPaid.toLocaleString()} ج.م`,
+      value: `${totalRevenue.toLocaleString()} ج.م`,
       icon: Wallet,
       colorClass: 'text-emerald-600 dark:text-emerald-400',
       bgClass: 'bg-emerald-600/10',
