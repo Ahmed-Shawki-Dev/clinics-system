@@ -2,7 +2,7 @@ import { getMyVisitFieldsAction } from '@/actions/doctor/get-my-visit-fields'
 import { getPatientSummaryAction } from '@/actions/patient/get-patient-summary'
 import { getVisitAction } from '@/actions/visit/get-visit'
 import { IDoctor } from '@/types/doctor'
-import { VisitTerminalClient } from './visit-terminal-client'
+import { VisitTerminalClient } from './visit-terminal-clinic'
 
 export default async function Page({
   params,
@@ -10,7 +10,6 @@ export default async function Page({
   params: Promise<{ visitId: string; tenantSlug: string }>
 }) {
   const { visitId, tenantSlug } = await params
-  console.log(visitId)
   // 1. جلب بيانات ة
   // 1. جلب بيانات الزيارة
   const visitResponse = await getVisitAction(tenantSlug, visitId)

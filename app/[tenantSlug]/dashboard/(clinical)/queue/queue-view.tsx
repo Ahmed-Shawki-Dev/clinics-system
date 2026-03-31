@@ -50,7 +50,6 @@ export function QueueView({ tenantSlug, initialBoardRes, doctors }: QueueViewPro
 
   const selectedSession = activeSessions.find((s) => s.sessionId === selectedSessionId)
  
-  console.log(selectedSession?.currentTicket?.serviceName)
  
   return (
     <div className='flex flex-col h-[calc(100vh-200px)] md:h-[calc(100vh-250px)] gap-6'>

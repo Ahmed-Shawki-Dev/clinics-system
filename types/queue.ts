@@ -10,28 +10,40 @@ export type TicketStatus =
 export interface IQueueTicket {
   id: string
   sessionId: string
+
+  // 🔥 الكنز اللي الباك إند ضافه (الربط المباشر بالزيارة والفاتورة)
+  visitId?: string | null
+  invoiceId?: string | null
+
   patientId: string
   patientName: string
   doctorId: string
   doctorName: string
   doctorServiceId?: string | null
   serviceName?: string | null
+
+  // 🔥 حقول الفلوس الجديدة اللي رجعت في التذكرة
+  invoiceAmount?: number
+  paidAmount?: number
+  remainingAmount?: number
+  invoiceStatus?: 'Paid' | 'Unpaid' | 'PartiallyPaid' |'Refunded' | string
+
   ticketNumber: number
   status: TicketStatus
   isUrgent: boolean
-  urgentAccepted?: boolean // <-- جديد
+  urgentAccepted?: boolean
   issuedAt: string
   calledAt?: string | null
   visitStartedAt?: string | null
   completedAt?: string | null
   notes?: string | null
 
-  // <-- حقول الـ Rich Status الجديدة -->
-  myQueueNumber?: number
-  currentServingNumber?: number
-  patientsAheadCount?: number
-  estimatedWaitMinutes?: number
-  estimatedWaitText?: string
+  // حقول الـ Rich Status
+  myQueueNumber?: number | null
+  currentServingNumber?: number | null
+  patientsAheadCount?: number | null
+  estimatedWaitMinutes?: number | null
+  estimatedWaitText?: string | null
 }
 
 export interface IQueueSession {
