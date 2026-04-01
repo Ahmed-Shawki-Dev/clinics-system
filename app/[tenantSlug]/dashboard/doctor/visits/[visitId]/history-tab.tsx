@@ -6,7 +6,7 @@ import { format } from 'date-fns'
 import { ar } from 'date-fns/locale'
 import { Eye, Stethoscope, Clock } from 'lucide-react'
 import Link from 'next/link'
-import { IPatientSummary } from '../../../../../../actions/patient/get-patient-summary'
+import { IPatientSummary } from '../../../../../../types/patient-app'
 
 interface HistoryTabProps {
   summary: IPatientSummary | null
