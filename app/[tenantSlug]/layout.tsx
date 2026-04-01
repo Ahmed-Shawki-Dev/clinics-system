@@ -2,8 +2,8 @@ import { IPublicClinic } from '@/types/public'
 import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 import { TenantInitializer } from '../../components/TenantInitializer'
-import { BaseApiResponse } from '../../types/api'
 import { getFullImageUrl } from '../../lib/utils'
+import { BaseApiResponse } from '../../types/api'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -42,7 +42,7 @@ export async function generateMetadata({
   }
 
   // استخدام دالتك الجاهزة
-  const absoluteLogoUrl = getFullImageUrl(clinic.logoUrl)
+  const absoluteShareImageUrl = getFullImageUrl(clinic.imgUrl || clinic.logoUrl)
 
   return {
     title: clinic.clinicName,
@@ -51,13 +51,15 @@ export async function generateMetadata({
     openGraph: {
       title: clinic.clinicName,
       siteName: clinic.clinicName,
-      images: absoluteLogoUrl ? [{ url: absoluteLogoUrl, alt: `لوجو ${clinic.clinicName}` }] : [],
+      images: absoluteShareImageUrl
+        ? [{ url: absoluteShareImageUrl, alt: `صورة ${clinic.clinicName}` }]
+        : [],
       type: 'website',
     },
     twitter: {
       card: 'summary_large_image',
       title: clinic.clinicName,
-      images: absoluteLogoUrl ? [absoluteLogoUrl] : [],
+      images: absoluteShareImageUrl ? [absoluteShareImageUrl] : [],
     },
   }
 }

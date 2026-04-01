@@ -27,6 +27,9 @@ export interface IPublicClinic {
   address: string | null
   city: string | null
   logoUrl: string | null
+  imgUrl: string | null
+  description: string | null
+  socialLinks: Record<string, string> | null
   bookingEnabled: boolean
   tenantSlug: string
   isActive: boolean

@@ -32,7 +32,8 @@ export default async function Page({ params }: PageProps) {
   const activeWorkingHours = workingHoursRes.data?.filter((w) => w.isActive) || []
 
   return (
-    <main className='relative flex min-h-screen w-full flex-col '>
+    <main className='relative flex min-h-screen w-full flex-col bg-background'>
+      <div className='pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_15%_15%,hsl(var(--primary)/0.12),transparent_36%),radial-gradient(circle_at_85%_20%,hsl(var(--primary)/0.08),transparent_28%),linear-gradient(to_bottom,hsl(var(--background)),hsl(var(--muted)/0.25)_40%,hsl(var(--background))_100%)]' />
       <Navbar clinic={clinic} tenantSlug={tenantSlug} />
       <Hero clinic={clinic} tenantSlug={tenantSlug} />
 
