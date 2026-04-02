@@ -53,7 +53,6 @@ export default async function DoctorVisitsPage({ params }: Props) {
           <Table>
             <TableHeader className='bg-muted/50'>
               <TableRow>
-                <TableHead className='text-right w-30'>رقم الزيارة</TableHead>
                 <TableHead className='text-right'>المريض</TableHead>
                 <TableHead className='text-right'>وقت البدء</TableHead>
                 <TableHead className='text-right'>الحالة</TableHead>
@@ -63,9 +62,6 @@ export default async function DoctorVisitsPage({ params }: Props) {
             <TableBody>
               {visits.map((visit) => (
                 <TableRow key={visit.id} className='hover:bg-muted/30 transition-colors'>
-                  <TableCell className='font-mono text-xs text-muted-foreground'>
-                    #{visit.id.slice(0, 8).toUpperCase()}
-                  </TableCell>
                   <TableCell className='font-bold text-foreground'>{visit.patientName}</TableCell>
                   <TableCell className='text-sm text-muted-foreground'>
                     <div className='flex items-center gap-1.5'>
@@ -77,7 +73,6 @@ export default async function DoctorVisitsPage({ params }: Props) {
                     {visit.status === 'Completed' || visit.completedAt ? (
                       <Badge
                         variant='outline'
-                        className='bg-emerald-50 text-emerald-600 border-emerald-200 gap-1 px-2 py-0.5'
                       >
                         <CheckCircle2 className='w-3.5 h-3.5' />
                         مكتملة

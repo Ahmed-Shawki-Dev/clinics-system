@@ -3,14 +3,13 @@
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { cn } from '@/lib/utils'
 import { IVisit } from '@/types/visit'
-import { Activity, AlertTriangle, CalendarDays, History, Printer } from 'lucide-react'
+import { AlertTriangle, CalendarDays, History, Printer } from 'lucide-react'
 import { toast } from 'sonner'
 import { useTenantStore } from '../../../../../../store/useTenantStore'
 
-import { HistoryTab } from './history-tab'
 import { IPatientSummary } from '../../../../../../types/patient-app'
+import { HistoryTab } from './history-tab'
 
 // ============================================================================
 // واجهة الهيدر الداخلي (بدون Gender)
@@ -62,13 +61,6 @@ export function TerminalHeader({
 
   return (
     <div className='bg-card p-4 md:p-5 rounded-xl border shadow-sm flex flex-col lg:flex-row justify-between gap-4 md:gap-5 relative overflow-hidden'>
-      <div
-        className={cn(
-          'absolute right-0 top-0 bottom-0 w-1.5 transition-colors',
-          chronicDiseases.length > 0 ? 'bg-destructive' : 'bg-primary',
-        )}
-      />
-
       {/* منطقة بيانات المريض (ريسبونسف) */}
       <div className='flex flex-col gap-2 md:gap-3 z-10 pl-0 md:pl-2'>
         <div className='flex flex-wrap items-center gap-2 md:gap-3'>
@@ -121,7 +113,7 @@ export function TerminalHeader({
           <SheetContent side='right' className='w-full sm:max-w-md overflow-y-auto pt-10 px-5'>
             <SheetHeader className='mb-6'>
               <SheetTitle className='flex items-center gap-2 text-primary border-b pb-4'>
-                <Activity className='w-5 h-5' /> التاريخ المرضي: {visit.patientName}
+                التاريخ المرضي: {visit.patientName}
               </SheetTitle>
             </SheetHeader>
             <HistoryTab summary={summary} tenantSlug={tenantSlug} currentVisitId={visit.id} />
@@ -142,11 +134,10 @@ export function TerminalHeader({
           <Button
             onClick={onComplete}
             disabled={isCompleting}
-            variant='destructive'
             size='sm'
             className='h-9 shadow-sm w-full sm:w-auto mt-2 sm:mt-0'
           >
-            {isCompleting ? 'جاري...' : 'إنهاء الزيارة'}
+            {isCompleting ? 'جاري...' : 'حفظ وإنهاء الزيارة'}
           </Button>
         )}
       </div>

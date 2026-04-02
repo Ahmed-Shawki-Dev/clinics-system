@@ -4,7 +4,6 @@ import {
   CalendarDays,
   ClipboardList,
   Clock,
-  Handshake,
   LayoutDashboard,
   PieChart,
   Receipt,
@@ -67,7 +66,7 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
         title: 'الرئيسية', // أسهل وأسرع للعين
         href: '/',
         icon: LayoutDashboard,
-        roles: ['ClinicOwner', 'ClinicManager', 'Receptionist', 'SuperAdmin'],
+        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
       },
       {
         title: 'العيادة الآن', // بتدي انطباع إن دي شاشة الـ Live للمرضى اللي حاضرين
