@@ -5,6 +5,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
@@ -16,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Calendar, Copy, Eye, MoreHorizontalIcon, Phone, User } from 'lucide-react'
+import { Copy, Eye, MoreHorizontalIcon, User } from 'lucide-react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 
@@ -56,9 +57,7 @@ export function PatientsList({ data }: PatientsListProps) {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className='flex items-center gap-2'>
-                    {patient.phone}
-                  </div>
+                  <div className='flex items-center gap-2'>{patient.phone}</div>
                 </TableCell>
                 <TableCell>
                   {patient.dateOfBirth ? (
@@ -78,6 +77,8 @@ export function PatientsList({ data }: PatientsListProps) {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end'>
+                      <DropdownMenuLabel className='text-xs'>خيارات المريض</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
                       {/* زر عرض البروفايل - متاح للجميع */}
                       <Link href={`/${tenantSlug}/dashboard/patients/${patient.id}`}>
                         <DropdownMenuItem>
