@@ -5,6 +5,7 @@ import { AlertCircle } from 'lucide-react'
 import { getFinanceByDoctorAction, getYearlyFinanceAction } from '../../actions/finance/reports'
 import { DashboardHeader, DashboardShell } from '../shell'
 import { DashboardCharts } from './DashboardCharts'
+import { StaleVisitsAlert } from './StaleVisitsAlert'
 
 interface OwnerDashboardProps {
   tenantSlug: string
@@ -92,6 +93,10 @@ export default async function OwnerDashboard({ tenantSlug }: OwnerDashboardProps
             </Card>
           )
         })}
+      </div>
+
+      <div>
+        <StaleVisitsAlert tenantSlug={tenantSlug} />
       </div>
 
       {yearlyRes.success && yearlyRes.data && doctorsRes.success && doctorsRes.data && (

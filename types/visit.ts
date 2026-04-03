@@ -151,3 +151,16 @@ export interface DoctorVisitFieldConfig {
   oxygenSaturation?: boolean
   respiratoryRate?: boolean
 }
+
+export interface IStaleVisit {
+  visitId: string
+  patientId: string
+  patientName: string
+  doctorId: string
+  doctorName: string
+  queueTicketId: string
+  complaint: string
+  startedAt: string
+  ageHours: number
+  hasActiveQueueTicket: boolean
+}
