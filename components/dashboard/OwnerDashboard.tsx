@@ -1,8 +1,8 @@
 import { getDailyFinance } from '@/actions/finance/get-daily-finance'
-import { getFinanceByDoctorAction, getYearlyFinanceAction } from '../../actions/finance/reports'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Activity, AlertCircle, Banknote, Wallet } from 'lucide-react'
+import { AlertCircle } from 'lucide-react'
+import { getFinanceByDoctorAction, getYearlyFinanceAction } from '../../actions/finance/reports'
 import { DashboardHeader, DashboardShell } from '../shell'
 import { DashboardCharts } from './DashboardCharts'
 
@@ -10,7 +10,7 @@ interface OwnerDashboardProps {
   tenantSlug: string
 }
 
-export default async function OwnerDashboard({ tenantSlug,  }: OwnerDashboardProps) {
+export default async function OwnerDashboard({ tenantSlug }: OwnerDashboardProps) {
   // 1. جلب التاريخ والسنة الحالية ديناميكياً
   const today = new Date()
   const currentYear = today.getFullYear()
@@ -49,33 +49,21 @@ export default async function OwnerDashboard({ tenantSlug,  }: OwnerDashboardPro
 
   const statCards = [
     {
-      title: 'إجمالي الدخل (اليوم)',
+      title: 'إجمالي الدخل اليومي',
       value: `${totalPaid.toLocaleString()} ج.م`,
-      icon: Banknote,
-      colorClass: 'text-primary',
-      bgClass: 'bg-primary/10',
     },
     {
-      title: 'المحصل (في الخزنة)',
+      title: 'المحصل في الخزنة اليوم',
       value: `${totalRevenue.toLocaleString()} ج.م`,
-      icon: Wallet,
-      colorClass: 'text-emerald-600 dark:text-emerald-400',
-      bgClass: 'bg-emerald-600/10',
     },
     {
-      title: 'آجل (مستحقات غير مدفوعة)',
+      title: 'المستحقات غير المدفوعة اليوم',
       value: `${totalUnpaid.toLocaleString()} ج.م`,
-      icon: AlertCircle,
-      colorClass: 'text-rose-600 dark:text-rose-400',
-      bgClass: 'bg-rose-600/10',
     },
     {
-      title: 'نشاط العيادة',
+      title: 'فواتير العيادة اليوم',
       value: `${invoiceCount} فاتورة`,
       subValue: `${paymentCount} عملية دفع`,
-      icon: Activity,
-      colorClass: 'text-amber-600 dark:text-amber-400',
-      bgClass: 'bg-amber-600/10',
     },
   ]
 
@@ -88,16 +76,12 @@ export default async function OwnerDashboard({ tenantSlug,  }: OwnerDashboardPro
 
       <div className='grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'>
         {statCards.map((stat, index) => {
-          const Icon = stat.icon
           return (
             <Card key={index} className='transition-all hover:shadow-md border-border/50'>
               <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
                 <CardTitle className='text-sm font-medium text-muted-foreground'>
                   {stat.title}
                 </CardTitle>
-                <div className={`p-2 rounded-xl ${stat.bgClass}`}>
-                  <Icon className={`h-4 w-4 ${stat.colorClass}`} />
-                </div>
               </CardHeader>
               <CardContent>
                 <div className='text-2xl font-black text-foreground'>{stat.value}</div>

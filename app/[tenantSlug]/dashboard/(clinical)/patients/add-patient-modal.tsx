@@ -146,7 +146,7 @@ export function AddPatientModal({
           phone: values.phone,
         })
 
-        setNewPatientData({
+      setNewPatientData({
           id: result.data.patient.id,
           name: result.data.patient.name,
         })
