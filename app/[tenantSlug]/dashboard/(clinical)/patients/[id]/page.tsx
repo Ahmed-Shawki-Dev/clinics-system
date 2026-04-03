@@ -1,6 +1,6 @@
 import { getPatientProfileAction } from '@/actions/patient/get-patient-profile'
 import { GenericPagination } from '@/components/shared/pagination'
-import { DashboardShell } from '@/components/shell'
+import { DashboardHeader, DashboardShell } from '@/components/shell'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Activity, ChevronLeft, User } from 'lucide-react'
 import Link from 'next/link'
@@ -31,24 +31,16 @@ export default async function PatientProfilePage({ params, searchParams }: PageP
 
   return (
     <DashboardShell>
-      {/* Header with Quick Actions stacked on mobile */}
-      <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2'>
-        <div>
-          <h1 className='text-2xl md:text-3xl font-bold tracking-tight text-foreground'>
-            الملف الطبي
-          </h1>
-          <p className='text-sm text-muted-foreground mt-1'>إدارة السجل الطبي الشامل للمريض</p>
-        </div>
+      <DashboardHeader heading='الملف الطبي' text='إدارة السجل الطبي الشامل للمريض'>
         <Button variant={'ghost'}>
           <Link href={`/${tenantSlug}/dashboard/patients`} className='flex space-x-2 items-center'>
             صفحة المرضى
             <ChevronLeft />
           </Link>
         </Button>
-      </div>
+      </DashboardHeader>
 
       <div className='grid grid-cols-1 lg:grid-cols-12 gap-6'>
-        {/* العمود الأيمن (كارت المريض) */}
         <div className='lg:col-span-4 xl:col-span-3'>
           <div className='sticky top-4'>
             <PatientInfoCard patient={patient} />

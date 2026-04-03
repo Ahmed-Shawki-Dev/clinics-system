@@ -151,7 +151,7 @@ export function AddPatientModal({
         toast.error(result.message)
       }
     } catch (error) {
-      toast.error('حدث خطأ أثناء حفظ البيانات')
+      if (error instanceof Error) toast.error('حدث خطأ أثناء حفظ البيانات')
     }
   }
 
@@ -200,8 +200,8 @@ export function AddPatientModal({
         {credentials ? (
           <>
             <DialogHeader className='flex flex-col items-center justify-center gap-3 pt-6'>
-              <div className='flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100/50'>
-                <CheckCircle2 className='h-8 w-8 text-emerald-600' />
+              <div className='flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100/50 dark:bg-emerald-100/10'>
+                <CheckCircle2 className='h-8 w-8 text-emerald-600 dark:text-emerald-400' />
               </div>
               <DialogTitle className='text-xl'>تم التسجيل بنجاح</DialogTitle>
             </DialogHeader>
@@ -233,9 +233,7 @@ export function AddPatientModal({
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle className='flex items-center gap-2'>
-                <UserPlus className='h-5 w-5 text-primary' /> إضافة مريض
-              </DialogTitle>
+              <DialogTitle className='flex items-center gap-2'>إضافة مريض</DialogTitle>
             </DialogHeader>
 
             <Form {...form}>
@@ -323,7 +321,6 @@ export function AddPatientModal({
                               mode='single'
                               selected={field.value}
                               onSelect={field.onChange}
-                              // 🔴 السطرين دول هم السحر
                               captionLayout='dropdown'
                               fromYear={1900}
                               toYear={new Date().getFullYear()}
@@ -356,7 +353,7 @@ export function AddPatientModal({
                   </div>
 
                   {showChronicFields && (
-                    <div className='grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300'>
+                    <div className='grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300'>
                       {chronicItems.map((item) => (
                         <FormField
                           key={item.id}
@@ -420,11 +417,12 @@ export function AddPatientModal({
                   <Button
                     type='submit'
                     disabled={form.formState.isSubmitting}
-                    className='w-full sm:w-auto'
+                    className='w-full'
+                    size={'xl'}
                   >
                     {form.formState.isSubmitting && (
                       <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                    )}{' '}
+                    )}
                     حفظ البيانات
                   </Button>
                 </DialogFooter>

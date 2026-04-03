@@ -25,3 +25,5 @@ export function getChronicDiseases(profile: IVisit['chronicProfile']): string[] 
   }
   return diseases
 }
+
+
