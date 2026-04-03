@@ -27,23 +27,23 @@ export const buttonVariants = cva(
       },
       size: {
         default: 'h-9 px-4 py-2 has-[>svg]:px-3',
-        xs: "h-6 gap-1 rounded-md px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
-        sm: 'h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5',
-        lg: 'h-10 rounded-md px-6 has-[>svg]:px-4',
+        xs: "h-6 gap-1  px-2 text-xs has-[>svg]:px-1.5 [&_svg:not([class*='size-'])]:size-3",
+        sm: 'h-8  gap-1.5 px-3 has-[>svg]:px-2.5',
+        lg: 'h-10  px-6 has-[>svg]:px-4',
 
-        xl: "h-12 rounded-lg px-8 text-base has-[>svg]:px-6 [&_svg:not([class*='size-'])]:size-5",
+        xl: "h-12  px-8 text-base has-[>svg]:px-6 [&_svg:not([class*='size-'])]:size-5",
         '2xl':
-          "h-14 rounded-xl px-10 text-lg font-semibold has-[>svg]:px-8 [&_svg:not([class*='size-'])]:size-6",
+          "h-14  px-10 text-lg font-semibold has-[>svg]:px-8 [&_svg:not([class*='size-'])]:size-6",
         massive:
-          "h-16 rounded-2xl px-12 text-xl font-bold shadow-sm has-[>svg]:px-10 [&_svg:not([class*='size-'])]:size-7",
+          "h-16  px-12 text-xl font-bold shadow-sm has-[>svg]:px-10 [&_svg:not([class*='size-'])]:size-7",
 
         icon: 'size-9',
-        'icon-xs': "size-6 rounded-md [&_svg:not([class*='size-'])]:size-3",
+        'icon-xs': "size-6  [&_svg:not([class*='size-'])]:size-3",
         'icon-sm': 'size-8',
         'icon-lg': 'size-10',
 
-        'icon-xl': "size-12 rounded-lg [&_svg:not([class*='size-'])]:size-5",
-        'icon-2xl': "size-14 rounded-xl [&_svg:not([class*='size-'])]:size-6",
+        'icon-xl': "size-12  [&_svg:not([class*='size-'])]:size-5",
+        'icon-2xl': "size-14  [&_svg:not([class*='size-'])]:size-6",
       },
     },
     defaultVariants: {

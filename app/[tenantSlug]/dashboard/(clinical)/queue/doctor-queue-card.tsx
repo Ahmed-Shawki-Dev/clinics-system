@@ -34,9 +34,8 @@ interface DoctorQueueCardProps {
 }
 
 export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
-  // 1. الداتا بتتعرض زي ما الباك إند باعتها بدون أي تلاعب في الترتيب
   const waitlist = session.waitingTickets || []
-  // 2. متغيرات حالة الطابور عشان الـ Force Close
+
   const isPatientInVisit = !!session.currentTicket
   const hasWaitingPatients = waitlist.length > 0
 
@@ -109,7 +108,7 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
               <AlertDialogCancel>إلغاء</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleCloseSession}
-                variant={isPatientInVisit ? 'destructive' : 'default'}
+                variant={'destructive'}
               >
                 {isPatientInVisit ? 'تأكيد الإنهاء الإجباري' : 'تأكيد الإغلاق'}
               </AlertDialogAction>

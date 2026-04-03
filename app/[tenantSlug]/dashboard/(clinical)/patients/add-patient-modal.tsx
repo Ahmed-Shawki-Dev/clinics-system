@@ -3,7 +3,7 @@
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { format } from 'date-fns'
 import { ar } from 'date-fns/locale'
-import { CalendarIcon, CheckCircle2, Loader2, MessageCircle, UserPlus } from 'lucide-react'
+import { CalendarIcon, CheckCircle2, Loader2, UserPlus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Path, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -93,7 +93,6 @@ export function AddPatientModal({
       address: '',
       notes: '',
       gender: 'Male',
-      // القيم الافتراضية للتايبس الجديدة
       diabetes: false,
       hypertension: false,
       cardiacDisease: false,
@@ -108,13 +107,11 @@ export function AddPatientModal({
 
   const onSubmit = async (values: CreatePatientInput) => {
     try {
-      // 1. إنشاء المريض الأساسي
       const result = await createPatientAction(values, tenantSlug)
 
       if (result.success && result.data) {
         const patientId = result.data.patient.id
 
-        // 🛑 المنطق الذكي: لو اختار أمراض، اضرب الريكوست التاني
         const hasChronicData =
           values.diabetes ||
           values.hypertension ||
@@ -146,7 +143,7 @@ export function AddPatientModal({
           phone: values.phone,
         })
 
-      setNewPatientData({
+        setNewPatientData({
           id: result.data.patient.id,
           name: result.data.patient.name,
         })
@@ -184,42 +181,55 @@ export function AddPatientModal({
       {controlledOpen === undefined && (
         <DialogTrigger asChild>
           {trigger || (
-            <Button>
+            <Button size={'lg'} type='button'>
               <UserPlus className='mr-2 h-4 w-4' /> مريض جديد
             </Button>
           )}
         </DialogTrigger>
       )}
 
-      <DialogContent className='sm:max-w-137.5 max-h-[90vh] overflow-y-auto'>
+      <DialogContent
+        className='sm:max-w-137.5 max-h-[90vh] overflow-y-auto'
+        onInteractOutside={(e) => {
+          if (form.formState.isSubmitting || credentials) e.preventDefault()
+        }}
+        onEscapeKeyDown={(e) => {
+          if (form.formState.isSubmitting || credentials) e.preventDefault()
+        }}
+      >
         {credentials ? (
-          <div className='flex flex-col items-center justify-center py-6 space-y-6'>
-            <div className='flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100'>
-              <CheckCircle2 className='h-10 w-10 text-emerald-600' />
-            </div>
-            <DialogTitle>تم التسجيل بنجاح</DialogTitle>
-            <div className='w-full bg-muted/50 p-4 rounded-lg space-y-3 border'>
-              <div className='flex justify-between'>
-                <span className='text-muted-foreground'>اسم المستخدم:</span>
+          <>
+            <DialogHeader className='flex flex-col items-center justify-center gap-3 pt-6'>
+              <div className='flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100/50'>
+                <CheckCircle2 className='h-8 w-8 text-emerald-600' />
+              </div>
+              <DialogTitle className='text-xl'>تم التسجيل بنجاح</DialogTitle>
+            </DialogHeader>
+
+            <div className='w-full bg-muted/30 p-4 rounded-lg space-y-3 border my-2 '>
+              <div className='flex justify-between items-center flex-wrap'>
+                <span className='text-sm text-muted-foreground'>اسم المستخدم:</span>
                 <b>{credentials.username}</b>
               </div>
-              <div className='flex justify-between'>
-                <span className='text-muted-foreground'>كلمة المرور:</span>
+              <div className='flex justify-between items-center flex-wrap'>
+                <span className='text-sm text-muted-foreground'>كلمة المرور:</span>
                 <b>{credentials.password}</b>
               </div>
             </div>
-            <div className='flex w-full gap-3'>
-              <Button onClick={handleClose} variant='outline' className='flex-1'>
+
+            <DialogFooter>
+              <Button onClick={handleClose} variant='outline' type='button'>
                 إغلاق
               </Button>
               <Button
                 onClick={handleSendWhatsApp}
-                className='flex-1 bg-green-600 hover:bg-green-500'
+                type='button'
+                className=' bg-green-600 hover:bg-green-700 text-white'
               >
-                <MessageCircle className='mr-2 h-4 w-4' /> واتساب
+                إرسال واتساب
               </Button>
-            </div>
-          </div>
+            </DialogFooter>
+          </>
         ) : (
           <>
             <DialogHeader>
@@ -229,7 +239,14 @@ export function AddPatientModal({
             </DialogHeader>
 
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5'>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation() // To Prevent Access Ticket Form
+                  form.handleSubmit(onSubmit)(e)
+                }}
+                className='space-y-5'
+              >
                 <div className='grid grid-cols-2 gap-4'>
                   <FormField
                     control={form.control}
@@ -238,7 +255,7 @@ export function AddPatientModal({
                       <FormItem>
                         <FormLabel>الاسم</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} placeholder='أحمد محمود' />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -251,7 +268,7 @@ export function AddPatientModal({
                       <FormItem>
                         <FormLabel>الهاتف</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} placeholder='010' />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -307,7 +324,7 @@ export function AddPatientModal({
                               selected={field.value}
                               onSelect={field.onChange}
                               // 🔴 السطرين دول هم السحر
-                              captionLayout='dropdown' 
+                              captionLayout='dropdown'
                               fromYear={1900}
                               toYear={new Date().getFullYear()}
                               // ---------------------------
