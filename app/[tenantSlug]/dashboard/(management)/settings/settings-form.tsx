@@ -41,7 +41,7 @@ export function SettingsForm({ initialData, tenantSlug }: SettingsFormProps) {
       imgUrl: initialData.imgUrl || '',
       description: initialData.description || '',
       socialLinks: {
-        website: initialData.socialLinks?.website || '',
+        address: initialData.socialLinks?.address || '',
         facebook: initialData.socialLinks?.facebook || '',
         instagram: initialData.socialLinks?.instagram || '',
         x: initialData.socialLinks?.x || '',

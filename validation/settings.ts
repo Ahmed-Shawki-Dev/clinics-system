@@ -35,7 +35,7 @@ export const UpdateSettingsSchema = v.object({
   description: v.optional(v.pipe(v.string(), v.maxLength(3000, 'الوصف طويل جداً'))),
   socialLinks: v.optional(
     v.object({
-      website: v.optional(v.string()),
+      address: v.optional(v.string()),
       facebook: v.optional(v.string()),
       instagram: v.optional(v.string()),
       x: v.optional(v.string()),

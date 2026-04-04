@@ -17,10 +17,10 @@ export function SocialLinksSettingsSection({ form }: SocialLinksSettingsSectionP
       <CardContent className='grid grid-cols-1 md:grid-cols-2 gap-4'>
         <FormField
           control={form.control}
-          name='socialLinks.website'
+          name='socialLinks.address'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>الموقع الإلكتروني</FormLabel>
+              <FormLabel>موقع عنوان العيادة</FormLabel>
               <FormControl>
                 <Input {...field} value={field.value || ''} placeholder='https://...' />
               </FormControl>
