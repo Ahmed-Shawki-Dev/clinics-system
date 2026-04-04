@@ -4,6 +4,7 @@ import {
   CalendarDays,
   ClipboardList,
   Clock,
+  Handshake,
   LayoutDashboard,
   PieChart,
   Receipt,
@@ -32,7 +33,7 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
     label: 'شاشة الطبيب', // بدل مساحة عمل الطبيب
     items: [
       {
-        title: 'كشوفات اليوم', // بدل طابور الكشف (لأن الطابور كلمة مش احترافية للمرضى)
+        title: 'إجراء كشف',
         href: '/doctor/queue',
         icon: Activity,
         roles: ['Doctor'],
@@ -47,6 +48,18 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
         title: 'ملفات المرضى', // بدل سجل مرضاي
         href: '/doctor/patients',
         icon: Users,
+        roles: ['Doctor'],
+      },
+      {
+        title: 'تقارير الأرباح',
+        href: '/doctor/reports',
+        icon: Banknote,
+        roles: ['Doctor'],
+      },
+      {
+        title: 'التعاقدات',
+        href: '/doctor/contracts',
+        icon: Handshake,
         roles: ['Doctor'],
       },
       {
@@ -103,20 +116,14 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
         title: 'المصروفات والعهد', // مصطلح مالي أصح
         href: '/expenses',
         icon: Banknote,
-        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
+        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin','Receptionist'],
       },
       {
-        title: 'حركة الخزنة والتقارير', // بيفهم صاحب العيادة إن هنا الفلوس
+        title: 'حركة الخزنة والتقارير',
         href: '/reports',
         icon: PieChart,
         roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
       },
-      // {
-      //   title: 'تعاقدات الشركات', // أوضح من كلمة تعاقدات مبهمة
-      //   href: '/contracts',
-      //   icon: Handshake,
-      //   roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
-      // },
     ],
   },
 
@@ -141,6 +148,12 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
         href: '/services',
         icon: Banknote,
         roles: ['ClinicOwner', 'SuperAdmin'],
+      },
+      {
+        title: 'تعاقدات الشركات', // أوضح من كلمة تعاقدات مبهمة
+        href: '/contracts',
+        icon: Handshake,
+        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
       },
       {
         title: 'بيانات المنشأة', // أشيك من "إعدادات العيادة"

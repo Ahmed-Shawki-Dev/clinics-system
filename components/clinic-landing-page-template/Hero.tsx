@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { toWhatsAppLink } from '../../lib/utils'
 import { IPublicClinic } from '../../types/public'
 import { ClinicImage } from '../shared/clinic-image'
 
@@ -42,9 +43,9 @@ export default function Hero({ clinic, tenantSlug }: HeroProps) {
             </p>
           </div>
 
-          <Button size={'lg'} asChild>
-            <Link href={`/${tenantSlug}/patient/login`}>
-              سجل الدخول كمريض
+          <Button size={'xl'} variant={'default'} asChild>
+            <Link href={toWhatsAppLink(clinic.supportWhatsAppNumber)} target='_blank'>
+              احجز الآن
               <ArrowLeft className='w-5 h-5 transition-transform duration-300 group-hover:-translate-x-2' />
             </Link>
           </Button>

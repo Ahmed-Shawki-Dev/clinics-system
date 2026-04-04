@@ -96,18 +96,18 @@ export interface IChronicProfile {
 
 export interface IVisit {
   id: string
-  visitType: VisitType // <-- جديد
+  visitType: VisitType 
   queueTicketId: string | null
   doctorId: string
   doctorName: string
   patientId: string
   patientName: string
-  patientPhone: string | null // <-- جديد
-  patientDateOfBirth: string | null // <-- جديد
-  patientGender: string | null // <-- جديد
+  patientPhone: string | null 
+  patientDateOfBirth: string | null 
+  patientGender: string | null 
   status: VisitStatus
-  lifecycleState: LifecycleState // <-- جديد
-  financialState: FinancialState // <-- جديد
+  lifecycleState: LifecycleState 
+  financialState: FinancialState
   complaint: string | null
   diagnosis: string | null
   notes: string
@@ -136,7 +136,7 @@ export interface IVisit {
   prescriptions: IPrescription[]
   labRequests: ILabRequest[]
   invoice: IInvoice | null
-  chronicProfile: IChronicProfile | null // <-- جديد
+  chronicProfile: IChronicProfile | null 
   createdAt: string
 }
 

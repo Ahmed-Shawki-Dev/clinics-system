@@ -53,7 +53,7 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
   const handleUrgent = async (ticketId: string) => {
     const res = await markTicketUrgent(tenantSlug, ticketId)
     if (res.success) {
-      toast.success('تم رفع الحالة لطوارئ')
+      toast.success('تم رفع الحالة للاستعجال')
       await mutate(['queueBoard', tenantSlug])
     } else {
       toast.error(res.message)
@@ -106,10 +106,7 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>إلغاء</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleCloseSession}
-                variant={'destructive'}
-              >
+              <AlertDialogAction onClick={handleCloseSession} variant={'destructive'}>
                 {isPatientInVisit ? 'تأكيد الإنهاء الإجباري' : 'تأكيد الإغلاق'}
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -168,7 +165,7 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
                         {ticket.patientName}
                         {ticket.isUrgent && (
                           <Badge variant='destructive' className='mr-2 text-[10px] h-4 px-1'>
-                            طوارئ
+                            استعجال
                           </Badge>
                         )}
                       </p>

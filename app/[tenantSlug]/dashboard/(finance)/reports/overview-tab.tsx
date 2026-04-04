@@ -1,6 +1,5 @@
 import { getProfitReportAction } from '@/actions/finance/reports'
 import { PeriodFilter } from '@/components/shared/period-filter'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table,
   TableBody,
@@ -10,7 +9,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
-import { ActivityIcon, ArrowDownIcon, ArrowUpIcon, ReceiptIcon, WalletIcon } from 'lucide-react'
 
 export async function OverviewTab({
   tenantSlug,
@@ -21,109 +19,162 @@ export async function OverviewTab({
   from?: string
   to?: string
 }) {
-  // الريكويست بيتضرب هنا في السيرفر
-  const response = await getProfitReportAction(tenantSlug, from, to)
+  const today = new Date()
+  const lastYear = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate())
+  const actualFrom = from || lastYear.toISOString().split('T')[0]
+  const actualTo = to || today.toISOString().split('T')[0]
+
+  const response = await getProfitReportAction(tenantSlug, actualFrom, actualTo)
   const report = response?.data
 
   if (!report) {
     return (
-      <div className='p-8 text-center border rounded-xl text-muted-foreground bg-muted/20'>
-        لا توجد بيانات مالية لهذه الفترة.
+      <div className='flex flex-col items-center justify-center py-20 text-muted-foreground border border-dashed rounded-xl bg-muted/10'>
+        <p className='text-sm font-medium'>لا توجد بيانات مالية لهذه الفترة المحددة.</p>
       </div>
     )
   }
 
-  // لو الربح موجب أو صفر هيبقى لونه أخضر (أو Primary)، لو سالب هيبقى أحمر
   const isProfit = report.netProfit >= 0
 
   return (
-    <div className='space-y-8 animate-in fade-in duration-500'>
-      <div className='flex items-center justify-between'>
-        <h3 className='text-lg font-black tracking-tight'>ملخص الأرباح والمصروفات</h3>
+    <div className='space-y-10 animate-in fade-in duration-500'>
+      {/* Header Area */}
+      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/40 pb-4'>
+        <div >
+          <h3 className='text-lg font-black tracking-tight'>نظرة عامة على الأداء</h3>
+        </div>
         <PeriodFilter />
       </div>
 
-      {/* 1. كروت الـ KPIs */}
-      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between pb-2 space-y-0'>
-            <CardTitle className='text-sm font-bold text-muted-foreground'>
+      {/* 1. Metric Blocks (Stripe-like Minimalist Grid) */}
+      <div className='border rounded-xl bg-card overflow-hidden shadow-sm'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 divide-y md:divide-y-0 md:divide-x md:divide-x-reverse divide-border/60'>
+          {/* Revenue */}
+          <div className='p-6 flex flex-col gap-2'>
+            <span className='text-[10px] font-bold uppercase tracking-wider text-muted-foreground'>
               إجمالي الإيرادات
-            </CardTitle>
-            <ActivityIcon className='w-4 h-4 text-muted-foreground' />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-black'>{report.totalPaid} ج.م</div>
-            <p className='text-xs text-muted-foreground mt-1'>شامل المديونيات</p>
-          </CardContent>
-        </Card>
+            </span>
+            <div className='flex items-baseline gap-1'>
+              <span className='text-2xl font-black font-mono tracking-tight text-foreground'>
+                {report.totalPaid.toLocaleString()}
+              </span>
+              <span className='text-xs font-semibold text-muted-foreground'>ج.م</span>
+            </div>
+            <span className='text-xs text-muted-foreground mt-1'>تشمل المديونيات غير المحصلة</span>
+          </div>
 
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between pb-2 space-y-0'>
-            <CardTitle className='text-sm font-bold text-muted-foreground'>
-              المحصل الفعلي (الكاش)
-            </CardTitle>
-            <WalletIcon className='w-4 h-4 text-primary' />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-black text-primary'>{report.totalRevenue} ج.م</div>
-            <p className='text-xs text-muted-foreground mt-1'>من {report.invoiceCount} فاتورة</p>
-          </CardContent>
-        </Card>
+          {/* Cash Collected */}
+          <div className='p-6 flex flex-col gap-2'>
+            <span className='text-[10px] font-bold uppercase tracking-wider text-muted-foreground'>
+              المحصل الفعلي
+            </span>
+            <div className='flex items-baseline gap-1'>
+              <span className='text-2xl font-black font-mono tracking-tight text-foreground'>
+                {report.totalRevenue.toLocaleString()}
+              </span>
+              <span className='text-xs font-semibold text-muted-foreground'>ج.م</span>
+            </div>
+            <span className='text-xs text-muted-foreground mt-1'>
+              من إجمالي <span className='font-bold text-foreground'>{report.invoiceCount}</span>{' '}
+              فاتورة
+            </span>
+          </div>
 
-        <Card>
-          <CardHeader className='flex flex-row items-center justify-between pb-2 space-y-0'>
-            <CardTitle className='text-sm font-bold text-muted-foreground'>
-              المصروفات الخارجة
-            </CardTitle>
-            <ReceiptIcon className='w-4 h-4 text-destructive' />
-          </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-black text-destructive'>{report.totalExpenses} ج.م</div>
-            <p className='text-xs text-muted-foreground mt-1'>من {report.expenseCount} عملية صرف</p>
-          </CardContent>
-        </Card>
+          {/* Expenses */}
+          <div className='p-6 flex flex-col gap-2'>
+            <span className='text-[10px] font-bold uppercase tracking-wider text-muted-foreground'>
+              المصروفات التشغيلية
+            </span>
+            <div className='flex items-baseline gap-1'>
+              <span className='text-2xl font-black font-mono tracking-tight text-foreground'>
+                {report.totalExpenses.toLocaleString()}
+              </span>
+              <span className='text-xs font-semibold text-muted-foreground'>ج.م</span>
+            </div>
+            <span className='text-xs text-muted-foreground mt-1'>
+              موزعة على <span className='font-bold text-foreground'>{report.expenseCount}</span>{' '}
+              عملية صرف
+            </span>
+          </div>
 
-        {/* كارت صافي الربح (بيتغير لونه حسب المكسب والخسارة) */}
-        <Card
-          className={cn(
-            'border-2',
-            isProfit ? 'border-primary/50 bg-primary/5' : 'border-destructive/50 bg-destructive/5',
-          )}
-        >
-          <CardHeader className='flex flex-row items-center justify-between pb-2 space-y-0'>
-            <CardTitle
-              className={cn('text-sm font-black', isProfit ? 'text-primary' : 'text-destructive')}
+          {/* Net Profit (Dynamic Color Accent) */}
+          <div
+            className={cn(
+              'p-6 flex flex-col gap-2 relative overflow-hidden',
+              isProfit ? 'bg-emerald-500/5' : 'bg-rose-500/5',
+            )}
+          >
+            {/* Accent Line */}
+            <div
+              className={cn(
+                'absolute top-0 bottom-0 right-0 w-1',
+                isProfit ? 'bg-emerald-500' : 'bg-rose-500',
+              )}
+            />
+
+            <span
+              className={cn(
+                'text-[10px] font-bold uppercase tracking-wider',
+                isProfit
+                  ? 'text-emerald-700 dark:text-emerald-500'
+                  : 'text-rose-700 dark:text-rose-500',
+              )}
             >
               صافي الربح
-            </CardTitle>
-            {isProfit ? (
-              <ArrowUpIcon className='w-5 h-5 text-primary' />
-            ) : (
-              <ArrowDownIcon className='w-5 h-5 text-destructive' />
-            )}
-          </CardHeader>
-          <CardContent>
-            <div
-              className={cn('text-3xl font-black', isProfit ? 'text-primary' : 'text-destructive')}
-            >
-              {report.netProfit} ج.م
+            </span>
+            <div className='flex items-baseline gap-1'>
+              <span
+                className={cn(
+                  'text-3xl font-black font-mono tracking-tight',
+                  isProfit
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-rose-600 dark:text-rose-400',
+                )}
+              >
+                {isProfit ? '+' : ''}
+                {report.netProfit.toLocaleString()}
+              </span>
+              <span
+                className={cn(
+                  'text-xs font-bold',
+                  isProfit ? 'text-emerald-600/70' : 'text-rose-600/70',
+                )}
+              >
+                ج.م
+              </span>
             </div>
-          </CardContent>
-        </Card>
+            <span className='text-xs font-medium text-muted-foreground mt-1'>
+              بعد خصم المصروفات من المحصل
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* 2. أداء الدكاترة (عشان صاحب العيادة يعرف مين بيدخله فلوس ومين مريح) */}
+      {/* 2. Doctor Performance Table (Clean UI) */}
       <div className='space-y-4'>
-        <h3 className='text-lg font-black tracking-tight'>مساهمة الأطباء في الإيرادات</h3>
-        <div className='overflow-hidden border rounded-md'>
-          <Table dir='rtl'>
-            <TableHeader className='bg-muted/50 h-12'>
-              <TableRow>
-                <TableHead className='font-bold text-right'>اسم الطبيب</TableHead>
-                <TableHead className='font-bold text-right'>عدد الكشوفات</TableHead>
-                <TableHead className='font-bold text-right'>الإيراد الكلي</TableHead>
-                <TableHead className='font-bold text-right'>المحصل الفعلي</TableHead>
+        <div className='flex items-center justify-between'>
+          <h3 className='text-sm font-bold uppercase tracking-wider text-muted-foreground'>
+            أداء الأطباء
+          </h3>
+        </div>
+
+        <div className='border rounded-xl overflow-hidden shadow-sm'>
+          <Table>
+            <TableHeader className='bg-muted/30'>
+              <TableRow className='hover:bg-transparent border-border/40'>
+                <TableHead className='h-10 text-xs font-semibold text-muted-foreground'>
+                  اسم الطبيب
+                </TableHead>
+                <TableHead className='h-10 text-xs font-semibold text-muted-foreground text-center'>
+                  الكشوفات
+                </TableHead>
+                <TableHead className='h-10 text-xs font-semibold text-muted-foreground text-left'>
+                  الإيراد الكلي
+                </TableHead>
+                <TableHead className='h-10 text-xs font-semibold text-muted-foreground text-left'>
+                  المحصل الفعلي
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -131,18 +182,31 @@ export async function OverviewTab({
                 <TableRow>
                   <TableCell
                     colSpan={4}
-                    className='h-24 text-center text-muted-foreground font-medium'
+                    className='h-24 text-center text-xs text-muted-foreground font-medium'
                   >
-                    لا توجد كشوفات مسجلة في هذه الفترة
+                    لا توجد بيانات مسجلة للأطباء في هذه الفترة
                   </TableCell>
                 </TableRow>
               ) : (
                 report.byDoctor.map((doc) => (
-                  <TableRow key={doc.doctorId}>
-                    <TableCell className='font-bold'>{doc.doctorName}</TableCell>
-                    <TableCell className='font-mono'>{doc.visitCount}</TableCell>
-                    <TableCell className='font-bold'>{doc.totalRevenue} ج.م</TableCell>
-                    <TableCell className='text-primary font-black'>{doc.totalPaid} ج.م</TableCell>
+                  <TableRow
+                    key={doc.doctorId}
+                    className='hover:bg-muted/10 border-border/30 transition-colors'
+                  >
+                    <TableCell className='py-3 font-semibold text-sm text-foreground'>
+                      د. {doc.doctorName}
+                    </TableCell>
+                    <TableCell className='py-3 text-center'>
+                      <span className='inline-flex items-center justify-center px-2 py-1 text-xs font-mono font-bold bg-muted rounded-md'>
+                        {doc.visitCount}
+                      </span>
+                    </TableCell>
+                    <TableCell className='py-3 text-left font-mono font-medium text-sm text-muted-foreground'>
+                      {doc.totalPaid.toLocaleString()} ج.م
+                    </TableCell>
+                    <TableCell className='py-3 text-left font-mono font-bold text-sm text-foreground'>
+                      {doc.totalRevenue.toLocaleString()} ج.م
+                    </TableCell>
                   </TableRow>
                 ))
               )}
