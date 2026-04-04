@@ -1,6 +1,7 @@
 import {
   Activity,
   Banknote,
+  BriefcaseMedicalIcon,
   CalendarDays,
   ClipboardList,
   Clock,
@@ -10,6 +11,7 @@ import {
   Receipt,
   Settings,
   Stethoscope,
+  Store,
   Users,
   type LucideIcon,
 } from 'lucide-react'
@@ -116,7 +118,7 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
         title: 'المصروفات والعهد', // مصطلح مالي أصح
         href: '/expenses',
         icon: Banknote,
-        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin','Receptionist'],
+        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin', 'Receptionist'],
       },
       {
         title: 'حركة الخزنة والتقارير',
@@ -150,9 +152,21 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
         roles: ['ClinicOwner', 'SuperAdmin'],
       },
       {
-        title: 'تعاقدات الشركات', // أوضح من كلمة تعاقدات مبهمة
+        title: 'تعاقدات الشركات',
         href: '/contracts',
         icon: Handshake,
+        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
+      },
+      {
+        title: 'المخزون والمتجر',
+        href: '/store',
+        icon: Store,
+        roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
+      },
+      {
+        title: 'الصيدلة',
+        href: '/pharmacy',
+        icon: BriefcaseMedicalIcon,
         roles: ['ClinicOwner', 'ClinicManager', 'SuperAdmin'],
       },
       {

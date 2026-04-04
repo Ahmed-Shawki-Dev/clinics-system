@@ -1,8 +1,10 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { User } from 'lucide-react'
+import { useParams, usePathname, useRouter } from 'next/navigation'
 import { useAuthStore } from '../store/useAuthStore'
 import { LogoutButton } from './auth/LogoutButton'
+import { DoctorNotesBell } from './DoctorNotesBell'
 import { ModeToggle } from './ModeToggle'
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import {
@@ -15,22 +17,43 @@ import {
 } from './ui/dropdown-menu'
 import { Separator } from './ui/separator'
 import { SidebarTrigger } from './ui/sidebar'
-import { DoctorNotesBell } from './DoctorNotesBell'
 
 export function AppHeader() {
   const pathname = usePathname()
+  const router = useRouter()
+  const params = useParams()
   const { user } = useAuthStore()
 
-  // الشرط بقا صريح: أي حد مسموح له يشوف الجرس ما عدا الدكتور
-  // (الريسبشن، المدير، المالك)
+  const tenantSlug = params.tenantSlug as string
+
   const isNotDoctor = user?.role !== 'Doctor'
 
   const getTitle = () => {
     if (pathname.includes('/patients')) return 'سجل المرضى'
     if (pathname.includes('/staff')) return 'إدارة الموظفين'
     if (pathname.includes('/settings')) return 'الإعدادات'
-    if (pathname.includes('/queue')) return 'الطابور'
+    if (pathname.includes('/queue')) return 'الكشفوفات'
+    if (pathname.includes('/appointments')) return 'الحجوزات'
+    if (pathname.includes('/invoices')) return 'الفواتير'
+    if (pathname.includes('/expenses')) return 'المصروفات'
+    if (pathname.includes('/reports')) return 'التقارير'
+    if (pathname.includes('/doctors')) return 'إدارة الأطباء'
+    if (pathname.includes('/services')) return 'الخدمات'
+    if (pathname.includes('/contracts')) return 'التعاقدات'
+    if (pathname.includes('/store')) return 'المخزون'
+    if (pathname.includes('/profile')) return 'الملف الشخصي'
     return 'الرئيسية'
+  }
+
+  const handleProfileNavigation = () => {
+    if (!tenantSlug) return
+
+    const profilePath =
+      user?.role === 'Doctor'
+        ? `/${tenantSlug}/dashboard/doctor/profile`
+        : `/${tenantSlug}/dashboard/profile`
+
+    router.push(profilePath)
   }
 
   return (
@@ -45,7 +68,6 @@ export function AppHeader() {
       </div>
 
       <div className='flex items-center gap-4'>
-        {/* الجرس هيظهر لكل أدوار العيادة إلا الدكتور */}
         {isNotDoctor && user?.tenantSlug && <DoctorNotesBell tenantSlug={user.tenantSlug} />}
 
         <ModeToggle />
@@ -62,7 +84,12 @@ export function AppHeader() {
           <DropdownMenuContent align='end' className='w-56'>
             <DropdownMenuLabel>{user?.displayName || 'مستخدم'}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>الملف الشخصي</DropdownMenuItem>
+
+            <DropdownMenuItem className='cursor-pointer' onClick={handleProfileNavigation}>
+              <User className='ml-2 h-4 w-4' />
+              <span>الملف الشخصي</span>
+            </DropdownMenuItem>
+
             <LogoutButton />
           </DropdownMenuContent>
         </DropdownMenu>
