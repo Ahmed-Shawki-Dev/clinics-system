@@ -1,16 +1,16 @@
-'use client'
+"use client";
 
-import { valibotResolver } from '@hookform/resolvers/valibot'
-import { format } from 'date-fns'
-import { ar } from 'date-fns/locale'
-import { CalendarIcon, CheckCircle2, Loader2, UserPlus } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { Path, useForm } from 'react-hook-form'
-import { toast } from 'sonner'
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { format } from "date-fns";
+import { ar } from "date-fns/locale";
+import { CalendarIcon, CheckCircle2, Loader2, UserPlus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Path, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
-import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
-import { Checkbox } from '@/components/ui/checkbox' // تأكد من وجود المكون ده عندك
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox"; // تأكد من وجود المكون ده عندك
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -27,31 +27,38 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Switch } from '@/components/ui/switch' // أو Switch لليوزبيليتي
-import { Textarea } from '@/components/ui/textarea'
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch"; // أو Switch لليوزبيليتي
+import { Textarea } from "@/components/ui/textarea";
 
-import { cn } from '@/lib/utils'
-import { createPatientAction } from '../../../../../actions/patient/createPatient'
-import { updateChronicConditionsAction } from '../../../../../actions/patient/updateChronicConditions'
-import { CreatePatientInput, CreatePatientSchema } from '../../../../../validation/patient'
+import { cn } from "@/lib/utils";
+import { createPatientAction } from "../../../../../actions/patient/createPatient";
+import { updateChronicConditionsAction } from "../../../../../actions/patient/updateChronicConditions";
+import {
+  CreatePatientInput,
+  CreatePatientSchema,
+} from "../../../../../validation/patient";
 
 interface AddPatientModalProps {
-  tenantSlug: string
-  initialPhone?: string
-  trigger?: React.ReactNode
-  onSuccess?: (patientId: string, patientName: string) => void
-  open?: boolean
-  onOpenChange?: (open: boolean) => void
+  tenantSlug: string;
+  initialPhone?: string;
+  trigger?: React.ReactNode;
+  onSuccess?: (patientId: string, patientName: string) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function AddPatientModal({
@@ -62,62 +69,65 @@ export function AddPatientModal({
   open: controlledOpen,
   onOpenChange: setControlledOpen,
 }: AddPatientModalProps) {
-  const [internalOpen, setInternalOpen] = useState(false)
-  const open = controlledOpen !== undefined ? controlledOpen : internalOpen
-  const setOpen = setControlledOpen || setInternalOpen
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = setControlledOpen || setInternalOpen;
 
   const [credentials, setCredentials] = useState<{
-    username: string
-    password: string
-    name: string
-    phone: string
-  } | null>(null)
+    username: string;
+    password: string;
+    name: string;
+    phone: string;
+  } | null>(null);
 
-  const [newPatientData, setNewPatientData] = useState<{ id: string; name: string } | null>(null)
+  const [newPatientData, setNewPatientData] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   const chronicItems: { id: Path<CreatePatientInput>; label: string }[] = [
-    { id: 'diabetes', label: 'سكر' },
-    { id: 'hypertension', label: 'ضغط' },
-    { id: 'cardiacDisease', label: 'قلب' },
-    { id: 'asthma', label: 'حساسية صدر' },
-  ]
+    { id: "diabetes", label: "سكر" },
+    { id: "hypertension", label: "ضغط" },
+    { id: "cardiacDisease", label: "قلب" },
+    { id: "asthma", label: "حساسية صدر" },
+  ];
 
   // 🔴 State لإظهار أو إخفاء قسم الأمراض المزمنة في الـ UI
-  const [showChronicFields, setShowChronicFields] = useState(false)
+  const [showChronicFields, setShowChronicFields] = useState(false);
 
   const form = useForm({
     resolver: valibotResolver(CreatePatientSchema),
     defaultValues: {
-      name: '',
-      phone: initialPhone || '',
-      address: '',
-      notes: '',
-      gender: 'Male',
+      name: "",
+      phone: initialPhone || "",
+      address: "",
+      notes: "",
+      gender: "Male",
       diabetes: false,
       hypertension: false,
       cardiacDisease: false,
       asthma: false,
-      otherChronic: '',
+      otherChronic: "",
     },
-  })
+  });
 
   useEffect(() => {
-    if (initialPhone) form.setValue('phone', initialPhone)
-  }, [initialPhone, form])
+    if (initialPhone) form.setValue("phone", initialPhone);
+  }, [initialPhone, form]);
 
   const onSubmit = async (values: CreatePatientInput) => {
     try {
-      const result = await createPatientAction(values, tenantSlug)
+      const result = await createPatientAction(values, tenantSlug);
 
       if (result.success && result.data) {
-        const patientId = result.data.patient.id
+        const patientId = result.data.patient.id;
 
         const hasChronicData =
           values.diabetes ||
           values.hypertension ||
           values.cardiacDisease ||
           values.asthma ||
-          values.otherChronic
+          values.otherChronic;
 
         if (hasChronicData) {
           await updateChronicConditionsAction(
@@ -128,103 +138,114 @@ export function AddPatientModal({
               cardiacDisease: values.cardiacDisease || false,
               asthma: values.asthma || false,
               other: !!values.otherChronic,
-              otherNotes: values.otherChronic || '',
+              otherNotes: values.otherChronic || "",
             },
             tenantSlug,
-          )
+          );
         }
 
-        toast.success('تم إنشاء ملف المريض بنجاح')
+        toast.success("تم إنشاء ملف المريض بنجاح");
 
         setCredentials({
-          username: result.data.username || '',
-          password: result.data.password || result.data.initialPassword || '',
+          username: result.data.username || "",
+          password: result.data.password || result.data.initialPassword || "",
           name: values.name,
           phone: values.phone,
-        })
+        });
 
         setNewPatientData({
           id: result.data.patient.id,
           name: result.data.patient.name,
-        })
+        });
       } else {
-        toast.error(result.message)
+        toast.error(result.message);
       }
     } catch (error) {
-      if (error instanceof Error) toast.error('حدث خطأ أثناء حفظ البيانات')
+      if (error instanceof Error) toast.error("حدث خطأ أثناء حفظ البيانات");
     }
-  }
+  };
 
   const handleSendWhatsApp = () => {
-    if (!credentials) return
-    const phone = credentials.phone.startsWith('0')
-      ? '20' + credentials.phone.substring(1)
-      : credentials.phone.replace(/\+/g, '')
-    const clinicLink = `${window.location.origin}/${tenantSlug}/patient/login`
-    const message = `بيانات دخولك للعيادة:\nالمستخدم: *${credentials.username}*\nكلمة المرور: *${credentials.password}*\nالرابط: ${clinicLink}`
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank')
-  }
+    if (!credentials) return;
+    const phone = credentials.phone.startsWith("0")
+      ? "20" + credentials.phone.substring(1)
+      : credentials.phone.replace(/\+/g, "");
+    const clinicLink = `${window.location.origin}/${tenantSlug}/patient/login`;
+    const message = `بيانات دخولك للعيادة:\nالمستخدم: *${credentials.username}*\nكلمة المرور: *${credentials.password}*\nالرابط: ${clinicLink}`;
+    window.open(
+      `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
+      "_blank",
+    );
+  };
 
   const handleClose = () => {
-    setOpen(false)
-    if (onSuccess && newPatientData) onSuccess(newPatientData.id, newPatientData.name)
+    setOpen(false);
+    if (onSuccess && newPatientData)
+      onSuccess(newPatientData.id, newPatientData.name);
     setTimeout(() => {
-      form.reset()
-      setCredentials(null)
-      setNewPatientData(null)
-      setShowChronicFields(false)
-    }, 200)
-  }
+      form.reset();
+      setCredentials(null);
+      setNewPatientData(null);
+      setShowChronicFields(false);
+    }, 200);
+  };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => (!isOpen ? handleClose() : setOpen(true))}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => (!isOpen ? handleClose() : setOpen(true))}
+    >
       {controlledOpen === undefined && (
         <DialogTrigger asChild>
           {trigger || (
-            <Button size={'lg'} type='button'>
-              <UserPlus className='mr-2 h-4 w-4' /> مريض جديد
+            <Button size={"lg"} type="button">
+              <UserPlus className="mr-2 h-4 w-4" /> مريض جديد
             </Button>
           )}
         </DialogTrigger>
       )}
 
       <DialogContent
-        className='sm:max-w-137.5 max-h-[90vh] overflow-y-auto'
+        className="max-h-[90vh] overflow-y-auto sm:max-w-137.5"
         onInteractOutside={(e) => {
-          if (form.formState.isSubmitting || credentials) e.preventDefault()
+          if (form.formState.isSubmitting || credentials) e.preventDefault();
         }}
         onEscapeKeyDown={(e) => {
-          if (form.formState.isSubmitting || credentials) e.preventDefault()
+          if (form.formState.isSubmitting || credentials) e.preventDefault();
         }}
       >
         {credentials ? (
           <>
-            <DialogHeader className='flex flex-col items-center justify-center gap-3 pt-6'>
-              <div className='flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100/50 dark:bg-emerald-100/10'>
-                <CheckCircle2 className='h-8 w-8 text-emerald-600 dark:text-emerald-400' />
+            <DialogHeader className="flex flex-col items-center justify-center gap-3 pt-6">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100/50 dark:bg-emerald-100/10">
+                <CheckCircle2 className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <DialogTitle className='text-xl'>تم التسجيل بنجاح</DialogTitle>
+              <DialogTitle className="text-xl">تم التسجيل بنجاح</DialogTitle>
             </DialogHeader>
 
-            <div className='w-full bg-muted/30 p-4 rounded-lg space-y-3 border my-2 '>
-              <div className='flex justify-between items-center flex-wrap'>
-                <span className='text-sm text-muted-foreground'>اسم المستخدم:</span>
+            <div className="bg-muted/30 my-2 w-full space-y-3 rounded-lg border p-4">
+              <div className="flex flex-wrap items-center justify-between">
+                <span className="text-muted-foreground text-sm">
+                  اسم المستخدم:
+                </span>
                 <b>{credentials.username}</b>
               </div>
-              <div className='flex justify-between items-center flex-wrap'>
-                <span className='text-sm text-muted-foreground'>كلمة المرور:</span>
+              <div className="flex flex-wrap items-center justify-between">
+                <span className="text-muted-foreground text-sm">
+                  كلمة المرور:
+                </span>
                 <b>{credentials.password}</b>
               </div>
             </div>
 
             <DialogFooter>
-              <Button onClick={handleClose} variant='outline' type='button'>
+              <Button onClick={handleClose} variant="outline" type="button">
                 إغلاق
               </Button>
               <Button
                 onClick={handleSendWhatsApp}
-                type='button'
-                className=' bg-green-600 hover:bg-green-700 text-white'
+                type="button"
+                className="bg-green-600 text-white hover:bg-green-700"
               >
                 إرسال واتساب
               </Button>
@@ -233,27 +254,29 @@ export function AddPatientModal({
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle className='flex items-center gap-2'>إضافة مريض</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                إضافة مريض
+              </DialogTitle>
             </DialogHeader>
 
             <Form {...form}>
               <form
                 onSubmit={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation() // To Prevent Access Ticket Form
-                  form.handleSubmit(onSubmit)(e)
+                  e.preventDefault();
+                  e.stopPropagation(); // To Prevent Access Ticket Form
+                  form.handleSubmit(onSubmit)(e);
                 }}
-                className='space-y-5'
+                className="space-y-5"
               >
-                <div className='grid grid-cols-2 gap-4'>
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name='name'
+                    name="name"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>الاسم</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder='أحمد محمود' />
+                          <Input {...field} placeholder="أحمد محمود" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -261,12 +284,12 @@ export function AddPatientModal({
                   />
                   <FormField
                     control={form.control}
-                    name='phone'
+                    name="phone"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>الهاتف</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder='010' />
+                          <Input {...field} placeholder="010" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -274,22 +297,25 @@ export function AddPatientModal({
                   />
                 </div>
 
-                <div className='grid grid-cols-2 gap-4'>
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name='gender'
+                    name="gender"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>النوع</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value='Male'>ذكر</SelectItem>
-                            <SelectItem value='Female'>أنثى</SelectItem>
+                            <SelectItem value="Male">ذكر</SelectItem>
+                            <SelectItem value="Female">أنثى</SelectItem>
                           </SelectContent>
                         </Select>
                       </FormItem>
@@ -297,36 +323,37 @@ export function AddPatientModal({
                   />
                   <FormField
                     control={form.control}
-                    name='dateOfBirth'
+                    name="dateOfBirth"
                     render={({ field }) => (
-                      <FormItem className='flex flex-col'>
-                        <FormLabel className='mb-2'>تاريخ الميلاد</FormLabel>
+                      <FormItem className="flex flex-col">
+                        <FormLabel className="mb-2">تاريخ الميلاد</FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <Button
-                              variant='outline'
+                              variant="outline"
                               className={cn(
-                                'w-full text-right',
-                                !field.value && 'text-muted-foreground',
+                                "w-full text-right",
+                                !field.value && "text-muted-foreground",
                               )}
                             >
                               {field.value
-                                ? format(field.value, 'PPP', { locale: ar })
-                                : 'اختر التاريخ'}
-                              <CalendarIcon className='mr-auto h-4 w-4 opacity-50' />
+                                ? format(field.value, "PPP", { locale: ar })
+                                : "اختر التاريخ"}
+                              <CalendarIcon className="mr-auto h-4 w-4 opacity-50" />
                             </Button>
                           </PopoverTrigger>
-                          <PopoverContent className='w-auto p-0'>
+                          <PopoverContent className="w-auto p-0">
                             <Calendar
-                              mode='single'
+                              mode="single"
                               selected={field.value}
                               onSelect={field.onChange}
-                              captionLayout='dropdown'
+                              captionLayout="dropdown"
                               fromYear={1900}
                               toYear={new Date().getFullYear()}
                               // ---------------------------
                               disabled={(date) =>
-                                date > new Date() || date < new Date('1900-01-01')
+                                date > new Date() ||
+                                date < new Date("1900-01-01")
                               }
                               initialFocus
                               locale={ar}
@@ -339,35 +366,37 @@ export function AddPatientModal({
                 </div>
 
                 {/* 🔴 قسم الأمراض المزمنة المطور */}
-                <div className='space-y-4 border-t pt-4'>
-                  <div className='flex items-center justify-between'>
-                    <div className='space-y-0.5'>
-                      <FormLabel className='text-base'>التاريخ الطبي</FormLabel>
-                      <FormDescription>هل يعاني المريض من أمراض مزمنة؟</FormDescription>
+                <div className="space-y-4 border-t pt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">التاريخ الطبي</FormLabel>
+                      <FormDescription>
+                        هل يعاني المريض من أمراض مزمنة؟
+                      </FormDescription>
                     </div>
                     <Switch
                       checked={showChronicFields}
                       onCheckedChange={setShowChronicFields}
-                      dir='ltr'
+                      dir="ltr"
                     />
                   </div>
 
                   {showChronicFields && (
-                    <div className='grid grid-cols-2 gap-4 p-4 bg-muted/50 rounded-xl animate-in fade-in slide-in-from-top-2 duration-300'>
+                    <div className="bg-muted/50 animate-in fade-in slide-in-from-top-2 grid grid-cols-2 gap-4 rounded-xl p-4 duration-300">
                       {chronicItems.map((item) => (
                         <FormField
                           key={item.id}
                           control={form.control}
                           name={item.id}
                           render={({ field }) => (
-                            <FormItem className='flex flex-row items-center space-x-reverse space-x-3 space-y-0'>
+                            <FormItem className="flex flex-row items-center space-y-0 space-x-3 space-x-reverse">
                               <FormControl>
                                 <Checkbox
                                   checked={!!field.value}
                                   onCheckedChange={field.onChange}
                                 />
                               </FormControl>
-                              <FormLabel className='text-sm font-medium cursor-pointer'>
+                              <FormLabel className="cursor-pointer text-sm font-medium">
                                 {item.label}
                               </FormLabel>
                             </FormItem>
@@ -376,20 +405,20 @@ export function AddPatientModal({
                       ))}
 
                       {/* خانة "أخرى" بنوعها المظبوط برضه */}
-                      <div className='col-span-2 pt-2 border-t mt-2'>
+                      <div className="col-span-2 mt-2 border-t pt-2">
                         <FormField
                           control={form.control}
-                          name='otherChronic'
+                          name="otherChronic"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className='text-xs text-muted-foreground'>
+                              <FormLabel className="text-muted-foreground text-xs">
                                 أمراض أو تنبيهات أخرى
                               </FormLabel>
                               <FormControl>
                                 <Input
                                   {...field}
-                                  placeholder='مثلاً: غدة درقية، سيولة..'
-                                  className='h-8 text-xs'
+                                  placeholder="مثلاً: غدة درقية، سيولة.."
+                                  className="h-8 text-xs"
                                 />
                               </FormControl>
                             </FormItem>
@@ -402,7 +431,7 @@ export function AddPatientModal({
 
                 <FormField
                   control={form.control}
-                  name='notes'
+                  name="notes"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>ملاحظات إضافية</FormLabel>
@@ -413,15 +442,15 @@ export function AddPatientModal({
                   )}
                 />
 
-                <DialogFooter className='mt-6'>
+                <DialogFooter className="mt-6">
                   <Button
-                    type='submit'
+                    type="submit"
                     disabled={form.formState.isSubmitting}
-                    className='w-full'
-                    size={'xl'}
+                    className="w-full"
+                    size={"xl"}
                   >
                     {form.formState.isSubmitting && (
-                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     )}
                     حفظ البيانات
                   </Button>
@@ -432,5 +461,5 @@ export function AddPatientModal({
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }

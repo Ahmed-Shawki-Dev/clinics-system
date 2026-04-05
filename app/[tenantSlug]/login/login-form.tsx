@@ -1,13 +1,13 @@
-'use client'
+"use client";
 
-import { valibotResolver } from '@hookform/resolvers/valibot'
-import { ArrowRight, KeyRound, Loader2, UserRound } from 'lucide-react'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { ArrowRight, KeyRound, Loader2, UserRound } from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
-import { Button } from '@/components/ui/button'
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -15,107 +15,107 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { ClinicImage } from '@/components/shared/clinic-image'
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ClinicImage } from "@/components/shared/clinic-image";
 
-import { loginAction } from '@/actions/auth/login'
-import { useAuthStore } from '@/store/useAuthStore'
-import { LoginInput, LoginSchema } from '@/validation/login'
+import { loginAction } from "@/actions/auth/login";
+import { useAuthStore } from "@/store/useAuthStore";
+import { LoginInput, LoginSchema } from "@/validation/login";
 
 export function LoginForm({
   tenantSlug,
   clinicName,
   logoUrl,
 }: {
-  tenantSlug: string
-  clinicName?: string
-  logoUrl?: string
+  tenantSlug: string;
+  clinicName?: string;
+  logoUrl?: string;
 }) {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<LoginInput>({
     resolver: valibotResolver(LoginSchema),
-    defaultValues: { username: '', password: '' },
-  })
+    defaultValues: { username: "", password: "" },
+  });
 
   const onSubmit = async (values: LoginInput) => {
-    setIsLoading(true)
+    setIsLoading(true);
     try {
-      const result = await loginAction(values, tenantSlug)
-      if (!result.success || !result.data) throw new Error(result.message)
+      const result = await loginAction(values, tenantSlug);
+      if (!result.success || !result.data) throw new Error(result.message);
 
-      useAuthStore.getState().setAuth(result.data)
-      toast.success('تم تسجيل الدخول بنجاح')
-      router.push(`/${tenantSlug}/dashboard`)
+      useAuthStore.getState().setAuth(result.data);
+      toast.success("تم تسجيل الدخول بنجاح");
+      router.push(`/${tenantSlug}/dashboard`);
     } catch (error) {
-      if (error instanceof Error) toast.error(error.message || 'خطأ في الدخول')
-      setIsLoading(false)
+      if (error instanceof Error) toast.error(error.message || "خطأ في الدخول");
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <div className='flex flex-col w-full animate-in fade-in slide-in-from-bottom-4 duration-700'>
+    <div className="animate-in fade-in slide-in-from-bottom-4 flex w-full flex-col duration-700">
       <button
         onClick={() => router.push(`/${tenantSlug}`)}
-        type='button'
-        className='self-start flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-foreground transition-colors mb-10'
+        type="button"
+        className="text-muted-foreground hover:text-foreground mb-10 flex items-center gap-2 self-start text-sm font-bold transition-colors"
       >
-        <ArrowRight className='size-4' />
+        <ArrowRight className="size-4" />
         <span>العودة للرئيسية</span>
       </button>
 
-      <div className='flex flex-col space-y-8'>
-        <div className='flex flex-col space-y-2 text-center lg:text-right'>
-          <div className='lg:hidden flex justify-center mb-4'>
+      <div className="flex flex-col space-y-8">
+        <div className="flex flex-col space-y-2 text-center lg:text-right">
+          <div className="mb-4 flex justify-center lg:hidden">
             {logoUrl ? (
               <ClinicImage
                 src={logoUrl}
-                alt='Logo'
+                alt="Logo"
                 width={48}
                 height={48}
-                className='rounded-lg shadow-sm  p-1 object-contain'
-                fallbackType='logo'
+                className="rounded-lg object-contain p-1 shadow-sm"
+                fallbackType="logo"
               />
             ) : (
-              <div className='w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl'>
+              <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-lg text-2xl font-bold">
                 {clinicName?.charAt(0) || tenantSlug.charAt(0).toUpperCase()}
               </div>
             )}
           </div>
-          <h2 className='text-2xl sm:text-3xl font-black tracking-tight text-foreground'>
+          <h2 className="text-foreground text-2xl font-black tracking-tight sm:text-3xl">
             تسجيل الدخول
           </h2>
-          <p className='text-sm font-medium text-muted-foreground'>
-            مرحباً بك في {clinicName || 'النظام'}، أدخل بياناتك للمتابعة.
+          <p className="text-muted-foreground text-sm font-medium">
+            مرحباً بك في {clinicName || "النظام"}، أدخل بياناتك للمتابعة.
           </p>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5'>
-            <div className='space-y-4'>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            <div className="space-y-4">
               {/* حقل اسم المستخدم */}
               <FormField
                 control={form.control}
-                name='username'
+                name="username"
                 render={({ field }) => (
-                  <FormItem className='space-y-2'>
-                    <FormLabel className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>
+                  <FormItem className="space-y-2">
+                    <FormLabel className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
                       اسم المستخدم
                     </FormLabel>
                     <FormControl>
-                      <div className='relative'>
-                        <UserRound className='absolute right-3 top-2.5 h-4 w-4 text-muted-foreground' />
+                      <div className="relative">
+                        <UserRound className="text-muted-foreground absolute top-2.5 right-3 h-4 w-4" />
                         <Input
-                          placeholder='example123'
-                          className='pl-3 pr-10 h-11 bg-muted/20 border-border/50 focus-visible:ring-primary/20 text-left'
-                          dir='ltr'
+                          placeholder="example123"
+                          className="bg-muted/20 border-border/50 focus-visible:ring-primary/20 h-11 pr-10 pl-3 text-left"
+                          dir="ltr"
                           {...field}
                         />
                       </div>
                     </FormControl>
-                    <FormMessage className='text-xs font-bold' />
+                    <FormMessage className="text-xs font-bold" />
                   </FormItem>
                 )}
               />
@@ -123,25 +123,25 @@ export function LoginForm({
               {/* حقل كلمة المرور */}
               <FormField
                 control={form.control}
-                name='password'
+                name="password"
                 render={({ field }) => (
-                  <FormItem className='space-y-2'>
-                    <FormLabel className='text-xs font-bold uppercase tracking-wider text-muted-foreground'>
+                  <FormItem className="space-y-2">
+                    <FormLabel className="text-muted-foreground text-xs font-bold tracking-wider uppercase">
                       كلمة المرور
                     </FormLabel>
                     <FormControl>
-                      <div className='relative'>
-                        <KeyRound className='absolute right-3 top-2.5 h-4 w-4 text-muted-foreground' />
+                      <div className="relative">
+                        <KeyRound className="text-muted-foreground absolute top-2.5 right-3 h-4 w-4" />
                         <Input
-                          type='password'
-                          placeholder='••••••••'
-                          className='pl-3 pr-10 h-11 bg-muted/20 border-border/50 focus-visible:ring-primary/20 text-left'
-                          dir='ltr'
+                          type="password"
+                          placeholder="••••••••"
+                          className="bg-muted/20 border-border/50 focus-visible:ring-primary/20 h-11 pr-10 pl-3 text-left"
+                          dir="ltr"
                           {...field}
                         />
                       </div>
                     </FormControl>
-                    <FormMessage className='text-xs font-bold' />
+                    <FormMessage className="text-xs font-bold" />
                   </FormItem>
                 )}
               />
@@ -149,24 +149,24 @@ export function LoginForm({
 
             {/* زرار الدخول */}
             <Button
-              type='submit'
-              className='w-full'
-              size={'lg'}
-              variant={'gradient'}
+              type="submit"
+              className="w-full"
+              size={"lg"}
+              variant={"gradient"}
               disabled={isLoading}
             >
               {isLoading ? (
                 <>
-                  <Loader2 className='mr-2 h-5 w-5 animate-spin' />
+                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                   جاري التحقق...
                 </>
               ) : (
-                'دخول'
+                "دخول"
               )}
             </Button>
           </form>
         </Form>
       </div>
     </div>
-  )
+  );
 }

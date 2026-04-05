@@ -22,15 +22,15 @@ SuperAdmin (Platform-level)└── ClinicOwner (Tenant-level — full control)
 
 ### Capabilities
 
--   Create, list, update, activate/suspend/block tenants
--   Manage subscriptions (create, update)
--   View and update feature flags for any tenant
--   Cross-tenant access to any tenant-scoped endpoint (attaches via `X-Tenant` header)
--   View platform audit logs
+- Create, list, update, activate/suspend/block tenants
+- Manage subscriptions (create, update)
+- View and update feature flags for any tenant
+- Cross-tenant access to any tenant-scoped endpoint (attaches via `X-Tenant` header)
+- View platform audit logs
 
 ### Cannot
 
--   Directly perform clinic operations without specifying `X-Tenant`
+- Directly perform clinic operations without specifying `X-Tenant`
 
 ### API Access
 
@@ -64,23 +64,23 @@ Full (with X-Tenant)
 
 ### Capabilities
 
--   Configure clinic settings (name, phone, working hours, booking rules)
--   Create, edit, enable/disable staff (ClinicManager or Receptionist roles)
--   Create, edit, enable/disable doctors with services and pricing
--   Create, edit, delete patients
--   Manage queue sessions and tickets
--   View all visits, prescriptions, lab requests
--   Create invoices and record payments
--   Add and view expenses
--   View all finance reports (daily, monthly, yearly, per-doctor, profit)
--   Send WhatsApp messages and PWA notifications
--   Create and manage bookings
--   View audit logs for the tenant
+- Configure clinic settings (name, phone, working hours, booking rules)
+- Create, edit, enable/disable staff (ClinicManager or Receptionist roles)
+- Create, edit, enable/disable doctors with services and pricing
+- Create, edit, delete patients
+- Manage queue sessions and tickets
+- View all visits, prescriptions, lab requests
+- Create invoices and record payments
+- Add and view expenses
+- View all finance reports (daily, monthly, yearly, per-doctor, profit)
+- Send WhatsApp messages and PWA notifications
+- Create and manage bookings
+- View audit logs for the tenant
 
 ### Cannot
 
--   Manage other tenants or platform-level resources
--   Access subscription or feature flag management
+- Manage other tenants or platform-level resources
+- Access subscription or feature flag management
 
 ---
 
@@ -92,23 +92,23 @@ Full (with X-Tenant)
 
 ### Capabilities
 
--   Create and manage patients (CRUD)
--   Manage queue (open/close sessions, issue tickets, skip, cancel)
--   View reception board
--   Record payments and manage invoices
--   Add expenses
--   View daily finance (today only)
--   View staff list (read-only)
--   View doctor list (read-only)
--   View clinic settings (read-only)
+- Create and manage patients (CRUD)
+- Manage queue (open/close sessions, issue tickets, skip, cancel)
+- View reception board
+- Record payments and manage invoices
+- Add expenses
+- View daily finance (today only)
+- View staff list (read-only)
+- View doctor list (read-only)
+- View clinic settings (read-only)
 
 ### Cannot
 
--   Create staff or doctors
--   Update clinic settings
--   Manage subscriptions or feature flags
--   View monthly/yearly finance (owner only)
--   Access visits or medical records
+- Create staff or doctors
+- Update clinic settings
+- Manage subscriptions or feature flags
+- View monthly/yearly finance (owner only)
+- Access visits or medical records
 
 ---
 
@@ -121,27 +121,27 @@ Full (with X-Tenant)
 
 ### Capabilities
 
--   Create, cancel, and reschedule bookings (on behalf of patients)
--   List and view bookings
--   Send WhatsApp messages (using templates)
--   Send PWA notifications
--   View unread doctor notes
--   Mark doctor notes as read
--   List doctor notes
--   View doctor list (list only, not detail)
--   View staff list (read-only)
--   View clinic settings (read-only)
--   Subscribe to push notifications
+- Create, cancel, and reschedule bookings (on behalf of patients)
+- List and view bookings
+- Send WhatsApp messages (using templates)
+- Send PWA notifications
+- View unread doctor notes
+- Mark doctor notes as read
+- List doctor notes
+- View doctor list (list only, not detail)
+- View staff list (read-only)
+- View clinic settings (read-only)
+- Subscribe to push notifications
 
 ### Cannot
 
--   Create doctors or staff
--   Update clinic settings
--   Manage subscriptions or feature flags
--   Access patients list (use owner token for patient lookup)
--   Access queue management
--   Access visits, prescriptions, or medical records
--   Access finance or expenses
+- Create doctors or staff
+- Update clinic settings
+- Manage subscriptions or feature flags
+- Access patients list (use owner token for patient lookup)
+- Access queue management
+- Access visits, prescriptions, or medical records
+- Access finance or expenses
 
 ### Key Difference from ClinicManager
 
@@ -157,23 +157,23 @@ The Receptionist role is focused on **communication and booking** while ClinicMa
 
 ### Capabilities
 
--   View own queue (`/api/clinic/queue-board/my-queue`)
--   Call next patient, start visit, finish visit
--   Create visit records with clinical data
--   Add prescriptions, lab requests, follow-ups
--   Send doctor-to-reception notes
--   View unread notes
--   List doctors (read-only)
--   Send WhatsApp messages
--   Send PWA notifications
+- View own queue (`/api/clinic/queue-board/my-queue`)
+- Call next patient, start visit, finish visit
+- Create visit records with clinical data
+- Add prescriptions, lab requests, follow-ups
+- Send doctor-to-reception notes
+- View unread notes
+- List doctors (read-only)
+- Send WhatsApp messages
+- Send PWA notifications
 
 ### Cannot
 
--   Create patients, staff, or other doctors
--   Access queue management (open/close sessions, issue tickets)
--   Access finance or payments
--   Update clinic settings
--   View reception board
+- Create patients, staff, or other doctors
+- Access queue management (open/close sessions, issue tickets)
+- Access finance or payments
+- Update clinic settings
+- View reception board
 
 ---
 
@@ -185,24 +185,24 @@ The Receptionist role is focused on **communication and booking** while ClinicMa
 
 ### Capabilities
 
--   View own profile and visit history
--   View own queue ticket status (`/api/clinic/queue-board/my-ticket`)
--   Book appointments online (if OnlineBooking feature enabled)
--   Cancel own bookings (within cancellation window)
--   View own bookings (`/api/clinic/bookings/my`)
--   View doctor list (read-only)
--   View clinic settings (read-only)
--   Subscribe to PWA notifications (if PwaNotifications feature enabled)
--   View own prescriptions
+- View own profile and visit history
+- View own queue ticket status (`/api/clinic/queue-board/my-ticket`)
+- Book appointments online (if OnlineBooking feature enabled)
+- Cancel own bookings (within cancellation window)
+- View own bookings (`/api/clinic/bookings/my`)
+- View doctor list (read-only)
+- View clinic settings (read-only)
+- Subscribe to PWA notifications (if PwaNotifications feature enabled)
+- View own prescriptions
 
 ### Cannot
 
--   Access other patients' data
--   Create visits, prescriptions, or lab requests
--   Access queue management or reception board
--   Access finance, expenses, or invoices
--   Send messages or notifications
--   Manage staff or doctors
+- Access other patients' data
+- Create visits, prescriptions, or lab requests
+- Access queue management or reception board
+- Access finance, expenses, or invoices
+- Send messages or notifications
+- Manage staff or doctors
 
 ---
 
@@ -212,7 +212,7 @@ The Receptionist role is focused on **communication and booking** while ClinicMa
 
 All 6 roles are automatically seeded on application startup:
 
--   SuperAdmin, ClinicOwner, ClinicManager, Receptionist, Doctor, Patient
+- SuperAdmin, ClinicOwner, ClinicManager, Receptionist, Doctor, Patient
 
 ### Staff Creation
 

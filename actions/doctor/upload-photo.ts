@@ -1,8 +1,8 @@
-'use server'
+"use server";
 
-import { fetchApi } from '@/lib/fetchApi'
-import { BaseApiResponse } from '@/types/api'
-import { revalidatePath } from 'next/cache'
+import { fetchApi } from "@/lib/fetchApi";
+import { BaseApiResponse } from "@/types/api";
+import { revalidatePath } from "next/cache";
 
 export async function uploadDoctorPhotoAction(
   tenantSlug: string,
@@ -12,16 +12,16 @@ export async function uploadDoctorPhotoAction(
   const result = await fetchApi<{ publicUrl: string }>(
     `/api/clinic/media/doctors/${doctorId}/photo`,
     {
-      method: 'POST',
+      method: "POST",
       tenantSlug,
-      authType: 'staff',
+      authType: "staff",
       body: formData,
     },
-  )
+  );
 
   if (result.success) {
-    revalidatePath(`/${tenantSlug}/dashboard/doctors`)
+    revalidatePath(`/${tenantSlug}/dashboard/doctors`);
   }
 
-  return result
+  return result;
 }

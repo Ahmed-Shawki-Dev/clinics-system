@@ -1,7 +1,7 @@
-'use server'
+"use server";
 
-import { revalidatePath } from 'next/cache'
-import { fetchApi } from '../../lib/fetchApi'
+import { revalidatePath } from "next/cache";
+import { fetchApi } from "../../lib/fetchApi";
 
 export const deletePrescriptionAction = async (
   tenantSlug: string,
@@ -9,16 +9,19 @@ export const deletePrescriptionAction = async (
   prescriptionId: string,
 ) => {
   try {
-    const result = await fetchApi(`/api/clinic/visits/${visitId}/prescriptions/${prescriptionId}`, {
-      method: 'DELETE',
-      headers: { 'X-Tenant': tenantSlug },
-    })
+    const result = await fetchApi(
+      `/api/clinic/visits/${visitId}/prescriptions/${prescriptionId}`,
+      {
+        method: "DELETE",
+        headers: { "X-Tenant": tenantSlug },
+      },
+    );
 
     if (result.success) {
-      revalidatePath(`/${tenantSlug}/dashboard/doctor/visits/${visitId}`)
+      revalidatePath(`/${tenantSlug}/dashboard/doctor/visits/${visitId}`);
     }
-    return result
+    return result;
   } catch (error) {
-    return { success: false, message: 'فشل في حذف الدواء' }
+    return { success: false, message: "فشل في حذف الدواء" };
   }
-}
+};

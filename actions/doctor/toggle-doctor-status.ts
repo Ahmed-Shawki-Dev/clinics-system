@@ -1,9 +1,9 @@
-'use server'
+"use server";
 
-import { fetchApi } from '@/lib/fetchApi'
-import { BaseApiResponse } from '@/types/api'
-import { revalidatePath } from 'next/cache'
-import { IDoctor } from '../../types/doctor'
+import { fetchApi } from "@/lib/fetchApi";
+import { BaseApiResponse } from "@/types/api";
+import { revalidatePath } from "next/cache";
+import { IDoctor } from "../../types/doctor";
 
 export async function toggleDoctorStatusAction(
   doctorId: string,
@@ -12,17 +12,17 @@ export async function toggleDoctorStatusAction(
 ): Promise<BaseApiResponse<IDoctor>> {
   const endpoint = isCurrentlyEnabled
     ? `/api/clinic/doctors/${doctorId}/disable`
-    : `/api/clinic/doctors/${doctorId}/enable`
+    : `/api/clinic/doctors/${doctorId}/enable`;
 
   const response = await fetchApi<IDoctor>(endpoint, {
-    method: 'POST',
+    method: "POST",
     tenantSlug,
-    authType:'staff'
-  })
+    authType: "staff",
+  });
 
   if (response.success) {
-    revalidatePath(`/${tenantSlug}/dashboard/doctors`) 
+    revalidatePath(`/${tenantSlug}/dashboard/doctors`);
   }
 
-  return response
+  return response;
 }

@@ -1,13 +1,18 @@
-'use client'
+"use client";
 
-import { valibotResolver } from '@hookform/resolvers/valibot'
-import { AlertCircle, Camera, Clock, Loader2 } from 'lucide-react'
-import { useRef, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { AlertCircle, Camera, Clock, Loader2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -15,138 +20,152 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
-import { updateDoctorAction } from '@/actions/doctor/update-doctor'
-import { uploadDoctorPhotoAction } from '@/actions/doctor/upload-photo'
-import { MEDICAL_SPECIALTIES } from '@/constants/specialties'
-import { IDoctor } from '@/types/doctor'
-import { UpdateDoctorInput, UpdateDoctorSchema } from '@/validation/doctor'
-import { ClinicImage } from '@/components/shared/clinic-image'
+import { updateDoctorAction } from "@/actions/doctor/update-doctor";
+import { uploadDoctorPhotoAction } from "@/actions/doctor/upload-photo";
+import { MEDICAL_SPECIALTIES } from "@/constants/specialties";
+import { IDoctor } from "@/types/doctor";
+import { UpdateDoctorInput, UpdateDoctorSchema } from "@/validation/doctor";
+import { ClinicImage } from "@/components/shared/clinic-image";
 
 interface EditDoctorDialogProps {
-  doctor: IDoctor
-  tenantSlug: string
-  isOpen: boolean
-  onClose: () => void
+  doctor: IDoctor;
+  tenantSlug: string;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-export function EditDoctorDialog({ doctor, tenantSlug, isOpen, onClose }: EditDoctorDialogProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [isUploading, setIsUploading] = useState(false)
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+export function EditDoctorDialog({
+  doctor,
+  tenantSlug,
+  isOpen,
+  onClose,
+}: EditDoctorDialogProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const form = useForm<UpdateDoctorInput>({
     resolver: valibotResolver(UpdateDoctorSchema),
     defaultValues: {
       name: doctor.name,
-      phone: doctor.phone || '',
+      phone: doctor.phone || "",
       specialty: doctor.specialty,
-      bio: doctor.bio || '',
+      bio: doctor.bio || "",
       urgentInsertAfterCount: doctor.urgentInsertAfterCount ?? 0, // 👈 التعديل هنا
       avgVisitDurationMinutes: doctor.avgVisitDurationMinutes,
-      photoUrl: doctor.photoUrl || '',
+      photoUrl: doctor.photoUrl || "",
     },
-  })
+  });
 
-  const watchPhotoUrl = form.watch('photoUrl')
+  const watchPhotoUrl = form.watch("photoUrl");
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (file.size > 2 * 1024 * 1024) return toast.error('الصورة كبيرة جداً (الحد الأقصى 2 ميجا)')
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024)
+      return toast.error("الصورة كبيرة جداً (الحد الأقصى 2 ميجا)");
 
-    const objectUrl = URL.createObjectURL(file)
-    setPreviewUrl(objectUrl)
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
 
-    const formData = new FormData()
-    formData.append('file', file)
+    const formData = new FormData();
+    formData.append("file", file);
 
-    setIsUploading(true)
+    setIsUploading(true);
     try {
-      const res = await uploadDoctorPhotoAction(tenantSlug, doctor.id, formData)
+      const res = await uploadDoctorPhotoAction(
+        tenantSlug,
+        doctor.id,
+        formData,
+      );
       if (res.success && res.data?.publicUrl) {
-        form.setValue('photoUrl', res.data.publicUrl, { shouldDirty: true })
-        toast.success('تم تحديث صورة الطبيب')
+        form.setValue("photoUrl", res.data.publicUrl, { shouldDirty: true });
+        toast.success("تم تحديث صورة الطبيب");
       } else {
-        toast.error(res.message || 'فشل في رفع الصورة')
+        toast.error(res.message || "فشل في رفع الصورة");
       }
     } catch (error) {
-      toast.error('حدث خطأ أثناء الرفع')
+      toast.error("حدث خطأ أثناء الرفع");
     } finally {
-      setIsUploading(false)
+      setIsUploading(false);
     }
-  }
+  };
 
   const onSubmit = async (values: UpdateDoctorInput) => {
-    const res = await updateDoctorAction(doctor.id, tenantSlug, values)
+    const res = await updateDoctorAction(doctor.id, tenantSlug, values);
     if (res.success) {
-      toast.success('تم تحديث بيانات الطبيب بنجاح')
-      onClose()
+      toast.success("تم تحديث بيانات الطبيب بنجاح");
+      onClose();
     } else {
-      toast.error(res.message || 'حدث خطأ أثناء التحديث')
+      toast.error(res.message || "حدث خطأ أثناء التحديث");
     }
-  }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={(val) => !val && onClose()}>
-      <DialogContent className='sm:max-w-2xl max-h-[90vh] overflow-y-auto'>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle className='text-xl font-bold'>تعديل بيانات الطبيب</DialogTitle>
+          <DialogTitle className="text-xl font-bold">
+            تعديل بيانات الطبيب
+          </DialogTitle>
         </DialogHeader>
 
-        <div className='flex flex-col items-center gap-3 py-4'>
-          <div className='relative h-24 w-24 rounded-full border-2 border-dashed border-primary/40 flex items-center justify-center bg-muted/50 overflow-hidden group shadow-sm'>
+        <div className="flex flex-col items-center gap-3 py-4">
+          <div className="border-primary/40 bg-muted/50 group relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-dashed shadow-sm">
             {isUploading ? (
-              <Loader2 className='animate-spin text-primary w-6 h-6' />
+              <Loader2 className="text-primary h-6 w-6 animate-spin" />
             ) : (
               <ClinicImage
                 src={previewUrl || watchPhotoUrl}
                 alt={doctor.name}
                 fill
-                fallbackType='doctor'
-                className='h-full w-full object-cover'
+                fallbackType="doctor"
+                className="h-full w-full object-cover"
               />
             )}
 
             <button
-              type='button'
+              type="button"
               onClick={() => fileInputRef.current?.click()}
-              className='absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer z-10'
+              className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100"
             >
-              <Camera className='text-white w-6 h-6' />
+              <Camera className="h-6 w-6 text-white" />
             </button>
           </div>
           <input
-            type='file'
-            className='hidden'
+            type="file"
+            className="hidden"
             ref={fileInputRef}
             onChange={handlePhotoUpload}
-            accept='image/*'
+            accept="image/*"
           />
-          <p className='text-xs font-medium text-muted-foreground'>اضغط على الصورة لتغييرها</p>
+          <p className="text-muted-foreground text-xs font-medium">
+            اضغط على الصورة لتغييرها
+          </p>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5'>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
-                name='name'
+                name="name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>الاسم ثلاثي</FormLabel>
                     <FormControl>
-                      <Input className='h-11' {...field} />
+                      <Input className="h-11" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -154,12 +173,12 @@ export function EditDoctorDialog({ doctor, tenantSlug, isOpen, onClose }: EditDo
               />
               <FormField
                 control={form.control}
-                name='phone'
+                name="phone"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>رقم الهاتف</FormLabel>
                     <FormControl>
-                      <Input className='h-11' {...field} />
+                      <Input className="h-11" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -169,17 +188,20 @@ export function EditDoctorDialog({ doctor, tenantSlug, isOpen, onClose }: EditDo
 
             <FormField
               control={form.control}
-              name='specialty'
+              name="specialty"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>التخصص</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
-                      <SelectTrigger className='h-11'>
+                      <SelectTrigger className="h-11">
                         <SelectValue />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className='max-h-52'>
+                    <SelectContent className="max-h-52">
                       {MEDICAL_SPECIALTIES.map((spec) => (
                         <SelectItem key={spec} value={spec}>
                           {spec}
@@ -194,31 +216,35 @@ export function EditDoctorDialog({ doctor, tenantSlug, isOpen, onClose }: EditDo
 
             <FormField
               control={form.control}
-              name='bio'
+              name="bio"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>النبذة التعريفية</FormLabel>
                   <FormControl>
-                    <Textarea className='h-20 resize-none bg-background' {...field} />
+                    <Textarea
+                      className="bg-background h-20 resize-none"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4 bg-muted/20 p-5 rounded-xl border border-border/50'>
+            <div className="bg-muted/20 border-border/50 grid grid-cols-1 gap-4 rounded-xl border p-5 md:grid-cols-2">
               <FormField
                 control={form.control}
-                name='avgVisitDurationMinutes'
+                name="avgVisitDurationMinutes"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='flex items-center gap-2'>
-                      <Clock className='w-4 h-4 text-primary' /> مدة الكشف (دقيقة)
+                    <FormLabel className="flex items-center gap-2">
+                      <Clock className="text-primary h-4 w-4" /> مدة الكشف
+                      (دقيقة)
                     </FormLabel>
                     <FormControl>
                       <Input
-                        type='number'
-                        className='h-11 bg-background'
+                        type="number"
+                        className="bg-background h-11"
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
                       />
@@ -229,27 +255,28 @@ export function EditDoctorDialog({ doctor, tenantSlug, isOpen, onClose }: EditDo
               />
               <FormField
                 control={form.control}
-                name='urgentInsertAfterCount'
+                name="urgentInsertAfterCount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className='flex items-center gap-2'>
-                      <AlertCircle className='w-4 h-4 text-destructive' /> نظام إدراج الكشف المستعجل
+                    <FormLabel className="flex items-center gap-2">
+                      <AlertCircle className="text-destructive h-4 w-4" /> نظام
+                      إدراج الكشف المستعجل
                     </FormLabel>
                     <Select
                       onValueChange={(val) => field.onChange(Number(val))}
                       defaultValue={String(field.value)}
                     >
                       <FormControl>
-                        <SelectTrigger className='h-11 bg-background border-destructive/20 focus:ring-destructive/30'>
+                        <SelectTrigger className="bg-background border-destructive/20 focus:ring-destructive/30 h-11">
                           <SelectValue />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {/* 👈 التعديل هنا للقِيَم الجديدة بوضوح */}
-                        <SelectItem value='0'>مباشرة (أول الطابور)</SelectItem>
-                        <SelectItem value='1'>بعد مريض واحد</SelectItem>
-                        <SelectItem value='2'>بعد مريضين</SelectItem>
-                        <SelectItem value='3'>بعد 3 مرضى</SelectItem>
+                        <SelectItem value="0">مباشرة (أول الطابور)</SelectItem>
+                        <SelectItem value="1">بعد مريض واحد</SelectItem>
+                        <SelectItem value="2">بعد مريضين</SelectItem>
+                        <SelectItem value="3">بعد 3 مرضى</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -259,21 +286,22 @@ export function EditDoctorDialog({ doctor, tenantSlug, isOpen, onClose }: EditDo
             </div>
 
             <Button
-              type='submit'
-              className='w-full h-12 text-base font-bold shadow-lg shadow-primary/20 mt-2'
+              type="submit"
+              className="shadow-primary/20 mt-2 h-12 w-full text-base font-bold shadow-lg"
               disabled={form.formState.isSubmitting || isUploading}
             >
               {form.formState.isSubmitting ? (
                 <>
-                  <Loader2 className='animate-spin w-5 h-5 ml-2' /> جاري التحديث...
+                  <Loader2 className="ml-2 h-5 w-5 animate-spin" /> جاري
+                  التحديث...
                 </>
               ) : (
-                'تحديث البيانات'
+                "تحديث البيانات"
               )}
             </Button>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

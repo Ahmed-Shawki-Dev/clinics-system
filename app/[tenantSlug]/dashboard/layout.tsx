@@ -1,7 +1,7 @@
-import DashboardLayoutClient from '@/components/dashboard-layout-client'
+import DashboardLayoutClient from "@/components/dashboard-layout-client";
 
 interface LayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export default async function DashboardServerLayout({ children }: LayoutProps) {
@@ -21,5 +21,5 @@ export default async function DashboardServerLayout({ children }: LayoutProps) {
   // }
 
   // 3. أي موظف تاني: ابعته للـ Client Layout اللي فيه السايدبار
-  return <DashboardLayoutClient>{children}</DashboardLayoutClient>
+  return <DashboardLayoutClient>{children}</DashboardLayoutClient>;
 }

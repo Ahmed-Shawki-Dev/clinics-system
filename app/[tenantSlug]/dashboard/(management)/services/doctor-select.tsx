@@ -1,31 +1,31 @@
-'use client'
+"use client";
 
-import { Label } from '@/components/ui/label'
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { IDoctor } from '@/types/doctor'
+} from "@/components/ui/select";
+import { IDoctor } from "@/types/doctor";
 
 interface Props {
-  doctors: IDoctor[]
-  selectedId: string
-  onSelect: (id: string) => void
+  doctors: IDoctor[];
+  selectedId: string;
+  onSelect: (id: string) => void;
 }
 
 export function DoctorSelect({ doctors, selectedId, onSelect }: Props) {
-  const activeDoctors = doctors?.filter((doctor) => doctor.isEnabled) || []
+  const activeDoctors = doctors?.filter((doctor) => doctor.isEnabled) || [];
 
   return (
-    <div className='flex items-center gap-4 bg-muted/30 p-4 rounded-lg border'>
+    <div className="bg-muted/30 flex items-center gap-4 rounded-lg border p-4">
       <Label>اختر الطبيب لتعديل خدماته:</Label>
 
       <Select value={selectedId || undefined} onValueChange={onSelect}>
-        <SelectTrigger className='w-75 bg-background'>
-          <SelectValue placeholder='اختر طبيب...' />
+        <SelectTrigger className="bg-background w-75">
+          <SelectValue placeholder="اختر طبيب..." />
         </SelectTrigger>
         <SelectContent>
           {activeDoctors.length > 0 ? (
@@ -35,12 +35,12 @@ export function DoctorSelect({ doctors, selectedId, onSelect }: Props) {
               </SelectItem>
             ))
           ) : (
-            <div className='p-2 text-sm text-center text-muted-foreground'>
+            <div className="text-muted-foreground p-2 text-center text-sm">
               لا يوجد أطباء متاحين
             </div>
           )}
         </SelectContent>
       </Select>
     </div>
-  )
+  );
 }

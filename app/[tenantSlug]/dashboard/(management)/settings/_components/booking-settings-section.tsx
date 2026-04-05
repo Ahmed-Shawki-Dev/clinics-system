@@ -1,12 +1,18 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Switch } from '@/components/ui/switch'
-import { UpdateSettingsInput } from '@/validation/settings'
-import { UseFormReturn } from 'react-hook-form'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { UpdateSettingsInput } from "@/validation/settings";
+import { UseFormReturn } from "react-hook-form";
 
 interface BookingSettingsSectionProps {
-  form: UseFormReturn<UpdateSettingsInput>
+  form: UseFormReturn<UpdateSettingsInput>;
 }
 
 export function BookingSettingsSection({ form }: BookingSettingsSectionProps) {
@@ -15,15 +21,19 @@ export function BookingSettingsSection({ form }: BookingSettingsSectionProps) {
       <CardHeader>
         <CardTitle>إعدادات الحجز</CardTitle>
       </CardHeader>
-      <CardContent className='space-y-6'>
+      <CardContent className="space-y-6">
         <FormField
           control={form.control}
-          name='bookingEnabled'
+          name="bookingEnabled"
           render={({ field }) => (
-            <FormItem className='flex items-center justify-between border p-4 rounded-lg'>
+            <FormItem className="flex items-center justify-between rounded-lg border p-4">
               <FormLabel>تفعيل الحجز الأونلاين</FormLabel>
               <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} dir='ltr' />
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  dir="ltr"
+                />
               </FormControl>
             </FormItem>
           )}
@@ -31,12 +41,16 @@ export function BookingSettingsSection({ form }: BookingSettingsSectionProps) {
 
         <FormField
           control={form.control}
-          name='retainCreditOnNoShow'
+          name="retainCreditOnNoShow"
           render={({ field }) => (
-            <FormItem className='flex items-center justify-between border p-4 rounded-lg'>
+            <FormItem className="flex items-center justify-between rounded-lg border p-4">
               <FormLabel>الاحتفاظ برصيد المريض عند عدم الحضور</FormLabel>
               <FormControl>
-                <Switch checked={field.value} onCheckedChange={field.onChange} dir='ltr' />
+                <Switch
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  dir="ltr"
+                />
               </FormControl>
             </FormItem>
           )}
@@ -44,13 +58,13 @@ export function BookingSettingsSection({ form }: BookingSettingsSectionProps) {
 
         <FormField
           control={form.control}
-          name='cancellationWindowHours'
+          name="cancellationWindowHours"
           render={({ field }) => (
             <FormItem>
               <FormLabel>فترة الإلغاء (ساعات)</FormLabel>
               <FormControl>
                 <Input
-                  type='number'
+                  type="number"
                   {...field}
                   onChange={(e) => field.onChange(Number(e.target.value))}
                 />
@@ -61,5 +75,5 @@ export function BookingSettingsSection({ form }: BookingSettingsSectionProps) {
         />
       </CardContent>
     </Card>
-  )
+  );
 }

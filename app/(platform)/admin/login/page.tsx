@@ -1,14 +1,20 @@
-'use client'
+"use client";
 
-import { valibotResolver } from '@hookform/resolvers/valibot'
-import { Loader2 } from 'lucide-react'
-import * as React from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
-import { useRouter } from 'next/navigation' // ضفنا الـ Router
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { Loader2 } from "lucide-react";
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation"; // ضفنا الـ Router
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -16,68 +22,70 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { superAdminLoginAction } from '../../../../actions/admin/login'
-import { LoginInput, LoginSchema } from '../../../../validation/login'
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { superAdminLoginAction } from "../../../../actions/admin/login";
+import { LoginInput, LoginSchema } from "../../../../validation/login";
 
 // استدعي الستور بتاعك من مساره الصحيح (عدل المسار لو مختلف عندك)
-import { useAuthStore } from '@/store/useAuthStore'
+import { useAuthStore } from "@/store/useAuthStore";
 
 export default function SuperAdminLoginPage() {
-  const [isPending, startTransition] = React.useTransition()
-  const router = useRouter()
+  const [isPending, startTransition] = React.useTransition();
+  const router = useRouter();
 
   // سحبنا الـ setAuth من الـ Store
-  const setAuth = useAuthStore((state) => state.setAuth)
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const form = useForm<LoginInput>({
     resolver: valibotResolver(LoginSchema),
     defaultValues: {
-      username: '',
-      password: '',
+      username: "",
+      password: "",
     },
-  })
+  });
 
   function onSubmit(data: LoginInput) {
     startTransition(async () => {
-      const res = await superAdminLoginAction(data)
+      const res = await superAdminLoginAction(data);
 
       if (res && !res.success) {
-        toast.error(res.message || 'بيانات الدخول غير صحيحة')
-        return
+        toast.error(res.message || "بيانات الدخول غير صحيحة");
+        return;
       }
 
       if (res && res.success && res.data) {
         // 1. خزن بيانات السوبر أدمن في Zustand
-        setAuth(res.data)
+        setAuth(res.data);
 
-        toast.success('تم تسجيل الدخول بنجاح')
+        toast.success("تم تسجيل الدخول بنجاح");
 
         // 2. وجهه للداشبورد من الكلاينت
-        router.push('/admin')
+        router.push("/admin");
       }
-    })
+    });
   }
 
   return (
-    <div className='min-h-screen flex items-center justify-center bg-muted/30 p-4'>
-      <Card className='w-full max-w-md shadow-lg border-primary/10'>
-        <CardHeader className='space-y-2 text-center'>
-          <CardTitle className='text-2xl font-bold'>إدارة المنصة</CardTitle>
-          <CardDescription>سجل دخولك كمدير عام للتحكم في العيادات والاشتراكات</CardDescription>
+    <div className="bg-muted/30 flex min-h-screen items-center justify-center p-4">
+      <Card className="border-primary/10 w-full max-w-md shadow-lg">
+        <CardHeader className="space-y-2 text-center">
+          <CardTitle className="text-2xl font-bold">إدارة المنصة</CardTitle>
+          <CardDescription>
+            سجل دخولك كمدير عام للتحكم في العيادات والاشتراكات
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-5'>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               <FormField
                 control={form.control}
-                name='username'
+                name="username"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>اسم المستخدم</FormLabel>
                     <FormControl>
-                      <Input {...field} disabled={isPending} dir='ltr' />
+                      <Input {...field} disabled={isPending} dir="ltr" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -86,17 +94,17 @@ export default function SuperAdminLoginPage() {
 
               <FormField
                 control={form.control}
-                name='password'
+                name="password"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>كلمة المرور</FormLabel>
                     <FormControl>
                       <Input
-                        type='password'
-                        placeholder='••••••••'
+                        type="password"
+                        placeholder="••••••••"
                         {...field}
                         disabled={isPending}
-                        dir='ltr'
+                        dir="ltr"
                       />
                     </FormControl>
                     <FormMessage />
@@ -104,14 +112,18 @@ export default function SuperAdminLoginPage() {
                 )}
               />
 
-              <Button type='submit' className='w-full h-11 text-md font-bold' disabled={isPending}>
+              <Button
+                type="submit"
+                className="text-md h-11 w-full font-bold"
+                disabled={isPending}
+              >
                 {isPending ? (
                   <>
-                    <Loader2 className='ml-2 w-5 h-5 animate-spin' />
+                    <Loader2 className="ml-2 h-5 w-5 animate-spin" />
                     جاري التحقق...
                   </>
                 ) : (
-                  'تسجيل الدخول'
+                  "تسجيل الدخول"
                 )}
               </Button>
             </form>
@@ -119,5 +131,5 @@ export default function SuperAdminLoginPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

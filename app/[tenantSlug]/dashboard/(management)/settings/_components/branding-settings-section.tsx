@@ -1,23 +1,29 @@
-import { ClinicImage } from '@/components/shared/clinic-image'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Textarea } from '@/components/ui/textarea'
-import { UpdateSettingsInput } from '@/validation/settings'
-import { Image as ImageIcon, Loader2, Upload } from 'lucide-react'
-import { RefObject } from 'react'
-import { UseFormReturn } from 'react-hook-form'
+import { ClinicImage } from "@/components/shared/clinic-image";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea";
+import { UpdateSettingsInput } from "@/validation/settings";
+import { Image as ImageIcon, Loader2, Upload } from "lucide-react";
+import { RefObject } from "react";
+import { UseFormReturn } from "react-hook-form";
 
 interface BrandingSettingsSectionProps {
-  form: UseFormReturn<UpdateSettingsInput>
-  logoInputRef: RefObject<HTMLInputElement | null>
-  imageInputRef: RefObject<HTMLInputElement | null>
-  isUploadingLogo: boolean
-  isUploadingImage: boolean
-  logoPreviewUrl: string | null
-  imagePreviewUrl: string | null
-  onLogoUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>
-  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>
+  form: UseFormReturn<UpdateSettingsInput>;
+  logoInputRef: RefObject<HTMLInputElement | null>;
+  imageInputRef: RefObject<HTMLInputElement | null>;
+  isUploadingLogo: boolean;
+  isUploadingImage: boolean;
+  logoPreviewUrl: string | null;
+  imagePreviewUrl: string | null;
+  onLogoUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
+  onImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
 }
 
 export function BrandingSettingsSection({
@@ -36,76 +42,76 @@ export function BrandingSettingsSection({
       <CardHeader>
         <CardTitle>الهوية والمظهر</CardTitle>
       </CardHeader>
-      <CardContent className='space-y-6'>
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
-          <div className='flex items-center gap-6 p-4 border rounded-lg bg-muted/20'>
-            <div className='relative h-20 w-20 shrink-0 rounded-full border-2 border-dashed flex items-center justify-center overflow-hidden bg-background'>
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="bg-muted/20 flex items-center gap-6 rounded-lg border p-4">
+            <div className="bg-background relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-dashed">
               {isUploadingLogo ? (
-                <Loader2 className='animate-spin' />
+                <Loader2 className="animate-spin" />
               ) : (
                 <ClinicImage
-                  src={logoPreviewUrl || form.watch('logoUrl')}
-                  alt='Clinic Logo'
+                  src={logoPreviewUrl || form.watch("logoUrl")}
+                  alt="Clinic Logo"
                   fill
-                  fallbackType='logo'
-                  className='object-cover'
+                  fallbackType="logo"
+                  className="object-cover"
                 />
               )}
             </div>
-            <div className='space-y-1.5'>
-              <h3 className='font-semibold text-sm'>شعار العيادة</h3>
+            <div className="space-y-1.5">
+              <h3 className="text-sm font-semibold">شعار العيادة</h3>
               <Button
-                type='button'
-                variant='secondary'
-                size='sm'
+                type="button"
+                variant="secondary"
+                size="sm"
                 onClick={() => logoInputRef.current?.click()}
                 disabled={isUploadingLogo}
               >
-                <Upload className='w-4 h-4 ml-2' /> رفع الشعار
+                <Upload className="ml-2 h-4 w-4" /> رفع الشعار
               </Button>
               <input
-                type='file'
-                className='hidden'
+                type="file"
+                className="hidden"
                 ref={logoInputRef}
                 onChange={onLogoUpload}
-                accept='image/*'
+                accept="image/*"
               />
             </div>
           </div>
 
-          <div className='flex items-center gap-6 p-4 border rounded-lg bg-muted/20'>
-            <div className='relative h-20 w-20 shrink-0 rounded-lg border-2 border-dashed flex items-center justify-center overflow-hidden bg-background'>
+          <div className="bg-muted/20 flex items-center gap-6 rounded-lg border p-4">
+            <div className="bg-background relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 border-dashed">
               {isUploadingImage ? (
-                <Loader2 className='animate-spin' />
-              ) : form.watch('imgUrl') || imagePreviewUrl ? (
+                <Loader2 className="animate-spin" />
+              ) : form.watch("imgUrl") || imagePreviewUrl ? (
                 <ClinicImage
-                  src={imagePreviewUrl || form.watch('imgUrl')}
-                  alt='Clinic Cover'
+                  src={imagePreviewUrl || form.watch("imgUrl")}
+                  alt="Clinic Cover"
                   fill
-                  fallbackType='general'
-                  className='object-cover'
+                  fallbackType="general"
+                  className="object-cover"
                 />
               ) : (
-                <ImageIcon className='h-8 w-8 text-muted-foreground/40' />
+                <ImageIcon className="text-muted-foreground/40 h-8 w-8" />
               )}
             </div>
-            <div className='space-y-1.5'>
-              <h3 className='font-semibold text-sm'>صورة الغلاف</h3>
+            <div className="space-y-1.5">
+              <h3 className="text-sm font-semibold">صورة الغلاف</h3>
               <Button
-                type='button'
-                variant='secondary'
-                size='sm'
+                type="button"
+                variant="secondary"
+                size="sm"
                 onClick={() => imageInputRef.current?.click()}
                 disabled={isUploadingImage}
               >
-                <Upload className='w-4 h-4 ml-2' /> رفع صورة الغلاف
+                <Upload className="ml-2 h-4 w-4" /> رفع صورة الغلاف
               </Button>
               <input
-                type='file'
-                className='hidden'
+                type="file"
+                className="hidden"
                 ref={imageInputRef}
                 onChange={onImageUpload}
-                accept='image/*'
+                accept="image/*"
               />
             </div>
           </div>
@@ -113,12 +119,12 @@ export function BrandingSettingsSection({
 
         <FormField
           control={form.control}
-          name='description'
+          name="description"
           render={({ field }) => (
             <FormItem>
               <FormLabel>وصف العيادة</FormLabel>
               <FormControl>
-                <Textarea {...field} value={field.value || ''} rows={5} />
+                <Textarea {...field} value={field.value || ""} rows={5} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -126,5 +132,5 @@ export function BrandingSettingsSection({
         />
       </CardContent>
     </Card>
-  )
+  );
 }

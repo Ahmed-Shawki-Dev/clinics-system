@@ -1,10 +1,9 @@
-'use server'
+"use server";
 
-import { fetchApi } from '@/lib/fetchApi'
-import { BaseApiResponse } from '@/types/api'
-import { revalidatePath } from 'next/cache'
-import { IStaleVisit, IVisit } from '../../types/visit'
-
+import { fetchApi } from "@/lib/fetchApi";
+import { BaseApiResponse } from "@/types/api";
+import { revalidatePath } from "next/cache";
+import { IStaleVisit, IVisit } from "../../types/visit";
 
 // 2. أكشن جلب الزيارات المعلقة
 export const getStaleVisitsAction = async (
@@ -14,11 +13,11 @@ export const getStaleVisitsAction = async (
   return await fetchApi<IStaleVisit[]>(
     `/api/clinic/visits/maintenance/stale-open?olderThanHours=${olderThanHours}`,
     {
-      method: 'GET',
+      method: "GET",
       tenantSlug,
     },
-  )
-}
+  );
+};
 
 // 3. أكشن الإغلاق الإداري الإجباري
 export const closeStaleVisitAction = async (
@@ -28,29 +27,32 @@ export const closeStaleVisitAction = async (
   markNoShow: boolean = true,
 ): Promise<BaseApiResponse<IVisit>> => {
   try {
-    const result = await fetchApi<IVisit>(`/api/clinic/visits/maintenance/${visitId}/close`, {
-      method: 'POST',
-      tenantSlug,
-      body: JSON.stringify({
-        resolutionNote: notes,
-        markQueueTicketNoShow: markNoShow,
-      }),
-    })
+    const result = await fetchApi<IVisit>(
+      `/api/clinic/visits/maintenance/${visitId}/close`,
+      {
+        method: "POST",
+        tenantSlug,
+        body: JSON.stringify({
+          resolutionNote: notes,
+          markQueueTicketNoShow: markNoShow,
+        }),
+      },
+    );
 
     if (result.success) {
-      revalidatePath(`/${tenantSlug}/dashboard`)
-      revalidatePath(`/${tenantSlug}/dashboard/doctor/queue`)
+      revalidatePath(`/${tenantSlug}/dashboard`);
+      revalidatePath(`/${tenantSlug}/dashboard/doctor/queue`);
     }
 
-    return result
+    return result;
   } catch (error) {
-    console.error('[MAINTENANCE_CLOSE_ERROR]:', error)
+    console.error("[MAINTENANCE_CLOSE_ERROR]:", error);
     return {
       success: false,
-      message: 'فشل في تنفيذ الإغلاق الإداري',
+      message: "فشل في تنفيذ الإغلاق الإداري",
       data: null,
       errors: [],
-      meta: { timestamp: new Date().toISOString(), requestId: '' },
-    }
+      meta: { timestamp: new Date().toISOString(), requestId: "" },
+    };
   }
-}
+};

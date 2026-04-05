@@ -1,9 +1,9 @@
-'use server'
+"use server";
 
-import { fetchApi } from '@/lib/fetchApi'
-import { BaseApiResponse } from '@/types/api'
-import { IVisit } from '@/types/visit'
-import { revalidatePath } from 'next/cache'
+import { fetchApi } from "@/lib/fetchApi";
+import { BaseApiResponse } from "@/types/api";
+import { IVisit } from "@/types/visit";
+import { revalidatePath } from "next/cache";
 
 export const completeVisitAction = async (
   tenantSlug: string,
@@ -12,31 +12,34 @@ export const completeVisitAction = async (
   notes?: string,
 ): Promise<BaseApiResponse<IVisit>> => {
   try {
-    const result = await fetchApi<IVisit>(`/api/clinic/visits/${visitId}/complete`, {
-      method: 'POST',
-      body: JSON.stringify({
-        diagnosis: diagnosis || '',
-        notes: notes || '',
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Tenant': tenantSlug,
+    const result = await fetchApi<IVisit>(
+      `/api/clinic/visits/${visitId}/complete`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          diagnosis: diagnosis || "",
+          notes: notes || "",
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Tenant": tenantSlug,
+        },
       },
-    })
+    );
 
     if (result.success) {
-      revalidatePath(`/${tenantSlug}/dashboard/doctor/queue`)
+      revalidatePath(`/${tenantSlug}/dashboard/doctor/queue`);
     }
 
-    return result
+    return result;
   } catch (error) {
-    console.error('[COMPLETE_VISIT_ERROR]:', error)
+    console.error("[COMPLETE_VISIT_ERROR]:", error);
     return {
       success: false,
-      message: 'فشل في إنهاء الزيارة',
+      message: "فشل في إنهاء الزيارة",
       data: null,
       errors: [],
-      meta: { timestamp: new Date().toISOString(), requestId: '' },
-    }
+      meta: { timestamp: new Date().toISOString(), requestId: "" },
+    };
   }
-}
+};

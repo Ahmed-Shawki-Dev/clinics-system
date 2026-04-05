@@ -5,62 +5,68 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { cn } from '@/lib/utils'
-import { getDoctorMeAction } from '../../../../../actions/Profiles/doctor-profile'
-import { VISIT_CONFIG_LABELS } from '../../../../../constants/visit-fields'
-import { ClinicImage } from '../../../../../components/shared/clinic-image'
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
+import { getDoctorMeAction } from "../../../../../actions/Profiles/doctor-profile";
+import { VISIT_CONFIG_LABELS } from "../../../../../constants/visit-fields";
+import { ClinicImage } from "../../../../../components/shared/clinic-image";
 
 export default async function DoctorProfilePage({
   params,
 }: {
-  params: Promise<{ tenantSlug: string }>
+  params: Promise<{ tenantSlug: string }>;
 }) {
-  const { tenantSlug } = await params
+  const { tenantSlug } = await params;
 
-  const response = await getDoctorMeAction(tenantSlug)
-  const doctor = response?.data
+  const response = await getDoctorMeAction(tenantSlug);
+  const doctor = response?.data;
 
   if (!doctor) {
     return (
-      <div className='py-20 text-center text-sm font-medium text-muted-foreground border border-border/40 rounded-xl bg-muted/5'>
+      <div className="text-muted-foreground border-border/40 bg-muted/5 rounded-xl border py-20 text-center text-sm font-medium">
         تعذر تحميل بيانات الطبيب.
       </div>
-    )
+    );
   }
 
-
   return (
-    <div className='max-w-4xl mx-auto pt-8 pb-16 animate-in fade-in duration-500 space-y-12'>
+    <div className="animate-in fade-in mx-auto max-w-4xl space-y-12 pt-8 pb-16 duration-500">
       {/* =====================================================================
           1. Hero Section (Profile Card)
           ===================================================================== */}
-      <div className='relative flex flex-col bg-card border border-border/50 rounded-3xl shadow-sm overflow-hidden'>
-        <div className='h-32 sm:h-40 bg-linear-to-r from-primary/10 via-muted/30 to-background border-b border-border/40' />
+      <div className="bg-card border-border/50 relative flex flex-col overflow-hidden rounded-3xl border shadow-sm">
+        <div className="from-primary/10 via-muted/30 to-background border-border/40 h-32 border-b bg-linear-to-r sm:h-40" />
 
-        <div className='absolute top-16 sm:top-24 right-8 w-24 h-24 sm:w-32 sm:h-32 bg-background border-4 border-background rounded-full flex items-center justify-center shadow-sm  overflow-hidden'>
-          <ClinicImage src={doctor.photoUrl} alt='Doctor Image' fill fallbackType='doctor' />
+        <div className="bg-background border-background absolute top-16 right-8 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-4 shadow-sm sm:top-24 sm:h-32 sm:w-32">
+          <ClinicImage
+            src={doctor.photoUrl}
+            alt="Doctor Image"
+            fill
+            fallbackType="doctor"
+          />
         </div>
 
-        <div className='pt-12 sm:pt-20 px-8 pb-10 flex flex-col md:flex-row md:justify-between md:items-end gap-6'>
-          <div className='flex flex-col gap-2'>
-            <h1 className='text-3xl sm:text-4xl font-black text-foreground tracking-tight'>
+        <div className="flex flex-col gap-6 px-8 pt-12 pb-10 sm:pt-20 md:flex-row md:items-end md:justify-between">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-foreground text-3xl font-black tracking-tight sm:text-4xl">
               د. {doctor.name}
             </h1>
-            <p className='text-lg font-bold text-muted-foreground'>{doctor.specialty}</p>
+            <p className="text-muted-foreground text-lg font-bold">
+              {doctor.specialty}
+            </p>
             {doctor.bio && (
-              <p className='text-sm font-medium text-muted-foreground/80 max-w-xl mt-2 leading-relaxed'>
+              <p className="text-muted-foreground/80 mt-2 max-w-xl text-sm leading-relaxed font-medium">
                 {doctor.bio}
               </p>
             )}
           </div>
 
-          <div className='flex flex-col gap-1 text-right'>
-            <span className='text-[10px] font-bold uppercase tracking-wider text-muted-foreground'>
+          <div className="flex flex-col gap-1 text-right">
+            <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
               رقم التواصل
             </span>
-            <span className='text-lg font-mono font-bold text-foreground'>
-              {doctor.phone || 'غير مسجل'}
+            <span className="text-foreground font-mono text-lg font-bold">
+              {doctor.phone || "غير مسجل"}
             </span>
           </div>
         </div>
@@ -69,58 +75,64 @@ export default async function DoctorProfilePage({
       {/* =====================================================================
           2. Queue & Urgent Configurations
           ===================================================================== */}
-      <div className='flex flex-col space-y-4'>
-        <h3 className='text-sm font-bold uppercase tracking-wider text-muted-foreground'>
+      <div className="flex flex-col space-y-4">
+        <h3 className="text-muted-foreground text-sm font-bold tracking-wider uppercase">
           إعدادات الكشف والطابور
         </h3>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-border/40 border border-border/40 rounded-xl overflow-hidden shadow-sm'>
-          <div className='bg-background p-6 flex flex-col gap-2'>
-            <span className='text-[10px] font-bold uppercase tracking-wider text-muted-foreground'>
+        <div className="bg-border/40 border-border/40 grid grid-cols-1 gap-px overflow-hidden rounded-xl border shadow-sm md:grid-cols-2 lg:grid-cols-4">
+          <div className="bg-background flex flex-col gap-2 p-6">
+            <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
               متوسط وقت الكشف
             </span>
-            <div className='flex items-baseline gap-1'>
-              <span className='text-2xl font-mono font-bold text-foreground'>
+            <div className="flex items-baseline gap-1">
+              <span className="text-foreground font-mono text-2xl font-bold">
                 {doctor.avgVisitDurationMinutes}
               </span>
-              <span className='text-xs font-bold text-muted-foreground'>دقيقة</span>
+              <span className="text-muted-foreground text-xs font-bold">
+                دقيقة
+              </span>
             </div>
           </div>
 
-          <div className='bg-background p-6 flex flex-col gap-2'>
-            <span className='text-[10px] font-bold uppercase tracking-wider text-muted-foreground'>
+          <div className="bg-background flex flex-col gap-2 p-6">
+            <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
               دعم الحالات المستعجلة
             </span>
             <div>
               <span
                 className={cn(
-                  'inline-flex items-center justify-center px-3 py-1 text-xs font-bold rounded-md',
+                  "inline-flex items-center justify-center rounded-md px-3 py-1 text-xs font-bold",
                   doctor.supportsUrgent
-                    ? 'bg-emerald-500/10 text-emerald-600'
-                    : 'bg-muted text-muted-foreground',
+                    ? "bg-emerald-500/10 text-emerald-600"
+                    : "bg-muted text-muted-foreground",
                 )}
               >
-                {doctor.supportsUrgent ? 'مفعل' : 'غير مفعل'}
+                {doctor.supportsUrgent ? "مفعل" : "غير مفعل"}
               </span>
             </div>
           </div>
 
-          <div className='bg-background p-6 flex flex-col gap-2'>
-            <span className='text-[10px] font-bold uppercase tracking-wider text-muted-foreground'>
+          <div className="bg-background flex flex-col gap-2 p-6">
+            <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
               نظام إدخال المستعجل
             </span>
-            <span className='text-sm font-bold text-foreground'>{doctor.urgentCaseMode}</span>
+            <span className="text-foreground text-sm font-bold">
+              {doctor.urgentCaseMode}
+            </span>
           </div>
 
-          <div className='bg-background p-6 flex flex-col gap-2'>
-            <span className='text-[10px] font-bold uppercase tracking-wider text-muted-foreground'>
+          <div className="bg-background flex flex-col gap-2 p-6">
+            <span className="text-muted-foreground text-[10px] font-bold tracking-wider uppercase">
               تخطي أدوار المستعجل
             </span>
-            <div className='flex items-baseline gap-1'>
-              <span className='text-xl font-mono font-bold text-foreground'>
+            <div className="flex items-baseline gap-1">
+              <span className="text-foreground font-mono text-xl font-bold">
                 {doctor.urgentInsertAfterCount}
               </span>
-              <span className='text-xs font-bold text-muted-foreground'>مرضى</span>
+              <span className="text-muted-foreground text-xs font-bold">
+                مرضى
+              </span>
             </div>
           </div>
         </div>
@@ -129,28 +141,28 @@ export default async function DoctorProfilePage({
       {/* =====================================================================
           3. Vital Signs Configurations (Badges Map)
           ===================================================================== */}
-      <div className='flex flex-col space-y-4'>
-        <h3 className='text-sm font-bold uppercase tracking-wider text-muted-foreground'>
+      <div className="flex flex-col space-y-4">
+        <h3 className="text-muted-foreground text-sm font-bold tracking-wider uppercase">
           العلامات الحيوية المفعلة للقياس
         </h3>
-        <div className='bg-background border border-border/40 rounded-xl p-6 shadow-sm'>
-          <div className='flex flex-wrap gap-3'>
+        <div className="bg-background border-border/40 rounded-xl border p-6 shadow-sm">
+          <div className="flex flex-wrap gap-3">
             {Object.entries(doctor.visitFieldConfig).map(([key, isEnabled]) => {
-              const configKey = key as keyof typeof VISIT_CONFIG_LABELS
+              const configKey = key as keyof typeof VISIT_CONFIG_LABELS;
 
               return (
                 <span
                   key={key}
                   className={cn(
-                    'px-3 py-1.5 text-xs font-bold rounded-md transition-colors',
+                    "rounded-md px-3 py-1.5 text-xs font-bold transition-colors",
                     isEnabled
-                      ? 'bg-primary/10 text-primary border border-primary/20'
-                      : 'bg-muted/30 text-muted-foreground/50 border border-border/40 line-through decoration-muted-foreground/30',
+                      ? "bg-primary/10 text-primary border-primary/20 border"
+                      : "bg-muted/30 text-muted-foreground/50 border-border/40 decoration-muted-foreground/30 border line-through",
                   )}
                 >
                   {VISIT_CONFIG_LABELS[configKey] || key}
                 </span>
-              )
+              );
             })}
           </div>
         </div>
@@ -159,24 +171,24 @@ export default async function DoctorProfilePage({
       {/* =====================================================================
           4. Services & Pricing Table
           ===================================================================== */}
-      <div className='flex flex-col space-y-4'>
-        <h3 className='text-sm font-bold uppercase tracking-wider text-muted-foreground'>
+      <div className="flex flex-col space-y-4">
+        <h3 className="text-muted-foreground text-sm font-bold tracking-wider uppercase">
           الخدمات والتسعير
         </h3>
-        <div className='bg-background border border-border/40 rounded-xl overflow-hidden shadow-sm'>
-          <Table dir='rtl'>
-            <TableHeader className='bg-muted/10'>
-              <TableRow className='hover:bg-transparent border-border/40'>
-                <TableHead className='h-10 text-xs font-semibold text-muted-foreground'>
+        <div className="bg-background border-border/40 overflow-hidden rounded-xl border shadow-sm">
+          <Table dir="rtl">
+            <TableHeader className="bg-muted/10">
+              <TableRow className="border-border/40 hover:bg-transparent">
+                <TableHead className="text-muted-foreground h-10 text-xs font-semibold">
                   اسم الخدمة
                 </TableHead>
-                <TableHead className='h-10 text-xs font-semibold text-muted-foreground text-center'>
+                <TableHead className="text-muted-foreground h-10 text-center text-xs font-semibold">
                   المدة المقدرة
                 </TableHead>
-                <TableHead className='h-10 text-xs font-semibold text-muted-foreground text-left'>
+                <TableHead className="text-muted-foreground h-10 text-left text-xs font-semibold">
                   التسعيرة
                 </TableHead>
-                <TableHead className='h-10 text-xs font-semibold text-muted-foreground text-center'>
+                <TableHead className="text-muted-foreground h-10 text-center text-xs font-semibold">
                   الحالة
                 </TableHead>
               </TableRow>
@@ -186,43 +198,48 @@ export default async function DoctorProfilePage({
                 <TableRow>
                   <TableCell
                     colSpan={4}
-                    className='py-8 text-center text-xs font-medium text-muted-foreground'
+                    className="text-muted-foreground py-8 text-center text-xs font-medium"
                   >
                     لا توجد خدمات مسجلة لهذا الطبيب.
                   </TableCell>
                 </TableRow>
               ) : (
                 doctor.services.map((service) => (
-                  <TableRow key={service.id} className='border-border/30 hover:bg-muted/5'>
-                    <TableCell className='py-3 text-sm font-bold text-foreground'>
+                  <TableRow
+                    key={service.id}
+                    className="border-border/30 hover:bg-muted/5"
+                  >
+                    <TableCell className="text-foreground py-3 text-sm font-bold">
                       {service.serviceName}
                     </TableCell>
 
-                    <TableCell className='py-3 text-center'>
-                      <span className='font-mono text-xs font-medium text-muted-foreground'>
+                    <TableCell className="py-3 text-center">
+                      <span className="text-muted-foreground font-mono text-xs font-medium">
                         {service.durationMinutes} دقيقة
                       </span>
                     </TableCell>
 
-                    <TableCell className='py-3 text-left'>
-                      <div className='flex items-baseline justify-end gap-1'>
-                        <span className='font-mono font-bold text-sm text-foreground'>
+                    <TableCell className="py-3 text-left">
+                      <div className="flex items-baseline justify-end gap-1">
+                        <span className="text-foreground font-mono text-sm font-bold">
                           {service.price.toLocaleString()}
                         </span>
-                        <span className='text-[10px] font-bold text-muted-foreground'>EGP</span>
+                        <span className="text-muted-foreground text-[10px] font-bold">
+                          EGP
+                        </span>
                       </div>
                     </TableCell>
 
-                    <TableCell className='py-3 text-center'>
+                    <TableCell className="py-3 text-center">
                       <span
                         className={cn(
-                          'text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-sm',
+                          "rounded-sm px-2 py-1 text-[10px] font-bold tracking-wider uppercase",
                           service.isActive
-                            ? 'bg-emerald-500/10 text-emerald-600'
-                            : 'bg-rose-500/10 text-rose-600',
+                            ? "bg-emerald-500/10 text-emerald-600"
+                            : "bg-rose-500/10 text-rose-600",
                         )}
                       >
-                        {service.isActive ? 'متاحة' : 'موقوفة'}
+                        {service.isActive ? "متاحة" : "موقوفة"}
                       </span>
                     </TableCell>
                   </TableRow>
@@ -233,5 +250,5 @@ export default async function DoctorProfilePage({
         </div>
       </div>
     </div>
-  )
+  );
 }

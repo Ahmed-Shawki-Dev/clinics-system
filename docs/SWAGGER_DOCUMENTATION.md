@@ -21,15 +21,16 @@
 
 ### `GET /api/health`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | System health check |
-| **Auth** | None |
-| **Headers** | None |
-| **Roles** | Public |
+| Property        | Value                                                                                                        |
+| --------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Summary**     | System health check                                                                                          |
+| **Auth**        | None                                                                                                         |
+| **Headers**     | None                                                                                                         |
+| **Roles**       | Public                                                                                                       |
 | **Description** | Returns API status, database connectivity, and version. Used for monitoring and load balancer health probes. |
 
 **Response 200:**
+
 ```json
 {
   "success": true,
@@ -48,15 +49,16 @@
 
 ### `POST /api/auth/login`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Authenticate user (SuperAdmin, ClinicOwner, ClinicManager, Doctor) |
-| **Auth** | None |
-| **Headers** | `Content-Type: application/json`. `X-Tenant` required for tenant users; omit for SuperAdmin. |
-| **Roles** | Public (produces auth token) |
+| Property        | Value                                                                                                                                                     |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Summary**     | Authenticate user (SuperAdmin, ClinicOwner, ClinicManager, Doctor)                                                                                        |
+| **Auth**        | None                                                                                                                                                      |
+| **Headers**     | `Content-Type: application/json`. `X-Tenant` required for tenant users; omit for SuperAdmin.                                                              |
+| **Roles**       | Public (produces auth token)                                                                                                                              |
 | **Description** | Validates username + password. Returns JWT + refresh token. For tenant users, X-Tenant header determines tenant scope. SuperAdmin does not send X-Tenant. |
 
 **Request Body:**
+
 ```json
 {
   "username": "string (required)",
@@ -70,6 +72,7 @@
 **Response 403:** Tenant suspended/blocked (for tenant user login).
 
 **Notes:**
+
 - No OTP, no email verification.
 - Login attempt is logged in audit trail (success and failure).
 - Failed login does NOT lock account (no lockout policy — configurable later).
@@ -78,15 +81,16 @@
 
 ### `POST /api/auth/patient/login`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Authenticate patient |
-| **Auth** | None |
-| **Headers** | `Content-Type: application/json`, `X-Tenant: {slug}` (required) |
-| **Roles** | Public (produces auth token) |
+| Property        | Value                                                                                                         |
+| --------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Summary**     | Authenticate patient                                                                                          |
+| **Auth**        | None                                                                                                          |
+| **Headers**     | `Content-Type: application/json`, `X-Tenant: {slug}` (required)                                               |
+| **Roles**       | Public (produces auth token)                                                                                  |
 | **Description** | Patient-specific login. Returns long-lived token (365 days). Includes profile list for multi-profile support. |
 
 **Request Body:**
+
 ```json
 {
   "username": "string (required)",
@@ -95,9 +99,10 @@
 ```
 
 **Response 200:** JWT token (long-lived), refresh token, expiry, user profile with `profiles[]` array.  
-**Response 401:** Invalid credentials.  
+**Response 401:** Invalid credentials.
 
 **Notes:**
+
 - Token expiry: 365 days (persistent session).
 - Response includes all profiles under the patient account (parent + children).
 - Frontend must NEVER show logout button.
@@ -106,15 +111,16 @@
 
 ### `POST /api/auth/refresh`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Refresh authentication token |
-| **Auth** | None (uses refresh token) |
-| **Headers** | `Content-Type: application/json` |
-| **Roles** | Any authenticated user type |
+| Property        | Value                                                                                                |
+| --------------- | ---------------------------------------------------------------------------------------------------- |
+| **Summary**     | Refresh authentication token                                                                         |
+| **Auth**        | None (uses refresh token)                                                                            |
+| **Headers**     | `Content-Type: application/json`                                                                     |
+| **Roles**       | Any authenticated user type                                                                          |
 | **Description** | Exchanges a valid refresh token for a new JWT + refresh token pair. Used for silent session renewal. |
 
 **Request Body:**
+
 ```json
 {
   "refreshToken": "string (required)"
@@ -128,15 +134,16 @@
 
 ### `GET /api/auth/me`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Get current authenticated user profile |
-| **Auth** | Bearer token |
-| **Headers** | `Authorization: Bearer {token}`. `X-Tenant` for tenant users. |
-| **Roles** | SuperAdmin, ClinicOwner, ClinicManager, Doctor, Patient |
+| Property        | Value                                                                         |
+| --------------- | ----------------------------------------------------------------------------- |
+| **Summary**     | Get current authenticated user profile                                        |
+| **Auth**        | Bearer token                                                                  |
+| **Headers**     | `Authorization: Bearer {token}`. `X-Tenant` for tenant users.                 |
+| **Roles**       | SuperAdmin, ClinicOwner, ClinicManager, Doctor, Patient                       |
 | **Description** | Returns the authenticated user's profile, role, tenant info, and permissions. |
 
 **Response 200:**
+
 ```json
 {
   "success": true,
@@ -158,14 +165,15 @@
 
 ### `POST /api/platform/tenants`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Create a new tenant (clinic) |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
+| Property        | Value                                                                                                                                               |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Summary**     | Create a new tenant (clinic)                                                                                                                        |
+| **Auth**        | Bearer token                                                                                                                                        |
+| **Roles**       | SuperAdmin                                                                                                                                          |
 | **Description** | Creates a new tenant with auto-generated feature flags. Slug must be unique, lowercase alphanumeric with hyphens. Tenant starts with Status=Active. |
 
 **Request Body:**
+
 ```json
 {
   "name": "string (required, max 200)",
@@ -177,6 +185,7 @@
 ```
 
 **Response 201:** Created tenant with ID.
+
 ```json
 {
   "success": true,
@@ -198,6 +207,7 @@
 **Response 403:** Non-SuperAdmin role.
 
 **Notes:**
+
 - Slug is immutable after creation — cannot be changed via PUT.
 - Feature flags are auto-created with PLAN.md §13 defaults (see Feature Flags module).
 - Slug is forced to lowercase.
@@ -206,14 +216,15 @@
 
 ### `GET /api/platform/tenants`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | List all tenants (paginated) |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
+| Property         | Value                                                                                                                  |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Summary**      | List all tenants (paginated)                                                                                           |
+| **Auth**         | Bearer token                                                                                                           |
+| **Roles**        | SuperAdmin                                                                                                             |
 | **Query Params** | `pageNumber` (int, default 1), `pageSize` (int, default 10), `searchTerm` (string, optional — filters by Name or Slug) |
 
 **Response 200:**
+
 ```json
 {
   "success": true,
@@ -238,6 +249,7 @@
 ```
 
 **Notes:**
+
 - Soft-deleted tenants are excluded from results.
 - `searchTerm` matches against `Name` or `Slug` (contains, case-insensitive).
 
@@ -245,13 +257,14 @@
 
 ### `GET /api/platform/tenants/{id}`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                    |
+| ----------- | ------------------------ |
 | **Summary** | Get tenant details by ID |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
+| **Auth**    | Bearer token             |
+| **Roles**   | SuperAdmin               |
 
 **Response 200:**
+
 ```json
 {
   "success": true,
@@ -276,14 +289,15 @@
 
 ### `PUT /api/platform/tenants/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Update tenant details (name, contact, address, logo) |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
-| **Description** | Updates mutable fields. Slug cannot be changed. |
+| Property        | Value                                                |
+| --------------- | ---------------------------------------------------- |
+| **Summary**     | Update tenant details (name, contact, address, logo) |
+| **Auth**        | Bearer token                                         |
+| **Roles**       | SuperAdmin                                           |
+| **Description** | Updates mutable fields. Slug cannot be changed.      |
 
 **Request Body:**
+
 ```json
 {
   "name": "string (required, max 200)",
@@ -300,11 +314,11 @@
 
 ### `POST /api/platform/tenants/{id}/activate`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                       |
+| ----------- | --------------------------- |
 | **Summary** | Set tenant status to Active |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
+| **Auth**    | Bearer token                |
+| **Roles**   | SuperAdmin                  |
 
 **Response 200:** `{ "success": true, "message": "Tenant activated successfully" }`  
 **Response 404:** Tenant not found.
@@ -313,11 +327,11 @@
 
 ### `POST /api/platform/tenants/{id}/suspend`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                          |
+| ----------- | ------------------------------ |
 | **Summary** | Set tenant status to Suspended |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
+| **Auth**    | Bearer token                   |
+| **Roles**   | SuperAdmin                     |
 
 **Response 200:** `{ "success": true, "message": "Tenant suspended successfully" }`  
 **Response 404:** Tenant not found.
@@ -326,11 +340,11 @@
 
 ### `POST /api/platform/tenants/{id}/block`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                        |
+| ----------- | ---------------------------- |
 | **Summary** | Set tenant status to Blocked |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
+| **Auth**    | Bearer token                 |
+| **Roles**   | SuperAdmin                   |
 
 **Response 200:** `{ "success": true, "message": "Tenant blocked successfully" }`  
 **Response 404:** Tenant not found.
@@ -339,11 +353,11 @@
 
 ### `DELETE /api/platform/tenants/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Soft-delete a tenant |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
+| Property        | Value                                                                                          |
+| --------------- | ---------------------------------------------------------------------------------------------- |
+| **Summary**     | Soft-delete a tenant                                                                           |
+| **Auth**        | Bearer token                                                                                   |
+| **Roles**       | SuperAdmin                                                                                     |
 | **Description** | Sets `IsDeleted=true` and `DeletedAt`. Tenant no longer appears in list. No physical deletion. |
 
 **Response 200:** `{ "success": true, "message": "Tenant deleted successfully" }`  
@@ -355,14 +369,15 @@
 
 ### `POST /api/platform/subscriptions`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Create a subscription record for a tenant |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
+| Property        | Value                                                                        |
+| --------------- | ---------------------------------------------------------------------------- |
+| **Summary**     | Create a subscription record for a tenant                                    |
+| **Auth**        | Bearer token                                                                 |
+| **Roles**       | SuperAdmin                                                                   |
 | **Description** | Manual/offline billing record. TenantId is passed in request body (not URL). |
 
 **Request Body:**
+
 ```json
 {
   "tenantId": "guid (required)",
@@ -376,6 +391,7 @@
 ```
 
 **Response 201:** Created subscription.
+
 ```json
 {
   "success": true,
@@ -386,7 +402,7 @@
     "planName": "Premium Annual",
     "startDate": "2026-01-01T00:00:00",
     "endDate": "2027-01-01T00:00:00",
-    "amount": 12000.00,
+    "amount": 12000.0,
     "currency": "EGP",
     "isPaid": false,
     "paidAt": null,
@@ -403,6 +419,7 @@
 **Response 400:** Validation error (tenant not found, EndDate < StartDate, missing fields).
 
 **Notes:**
+
 - Defaults: `Status=Active (0)`, `IsPaid=false`.
 - Tenant must exist and not be soft-deleted.
 - ⚠️ **Known issue (SV03):** `StartDate` is a `DateTime` value type. If omitted from JSON, it defaults to `0001-01-01` instead of returning 400. Fix planned for Phase 2.
@@ -411,11 +428,11 @@
 
 ### `GET /api/platform/subscriptions`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | List subscriptions (paginated, optionally filtered by tenant) |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
+| Property         | Value                                                                    |
+| ---------------- | ------------------------------------------------------------------------ |
+| **Summary**      | List subscriptions (paginated, optionally filtered by tenant)            |
+| **Auth**         | Bearer token                                                             |
+| **Roles**        | SuperAdmin                                                               |
 | **Query Params** | `pageNumber` (int), `pageSize` (int), `tenantId` (guid, optional filter) |
 
 **Response 200:** Paginated list of `SubscriptionDto` items.
@@ -424,13 +441,14 @@
 
 ### `POST /api/platform/subscriptions/{id}/extend`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                            |
+| ----------- | -------------------------------- |
 | **Summary** | Extend a subscription's end date |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
+| **Auth**    | Bearer token                     |
+| **Roles**   | SuperAdmin                       |
 
 **Request Body:**
+
 ```json
 {
   "newEndDate": "datetime (required, ISO 8601)",
@@ -445,13 +463,14 @@
 
 ### `POST /api/platform/subscriptions/{id}/cancel`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                 |
+| ----------- | --------------------- |
 | **Summary** | Cancel a subscription |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
+| **Auth**    | Bearer token          |
+| **Roles**   | SuperAdmin            |
 
 **Request Body:**
+
 ```json
 {
   "cancelReason": "string (required, max 500)"
@@ -465,13 +484,14 @@
 
 ### `POST /api/platform/subscriptions/{id}/mark-paid`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                             |
+| ----------- | --------------------------------- |
 | **Summary** | Record payment for a subscription |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
+| **Auth**    | Bearer token                      |
+| **Roles**   | SuperAdmin                        |
 
 **Request Body:**
+
 ```json
 {
   "paymentMethod": "string (required, max 100)",
@@ -489,13 +509,14 @@
 
 ### `GET /api/platform/feature-flags/{tenantId}`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                          |
+| ----------- | ------------------------------ |
 | **Summary** | Get feature flags for a tenant |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
+| **Auth**    | Bearer token                   |
+| **Roles**   | SuperAdmin                     |
 
 **Response 200:**
+
 ```json
 {
   "success": true,
@@ -517,20 +538,22 @@
 **Response 404:** Tenant or flags not found.
 
 **Notes:**
+
 - Flags are auto-created when a tenant is created, with defaults from PLAN.md §13.
 
 ---
 
 ### `PUT /api/platform/feature-flags/{tenantId}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Update all feature flags for a tenant |
-| **Auth** | Bearer token |
-| **Roles** | SuperAdmin |
+| Property        | Value                                                          |
+| --------------- | -------------------------------------------------------------- |
+| **Summary**     | Update all feature flags for a tenant                          |
+| **Auth**        | Bearer token                                                   |
+| **Roles**       | SuperAdmin                                                     |
 | **Description** | Replaces all 7 flags. No partial update — all fields required. |
 
 **Request Body:**
+
 ```json
 {
   "onlineBooking": "bool (required)",
@@ -547,6 +570,7 @@
 **Response 400:** Tenant not found.
 
 **Notes:**
+
 - No partial update — all 7 boolean fields must be provided.
 - Sending `true` for a flag that is already `true` is a no-op (HTTP 200, no error).
 
@@ -556,15 +580,16 @@
 
 ### `GET /api/clinic/settings`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Get clinic configuration |
-| **Auth** | Bearer token |
-| **Headers** | `X-Tenant: {slug}` (required) |
-| **Roles** | ClinicOwner, ClinicManager, Doctor (read-only for all) |
+| Property        | Value                                                                                        |
+| --------------- | -------------------------------------------------------------------------------------------- |
+| **Summary**     | Get clinic configuration                                                                     |
+| **Auth**        | Bearer token                                                                                 |
+| **Headers**     | `X-Tenant: {slug}` (required)                                                                |
+| **Roles**       | ClinicOwner, ClinicManager, Doctor (read-only for all)                                       |
 | **Description** | Returns clinic name, phone numbers, address, working hours, booking settings. Tenant-scoped. |
 
 **Response 200:**
+
 ```json
 {
   "success": true,
@@ -578,7 +603,13 @@
     "bookingEnabled": true,
     "cancellationWindowHours": 2,
     "workingHours": [
-      { "id": "guid", "dayOfWeek": 0, "startTime": "09:00:00", "endTime": "17:00:00", "isActive": true }
+      {
+        "id": "guid",
+        "dayOfWeek": 0,
+        "startTime": "09:00:00",
+        "endTime": "17:00:00",
+        "isActive": true
+      }
     ]
   }
 }
@@ -588,15 +619,16 @@
 
 ### `PUT /api/clinic/settings`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Update clinic configuration |
-| **Auth** | Bearer token |
-| **Headers** | `X-Tenant: {slug}` (required) |
-| **Roles** | ClinicOwner |
+| Property        | Value                                                                           |
+| --------------- | ------------------------------------------------------------------------------- |
+| **Summary**     | Update clinic configuration                                                     |
+| **Auth**        | Bearer token                                                                    |
+| **Headers**     | `X-Tenant: {slug}` (required)                                                   |
+| **Roles**       | ClinicOwner                                                                     |
 | **Description** | Update all clinic settings including working hours. ClinicManager cannot write. |
 
 **Request Body:**
+
 ```json
 {
   "clinicName": "string (required, max 200)",
@@ -625,15 +657,16 @@
 
 ### `POST /api/clinic/staff`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Create staff member |
-| **Auth** | Bearer token |
-| **Headers** | `X-Tenant: {slug}` (required) |
-| **Roles** | ClinicOwner |
+| Property        | Value                                                                                                       |
+| --------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Summary**     | Create staff member                                                                                         |
+| **Auth**        | Bearer token                                                                                                |
+| **Headers**     | `X-Tenant: {slug}` (required)                                                                               |
+| **Roles**       | ClinicOwner                                                                                                 |
 | **Description** | Creates ApplicationUser with ClinicManager role + Employee entity. Auto-generates username if not provided. |
 
 **Request Body:**
+
 ```json
 {
   "name": "string (required, max 200)",
@@ -651,15 +684,16 @@
 
 ### `GET /api/clinic/staff`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | List all staff members (paginated) |
-| **Auth** | Bearer token |
-| **Headers** | `X-Tenant: {slug}` (required) |
-| **Roles** | ClinicOwner, ClinicManager |
+| Property        | Value                                           |
+| --------------- | ----------------------------------------------- |
+| **Summary**     | List all staff members (paginated)              |
+| **Auth**        | Bearer token                                    |
+| **Headers**     | `X-Tenant: {slug}` (required)                   |
+| **Roles**       | ClinicOwner, ClinicManager                      |
 | **Description** | Returns paginated list of staff. Tenant-scoped. |
 
 **Query Params:**
+
 - `pageNumber` (default 1)
 - `pageSize` (default 10, max 100)
 
@@ -669,13 +703,13 @@
 
 ### `GET /api/clinic/staff/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Get staff details by ID |
-| **Auth** | Bearer token |
-| **Headers** | `X-Tenant: {slug}` (required) |
-| **Roles** | ClinicOwner |
-| **Description** | Returns full staff profile. |
+| Property        | Value                         |
+| --------------- | ----------------------------- |
+| **Summary**     | Get staff details by ID       |
+| **Auth**        | Bearer token                  |
+| **Headers**     | `X-Tenant: {slug}` (required) |
+| **Roles**       | ClinicOwner                   |
+| **Description** | Returns full staff profile.   |
 
 **Response 200:** StaffDto.  
 **Response 404:** Staff not found.
@@ -684,15 +718,16 @@
 
 ### `PUT /api/clinic/staff/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Update staff profile |
-| **Auth** | Bearer token |
-| **Headers** | `X-Tenant: {slug}` (required) |
-| **Roles** | ClinicOwner |
+| Property        | Value                             |
+| --------------- | --------------------------------- |
+| **Summary**     | Update staff profile              |
+| **Auth**        | Bearer token                      |
+| **Headers**     | `X-Tenant: {slug}` (required)     |
+| **Roles**       | ClinicOwner                       |
 | **Description** | Update name, phone, salary, note. |
 
 **Request Body:**
+
 ```json
 {
   "name": "string (required, max 200)",
@@ -708,11 +743,11 @@
 
 ### `POST /api/clinic/staff/{id}/enable`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Enable staff access |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner |
+| Property        | Value                              |
+| --------------- | ---------------------------------- |
+| **Summary**     | Enable staff access                |
+| **Auth**        | Bearer token                       |
+| **Roles**       | ClinicOwner                        |
 | **Description** | Re-enable staff account for login. |
 
 **Response 200:** Updated StaffDto with isEnabled=true.
@@ -721,11 +756,11 @@
 
 ### `POST /api/clinic/staff/{id}/disable`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Disable staff access |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner |
+| Property        | Value                                         |
+| --------------- | --------------------------------------------- |
+| **Summary**     | Disable staff access                          |
+| **Auth**        | Bearer token                                  |
+| **Roles**       | ClinicOwner                                   |
 | **Description** | Disable staff login without deleting account. |
 
 **Response 200:** Updated StaffDto with isEnabled=false.
@@ -736,14 +771,15 @@
 
 ### `POST /api/clinic/doctors`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Create doctor |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner |
+| Property        | Value                                                     |
+| --------------- | --------------------------------------------------------- |
+| **Summary**     | Create doctor                                             |
+| **Auth**        | Bearer token                                              |
+| **Roles**       | ClinicOwner                                               |
 | **Description** | Creates ApplicationUser with Doctor role + Doctor entity. |
 
 **Request Body:**
+
 ```json
 {
   "name": "string (required, max 200)",
@@ -762,12 +798,12 @@
 
 ### `GET /api/clinic/doctors`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | List all doctors (paginated) |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner, ClinicManager, Doctor |
-| **Description** | Tenant-scoped list. |
+| Property        | Value                              |
+| --------------- | ---------------------------------- |
+| **Summary**     | List all doctors (paginated)       |
+| **Auth**        | Bearer token                       |
+| **Roles**       | ClinicOwner, ClinicManager, Doctor |
+| **Description** | Tenant-scoped list.                |
 
 **Query Params:** `pageNumber`, `pageSize`
 
@@ -777,11 +813,11 @@
 
 ### `GET /api/clinic/doctors/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Get doctor with services and visit field config |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner |
+| Property        | Value                                                                   |
+| --------------- | ----------------------------------------------------------------------- |
+| **Summary**     | Get doctor with services and visit field config                         |
+| **Auth**        | Bearer token                                                            |
+| **Roles**       | ClinicOwner                                                             |
 | **Description** | Full doctor profile including services array and visitor field toggles. |
 
 **Response 200:** DoctorDto with nested services and visitFieldConfig.
@@ -790,13 +826,14 @@
 
 ### `PUT /api/clinic/doctors/{id}`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                 |
+| ----------- | --------------------- |
 | **Summary** | Update doctor profile |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner |
+| **Auth**    | Bearer token          |
+| **Roles**   | ClinicOwner           |
 
 **Request Body:**
+
 ```json
 {
   "name": "string",
@@ -813,14 +850,15 @@
 
 ### `PUT /api/clinic/doctors/{id}/services`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Configure doctor services and pricing |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner |
+| Property        | Value                                                                                   |
+| --------------- | --------------------------------------------------------------------------------------- |
+| **Summary**     | Configure doctor services and pricing                                                   |
+| **Auth**        | Bearer token                                                                            |
+| **Roles**       | ClinicOwner                                                                             |
 | **Description** | Replace all services (not an append operation). Each service has name, price, duration. |
 
 **Request Body:**
+
 ```json
 {
   "services": [
@@ -840,14 +878,15 @@
 
 ### `PUT /api/clinic/doctors/{id}/visit-fields`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Configure which vitals are required for this doctor |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner |
+| Property        | Value                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------ |
+| **Summary**     | Configure which vitals are required for this doctor                                        |
+| **Auth**        | Bearer token                                                                               |
+| **Roles**       | ClinicOwner                                                                                |
 | **Description** | Toggle blood pressure, temperature, weight, height, BMI, etc. for visits with this doctor. |
 
 **Request Body:**
+
 ```json
 {
   "bloodPressure": "bool",
@@ -868,11 +907,11 @@
 
 ### `POST /api/clinic/doctors/{id}/enable` / `disable`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                                      |
+| ----------- | ------------------------------------------ |
 | **Summary** | Enable / disable doctor (similar to staff) |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner |
+| **Auth**    | Bearer token                               |
+| **Roles**   | ClinicOwner                                |
 
 ---
 
@@ -880,15 +919,16 @@
 
 ### `POST /api/clinic/patients`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Register new patient (walk-in) |
-| **Auth** | Bearer token |
-| **Headers** | `X-Tenant: {slug}` (required) |
-| **Roles** | ClinicOwner, ClinicManager |
+| Property        | Value                                                                                           |
+| --------------- | ----------------------------------------------------------------------------------------------- |
+| **Summary**     | Register new patient (walk-in)                                                                  |
+| **Auth**        | Bearer token                                                                                    |
+| **Headers**     | `X-Tenant: {slug}` (required)                                                                   |
+| **Roles**       | ClinicOwner, ClinicManager                                                                      |
 | **Description** | Creates ApplicationUser with Patient role + Patient entity. Returns auto-generated credentials. |
 
 **Request Body:**
+
 ```json
 {
   "name": "string (required, max 200)",
@@ -906,13 +946,14 @@
 
 ### `GET /api/clinic/patients`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                                     |
+| ----------- | ----------------------------------------- |
 | **Summary** | List all patients (paginated, searchable) |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner, ClinicManager |
+| **Auth**    | Bearer token                              |
+| **Roles**   | ClinicOwner, ClinicManager                |
 
 **Query Params:**
+
 - `pageNumber` (default 1)
 - `pageSize` (default 10)
 - `search` (optional, filters by name)
@@ -923,11 +964,11 @@
 
 ### `GET /api/clinic/patients/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Get patient with sub-profiles |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner, ClinicManager |
+| Property        | Value                                                                |
+| --------------- | -------------------------------------------------------------------- |
+| **Summary**     | Get patient with sub-profiles                                        |
+| **Auth**        | Bearer token                                                         |
+| **Roles**       | ClinicOwner, ClinicManager                                           |
 | **Description** | Returns patient with all sub-profiles (children under same account). |
 
 **Response 200:** PatientDto (includes subProfiles array).
@@ -936,13 +977,14 @@
 
 ### `PUT /api/clinic/patients/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Update patient profile |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner, ClinicManager |
+| Property    | Value                      |
+| ----------- | -------------------------- |
+| **Summary** | Update patient profile     |
+| **Auth**    | Bearer token               |
+| **Roles**   | ClinicOwner, ClinicManager |
 
 **Request Body:**
+
 ```json
 {
   "name": "string",
@@ -960,14 +1002,15 @@
 
 ### `POST /api/clinic/patients/{id}/profiles`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Add sub-profile (child/dependent) |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner, ClinicManager |
+| Property        | Value                                                     |
+| --------------- | --------------------------------------------------------- |
+| **Summary**     | Add sub-profile (child/dependent)                         |
+| **Auth**        | Bearer token                                              |
+| **Roles**       | ClinicOwner, ClinicManager                                |
 | **Description** | Add a secondary profile (e.g., child) under same account. |
 
 **Request Body:**
+
 ```json
 {
   "name": "string (required)",
@@ -983,11 +1026,11 @@
 
 ### `POST /api/clinic/patients/{id}/reset-password`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Generate new patient password |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner, ClinicManager |
+| Property        | Value                                                 |
+| --------------- | ----------------------------------------------------- |
+| **Summary**     | Generate new patient password                         |
+| **Auth**        | Bearer token                                          |
+| **Roles**       | ClinicOwner, ClinicManager                            |
 | **Description** | Staff-initiated password reset. Returns new password. |
 
 **Response 200:** ResetPasswordResponse (newPassword).
@@ -996,11 +1039,11 @@
 
 ### `DELETE /api/clinic/patients/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Soft-delete patient |
-| **Auth** | Bearer token |
-| **Roles** | ClinicOwner (not ClinicManager) |
+| Property        | Value                                                        |
+| --------------- | ------------------------------------------------------------ |
+| **Summary**     | Soft-delete patient                                          |
+| **Auth**        | Bearer token                                                 |
+| **Roles**       | ClinicOwner (not ClinicManager)                              |
 | **Description** | Mark patient as deleted (soft delete). Not returned in list. |
 
 **Response 200:** success.
@@ -1011,14 +1054,15 @@
 
 ### `POST /api/auth/login` (ENHANCED)
 
-| Property | Value |
-|----------|-------|
-| **Summary** | [Updated] Staff/Doctor login with tenant scope |
-| **Auth** | None |
-| **Headers** | `Content-Type: application/json`, `X-Tenant: {slug}` (required for staff/doctor, optional for SuperAdmin) |
+| Property        | Value                                                                                                                                                             |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Summary**     | [Updated] Staff/Doctor login with tenant scope                                                                                                                    |
+| **Auth**        | None                                                                                                                                                              |
+| **Headers**     | `Content-Type: application/json`, `X-Tenant: {slug}` (required for staff/doctor, optional for SuperAdmin)                                                         |
 | **Description** | **Phase 2 enhancement:** Tenant users must include X-Tenant header. SuperAdmin may omit. Response includes `tenantSlug` and `permissions` array for tenant users. |
 
 **Response 200 (staff/doctor):**
+
 ```json
 {
   "success": true,
@@ -1033,7 +1077,7 @@
       "role": "ClinicManager",
       "tenantId": "guid",
       "tenantSlug": "demo-clinic",
-      "permissions": [ "clinic:read", "patient:create", "patient:write" ]
+      "permissions": ["clinic:read", "patient:create", "patient:write"]
     }
   }
 }
@@ -1043,15 +1087,16 @@
 
 ### `POST /api/auth/patient/login` (NEW)
 
-| Property | Value |
-|----------|-------|
-| **Summary** | [NEW] Patient login endpoint |
-| **Auth** | None |
-| **Headers** | `Content-Type: application/json`, `X-Tenant: {slug}` (required) |
-| **Roles** | Public (patient login only) |
+| Property        | Value                                                                                                       |
+| --------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Summary**     | [NEW] Patient login endpoint                                                                                |
+| **Auth**        | None                                                                                                        |
+| **Headers**     | `Content-Type: application/json`, `X-Tenant: {slug}` (required)                                             |
+| **Roles**       | Public (patient login only)                                                                                 |
 | **Description** | Patient-only login. Returns long-lived token (365 days). Includes profiles array for multi-profile support. |
 
 **Request Body:**
+
 ```json
 {
   "username": "string (required)",
@@ -1060,6 +1105,7 @@
 ```
 
 **Response 200:**
+
 ```json
 {
   "success": true,
@@ -1083,6 +1129,7 @@
 ```
 
 **Notes:**
+
 - Token lifetime: 365 days (vs 8 hours for staff/doctor).
 - No `tenantSlug` in response (patients belong to one clinic).
 - `profiles[]` array allows UI to switch between parent and sub-profiles.
@@ -1091,13 +1138,14 @@
 
 ### `GET /api/auth/me` (ENHANCED)
 
-| Property | Value |
-|----------|-------|
-| **Summary** | [Updated] Get current user info with tenant context |
-| **Auth** | Bearer token |
+| Property        | Value                                                                                                                    |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| **Summary**     | [Updated] Get current user info with tenant context                                                                      |
+| **Auth**        | Bearer token                                                                                                             |
 | **Description** | **Phase 2 enhancement:** Now includes `tenantSlug` and `permissions` for tenant users. SuperAdmin returns these as null. |
 
 **Response 200 (staff):**
+
 ```json
 {
   "success": true,
@@ -1119,15 +1167,16 @@
 
 ### `POST /api/clinic/queue/sessions`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Open a new queue session (doctor's shift) |
-| **Auth** | Bearer Token |
-| **Headers** | `Authorization`, `X-Tenant` |
-| **Roles** | ClinicOwner, ClinicManager, Doctor, SuperAdmin |
+| Property        | Value                                                                                           |
+| --------------- | ----------------------------------------------------------------------------------------------- |
+| **Summary**     | Open a new queue session (doctor's shift)                                                       |
+| **Auth**        | Bearer Token                                                                                    |
+| **Headers**     | `Authorization`, `X-Tenant`                                                                     |
+| **Roles**       | ClinicOwner, ClinicManager, Doctor, SuperAdmin                                                  |
 | **Description** | Starts a doctor's shift, begins accepting patients. Only one active session per doctor allowed. |
 
 **Request Body:**
+
 ```json
 {
   "doctorId": "guid (optional, auto-resolved for Doctor role)",
@@ -1136,6 +1185,7 @@
 ```
 
 **Response 201:**
+
 ```json
 {
   "success": true,
@@ -1159,12 +1209,12 @@
 
 ### `POST /api/clinic/queue/sessions/{id}/close`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Close a queue session |
-| **Auth** | Bearer Token |
-| **Headers** | `Authorization`, `X-Tenant` |
-| **Roles** | ClinicOwner, ClinicManager, Doctor, SuperAdmin |
+| Property        | Value                                                                                  |
+| --------------- | -------------------------------------------------------------------------------------- |
+| **Summary**     | Close a queue session                                                                  |
+| **Auth**        | Bearer Token                                                                           |
+| **Headers**     | `Authorization`, `X-Tenant`                                                            |
+| **Roles**       | ClinicOwner, ClinicManager, Doctor, SuperAdmin                                         |
 | **Description** | Ends the doctor's shift. Remaining Waiting/Called tickets automatically become NoShow. |
 
 **Response 200:** `ApiResponse<QueueSessionDto>` with `isActive: false`
@@ -1173,13 +1223,13 @@
 
 ### `GET /api/clinic/queue/sessions`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | List all queue sessions (paginated) |
-| **Auth** | Bearer Token |
-| **Headers** | `Authorization`, `X-Tenant` |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
-| **Query** | `pageNumber` (default 1), `pageSize` (default 20) |
+| Property    | Value                                             |
+| ----------- | ------------------------------------------------- |
+| **Summary** | List all queue sessions (paginated)               |
+| **Auth**    | Bearer Token                                      |
+| **Headers** | `Authorization`, `X-Tenant`                       |
+| **Roles**   | ClinicOwner, ClinicManager, SuperAdmin            |
+| **Query**   | `pageNumber` (default 1), `pageSize` (default 20) |
 
 **Response 200:** `ApiResponse<PagedResult<QueueSessionDto>>`
 
@@ -1187,12 +1237,12 @@
 
 ### `GET /api/clinic/queue/sessions/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Get session by ID with ticket summary |
-| **Auth** | Bearer Token |
-| **Headers** | `Authorization`, `X-Tenant` |
-| **Roles** | ClinicOwner, ClinicManager, Doctor, SuperAdmin |
+| Property    | Value                                          |
+| ----------- | ---------------------------------------------- |
+| **Summary** | Get session by ID with ticket summary          |
+| **Auth**    | Bearer Token                                   |
+| **Headers** | `Authorization`, `X-Tenant`                    |
+| **Roles**   | ClinicOwner, ClinicManager, Doctor, SuperAdmin |
 
 **Response 200:** `ApiResponse<QueueSessionDto>`
 
@@ -1200,12 +1250,12 @@
 
 ### `GET /api/clinic/queue/sessions/{id}/tickets`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Get all tickets for a session |
-| **Auth** | Bearer Token |
-| **Headers** | `Authorization`, `X-Tenant` |
-| **Roles** | ClinicOwner, ClinicManager, Doctor, SuperAdmin |
+| Property        | Value                                                       |
+| --------------- | ----------------------------------------------------------- |
+| **Summary**     | Get all tickets for a session                               |
+| **Auth**        | Bearer Token                                                |
+| **Headers**     | `Authorization`, `X-Tenant`                                 |
+| **Roles**       | ClinicOwner, ClinicManager, Doctor, SuperAdmin              |
 | **Description** | Returns tickets ordered: urgent first, then by issued time. |
 
 **Response 200:** `ApiResponse<List<QueueTicketDto>>`
@@ -1216,15 +1266,16 @@
 
 ### `POST /api/clinic/queue/tickets`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Issue a ticket to a patient (reception) |
-| **Auth** | Bearer Token |
-| **Headers** | `Authorization`, `X-Tenant` |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
+| Property        | Value                                                                                               |
+| --------------- | --------------------------------------------------------------------------------------------------- |
+| **Summary**     | Issue a ticket to a patient (reception)                                                             |
+| **Auth**        | Bearer Token                                                                                        |
+| **Headers**     | `Authorization`, `X-Tenant`                                                                         |
+| **Roles**       | ClinicOwner, ClinicManager, SuperAdmin                                                              |
 | **Description** | Reception issues ticket to patient for a doctor session. One active ticket per patient per session. |
 
 **Request Body:**
+
 ```json
 {
   "sessionId": "guid",
@@ -1236,6 +1287,7 @@
 ```
 
 **Response 201:**
+
 ```json
 {
   "success": true,
@@ -1262,64 +1314,64 @@
 
 ### `POST /api/clinic/queue/tickets/{id}/call`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Call next patient (Waiting → Called) |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, Doctor, SuperAdmin |
+| Property    | Value                                          |
+| ----------- | ---------------------------------------------- |
+| **Summary** | Call next patient (Waiting → Called)           |
+| **Auth**    | Bearer Token                                   |
+| **Roles**   | ClinicOwner, ClinicManager, Doctor, SuperAdmin |
 
 ---
 
 ### `POST /api/clinic/queue/tickets/{id}/start-visit`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Start visit from ticket (Called → InVisit) |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, Doctor, SuperAdmin |
+| Property        | Value                                                          |
+| --------------- | -------------------------------------------------------------- |
+| **Summary**     | Start visit from ticket (Called → InVisit)                     |
+| **Auth**        | Bearer Token                                                   |
+| **Roles**       | ClinicOwner, ClinicManager, Doctor, SuperAdmin                 |
 | **Description** | Transitions ticket to InVisit and auto-creates a Visit entity. |
 
 ---
 
 ### `POST /api/clinic/queue/tickets/{id}/finish`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Finish ticket (InVisit → Completed) |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, Doctor, SuperAdmin |
-| **Description** | Marks ticket and linked visit as completed. |
+| Property        | Value                                          |
+| --------------- | ---------------------------------------------- |
+| **Summary**     | Finish ticket (InVisit → Completed)            |
+| **Auth**        | Bearer Token                                   |
+| **Roles**       | ClinicOwner, ClinicManager, Doctor, SuperAdmin |
+| **Description** | Marks ticket and linked visit as completed.    |
 
 ---
 
 ### `POST /api/clinic/queue/tickets/{id}/skip`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Skip ticket (Called → Skipped) |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, Doctor, SuperAdmin |
+| Property        | Value                                                      |
+| --------------- | ---------------------------------------------------------- |
+| **Summary**     | Skip ticket (Called → Skipped)                             |
+| **Auth**        | Bearer Token                                               |
+| **Roles**       | ClinicOwner, ClinicManager, Doctor, SuperAdmin             |
 | **Description** | Patient didn't answer when called. Can be re-called later. |
 
 ---
 
 ### `POST /api/clinic/queue/tickets/{id}/cancel`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Cancel ticket |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
+| Property    | Value                                  |
+| ----------- | -------------------------------------- |
+| **Summary** | Cancel ticket                          |
+| **Auth**    | Bearer Token                           |
+| **Roles**   | ClinicOwner, ClinicManager, SuperAdmin |
 
 ---
 
 ### `POST /api/clinic/queue/tickets/{id}/urgent`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Mark ticket as urgent |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, Doctor, SuperAdmin |
+| Property        | Value                                                           |
+| --------------- | --------------------------------------------------------------- |
+| **Summary**     | Mark ticket as urgent                                           |
+| **Auth**        | Bearer Token                                                    |
+| **Roles**       | ClinicOwner, ClinicManager, Doctor, SuperAdmin                  |
 | **Description** | Elevates ticket priority. Urgent tickets appear first in queue. |
 
 ---
@@ -1328,15 +1380,16 @@
 
 ### `GET /api/clinic/queue/board`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Reception board — all active sessions with ticket counts |
-| **Auth** | Bearer Token |
-| **Headers** | `Authorization`, `X-Tenant` |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
+| Property        | Value                                                                                                         |
+| --------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Summary**     | Reception board — all active sessions with ticket counts                                                      |
+| **Auth**        | Bearer Token                                                                                                  |
+| **Headers**     | `Authorization`, `X-Tenant`                                                                                   |
+| **Roles**       | ClinicOwner, ClinicManager, SuperAdmin                                                                        |
 | **Description** | Returns today's active sessions with waiting/called/in-visit/completed ticket counts and current ticket info. |
 
 **Response 200:**
+
 ```json
 {
   "success": true,
@@ -1362,11 +1415,11 @@
 
 ### `GET /api/clinic/queue/my-queue`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Doctor's own queue |
-| **Auth** | Bearer Token |
-| **Roles** | Doctor, SuperAdmin |
+| Property        | Value                                                         |
+| --------------- | ------------------------------------------------------------- |
+| **Summary**     | Doctor's own queue                                            |
+| **Auth**        | Bearer Token                                                  |
+| **Roles**       | Doctor, SuperAdmin                                            |
 | **Description** | Shows the logged-in doctor's active session with all tickets. |
 
 **Response 200:** `ApiResponse<QueueBoardSessionDto>`
@@ -1375,11 +1428,11 @@
 
 ### `GET /api/clinic/queue/my-ticket`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Patient's active ticket status |
-| **Auth** | Bearer Token |
-| **Roles** | Patient, SuperAdmin |
+| Property        | Value                                                                 |
+| --------------- | --------------------------------------------------------------------- |
+| **Summary**     | Patient's active ticket status                                        |
+| **Auth**        | Bearer Token                                                          |
+| **Roles**       | Patient, SuperAdmin                                                   |
 | **Description** | Returns the patient's current active ticket (Waiting/Called/InVisit). |
 
 **Response 200:** `ApiResponse<QueueTicketDto>`  
@@ -1391,15 +1444,16 @@
 
 ### `POST /api/clinic/visits`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Create a visit manually (no ticket required) |
-| **Auth** | Bearer Token |
-| **Headers** | `Authorization`, `X-Tenant` |
-| **Roles** | ClinicOwner, ClinicManager, Doctor, SuperAdmin |
+| Property        | Value                                                                                                                                               |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Summary**     | Create a visit manually (no ticket required)                                                                                                        |
+| **Auth**        | Bearer Token                                                                                                                                        |
+| **Headers**     | `Authorization`, `X-Tenant`                                                                                                                         |
+| **Roles**       | ClinicOwner, ClinicManager, Doctor, SuperAdmin                                                                                                      |
 | **Description** | Creates a visit without a queue ticket. Supports walk-in patients or ad-hoc consultations. Can also link to an existing ticket via `queueTicketId`. |
 
 **Request Body:**
+
 ```json
 {
   "queueTicketId": "guid? (optional)",
@@ -1411,6 +1465,7 @@
 ```
 
 **Response 201:**
+
 ```json
 {
   "success": true,
@@ -1443,14 +1498,15 @@
 
 ### `PUT /api/clinic/visits/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Update visit (complaint, vitals, diagnosis, notes) |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, Doctor, SuperAdmin |
-| **Description** | Only updatable while visit status is Open. |
+| Property        | Value                                              |
+| --------------- | -------------------------------------------------- |
+| **Summary**     | Update visit (complaint, vitals, diagnosis, notes) |
+| **Auth**        | Bearer Token                                       |
+| **Roles**       | ClinicOwner, Doctor, SuperAdmin                    |
+| **Description** | Only updatable while visit status is Open.         |
 
 **Request Body:**
+
 ```json
 {
   "complaint": "string?",
@@ -1474,14 +1530,15 @@
 
 ### `POST /api/clinic/visits/{id}/complete`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Complete a visit |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, Doctor, SuperAdmin |
+| Property        | Value                                                              |
+| --------------- | ------------------------------------------------------------------ |
+| **Summary**     | Complete a visit                                                   |
+| **Auth**        | Bearer Token                                                       |
+| **Roles**       | ClinicOwner, Doctor, SuperAdmin                                    |
 | **Description** | Marks visit as Completed. Also completes linked ticket if present. |
 
 **Request Body:**
+
 ```json
 {
   "diagnosis": "string?",
@@ -1493,11 +1550,11 @@
 
 ### `GET /api/clinic/visits/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Get visit by ID with nested data |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, Doctor, SuperAdmin |
+| Property        | Value                                                             |
+| --------------- | ----------------------------------------------------------------- |
+| **Summary**     | Get visit by ID with nested data                                  |
+| **Auth**        | Bearer Token                                                      |
+| **Roles**       | ClinicOwner, Doctor, SuperAdmin                                   |
 | **Description** | Returns full visit with prescriptions, lab requests, and invoice. |
 
 **Response 200:** `ApiResponse<VisitDto>` (includes `prescriptions[]`, `labRequests[]`, `invoice?`)
@@ -1506,12 +1563,12 @@
 
 ### `GET /api/clinic/patients/{patientId}/visits`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                                 |
+| ----------- | ------------------------------------- |
 | **Summary** | Get patient visit history (paginated) |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, Doctor, SuperAdmin |
-| **Query** | `pageNumber`, `pageSize` |
+| **Auth**    | Bearer Token                          |
+| **Roles**   | ClinicOwner, Doctor, SuperAdmin       |
+| **Query**   | `pageNumber`, `pageSize`              |
 
 **Response 200:** `ApiResponse<PagedResult<VisitDto>>`
 
@@ -1519,14 +1576,15 @@
 
 ### `GET /api/clinic/patients/{patientId}/summary`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Patient summary for doctor view |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, Doctor, SuperAdmin |
+| Property        | Value                                                        |
+| --------------- | ------------------------------------------------------------ |
+| **Summary**     | Patient summary for doctor view                              |
+| **Auth**        | Bearer Token                                                 |
+| **Roles**       | ClinicOwner, Doctor, SuperAdmin                              |
 | **Description** | Quick patient overview: info + total visits + last 5 visits. |
 
 **Response 200:**
+
 ```json
 {
   "success": true,
@@ -1557,13 +1615,14 @@
 
 ### `POST /api/clinic/visits/{visitId}/prescriptions`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Add prescription to visit |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, Doctor, SuperAdmin |
+| Property    | Value                           |
+| ----------- | ------------------------------- |
+| **Summary** | Add prescription to visit       |
+| **Auth**    | Bearer Token                    |
+| **Roles**   | ClinicOwner, Doctor, SuperAdmin |
 
 **Request Body:**
+
 ```json
 {
   "medicationName": "Amoxicillin 500mg",
@@ -1580,31 +1639,31 @@
 
 ### `PUT /api/clinic/visits/{visitId}/prescriptions/{id}`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                               |
+| ----------- | ----------------------------------- |
 | **Summary** | Update prescription (same-day only) |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, Doctor, SuperAdmin |
+| **Auth**    | Bearer Token                        |
+| **Roles**   | ClinicOwner, Doctor, SuperAdmin     |
 
 ---
 
 ### `DELETE /api/clinic/visits/{visitId}/prescriptions/{id}`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                               |
+| ----------- | ----------------------------------- |
 | **Summary** | Delete prescription (same-day only) |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, Doctor, SuperAdmin |
+| **Auth**    | Bearer Token                        |
+| **Roles**   | ClinicOwner, Doctor, SuperAdmin     |
 
 ---
 
 ### `GET /api/clinic/visits/{visitId}/prescriptions`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                              |
+| ----------- | ---------------------------------- |
 | **Summary** | List all prescriptions for a visit |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, Doctor, SuperAdmin |
+| **Auth**    | Bearer Token                       |
+| **Roles**   | ClinicOwner, Doctor, SuperAdmin    |
 
 **Response 200:** `ApiResponse<List<PrescriptionDto>>`
 
@@ -1614,13 +1673,14 @@
 
 ### `POST /api/clinic/visits/{visitId}/labs`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                            |
+| ----------- | -------------------------------- |
 | **Summary** | Add lab/imaging request to visit |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, Doctor, SuperAdmin |
+| **Auth**    | Bearer Token                     |
+| **Roles**   | ClinicOwner, Doctor, SuperAdmin  |
 
 **Request Body:**
+
 ```json
 {
   "testName": "CBC - Complete Blood Count",
@@ -1636,24 +1696,25 @@
 
 ### `PUT /api/clinic/visits/{visitId}/labs/{id}`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                                      |
+| ----------- | ------------------------------------------ |
 | **Summary** | Update lab/imaging request (same-day only) |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, Doctor, SuperAdmin |
+| **Auth**    | Bearer Token                               |
+| **Roles**   | ClinicOwner, Doctor, SuperAdmin            |
 
 ---
 
 ### `POST /api/clinic/visits/{visitId}/labs/{id}/result`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Add result to a lab/imaging request |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
+| Property        | Value                                                              |
+| --------------- | ------------------------------------------------------------------ |
+| **Summary**     | Add result to a lab/imaging request                                |
+| **Auth**        | Bearer Token                                                       |
+| **Roles**       | ClinicOwner, ClinicManager, SuperAdmin                             |
 | **Description** | Usually entered by staff/manager when results arrive from the lab. |
 
 **Request Body:**
+
 ```json
 {
   "resultText": "WBC: 7.5, RBC: 4.8, Hemoglobin: 14.2..."
@@ -1664,11 +1725,11 @@
 
 ### `GET /api/clinic/visits/{visitId}/labs`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                                     |
+| ----------- | ----------------------------------------- |
 | **Summary** | List all lab/imaging requests for a visit |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, Doctor, SuperAdmin |
+| **Auth**    | Bearer Token                              |
+| **Roles**   | ClinicOwner, Doctor, SuperAdmin           |
 
 **Response 200:** `ApiResponse<List<LabRequestDto>>`
 
@@ -1678,24 +1739,26 @@
 
 ### `POST /api/clinic/invoices`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Create an invoice for a visit |
-| **Auth** | Bearer Token |
-| **Headers** | `Authorization`, `X-Tenant` |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
+| Property        | Value                                                                     |
+| --------------- | ------------------------------------------------------------------------- |
+| **Summary**     | Create an invoice for a visit                                             |
+| **Auth**        | Bearer Token                                                              |
+| **Headers**     | `Authorization`, `X-Tenant`                                               |
+| **Roles**       | ClinicOwner, ClinicManager, SuperAdmin                                    |
 | **Description** | One invoice per visit. Invoice amount can be updated while visit is Open. |
 
 **Request Body:**
+
 ```json
 {
   "visitId": "guid",
-  "amount": 500.00,
+  "amount": 500.0,
   "notes": "Consultation + X-ray"
 }
 ```
 
 **Response 201:**
+
 ```json
 {
   "success": true,
@@ -1706,9 +1769,9 @@
     "patientName": "Mohamed Hassan",
     "doctorId": "guid",
     "doctorName": "Dr. Khaled",
-    "amount": 500.00,
-    "paidAmount": 0.00,
-    "remainingAmount": 500.00,
+    "amount": 500.0,
+    "paidAmount": 0.0,
+    "remainingAmount": 500.0,
     "status": "Unpaid",
     "notes": "Consultation + X-ray",
     "payments": [],
@@ -1721,51 +1784,52 @@
 
 ### `PUT /api/clinic/invoices/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Update invoice amount/notes |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
+| Property        | Value                                           |
+| --------------- | ----------------------------------------------- |
+| **Summary**     | Update invoice amount/notes                     |
+| **Auth**        | Bearer Token                                    |
+| **Roles**       | ClinicOwner, ClinicManager, SuperAdmin          |
 | **Description** | Cannot reduce amount below already-paid amount. |
 
 ---
 
 ### `GET /api/clinic/invoices/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Get invoice by ID with payments |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
+| Property    | Value                                  |
+| ----------- | -------------------------------------- |
+| **Summary** | Get invoice by ID with payments        |
+| **Auth**    | Bearer Token                           |
+| **Roles**   | ClinicOwner, ClinicManager, SuperAdmin |
 
 ---
 
 ### `GET /api/clinic/invoices`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | List invoices (filterable) |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
-| **Query** | `from`, `to`, `doctorId`, `pageNumber`, `pageSize` |
+| Property    | Value                                              |
+| ----------- | -------------------------------------------------- |
+| **Summary** | List invoices (filterable)                         |
+| **Auth**    | Bearer Token                                       |
+| **Roles**   | ClinicOwner, ClinicManager, SuperAdmin             |
+| **Query**   | `from`, `to`, `doctorId`, `pageNumber`, `pageSize` |
 
 ---
 
 ### `POST /api/clinic/payments`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Record a payment against an invoice |
-| **Auth** | Bearer Token |
-| **Headers** | `Authorization`, `X-Tenant` |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
+| Property        | Value                                                                                                                                 |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Summary**     | Record a payment against an invoice                                                                                                   |
+| **Auth**        | Bearer Token                                                                                                                          |
+| **Headers**     | `Authorization`, `X-Tenant`                                                                                                           |
+| **Roles**       | ClinicOwner, ClinicManager, SuperAdmin                                                                                                |
 | **Description** | Partial payments supported. Invoice status auto-transitions: Unpaid → PartiallyPaid → Paid. Cannot overpay (exceed remaining amount). |
 
 **Request Body:**
+
 ```json
 {
   "invoiceId": "guid",
-  "amount": 200.00,
+  "amount": 200.0,
   "paymentMethod": "Cash",
   "referenceNumber": "REC-001",
   "notes": "Partial payment"
@@ -1778,11 +1842,11 @@
 
 ### `GET /api/clinic/invoices/{id}/payments`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Get all payments for an invoice |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
+| Property    | Value                                  |
+| ----------- | -------------------------------------- |
+| **Summary** | Get all payments for an invoice        |
+| **Auth**    | Bearer Token                           |
+| **Roles**   | ClinicOwner, ClinicManager, SuperAdmin |
 
 **Response 200:** `ApiResponse<List<PaymentDto>>`
 
@@ -1792,18 +1856,19 @@
 
 ### `POST /api/clinic/expenses`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Add expense |
-| **Auth** | Bearer Token |
-| **Headers** | `Authorization`, `X-Tenant` |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
+| Property    | Value                                  |
+| ----------- | -------------------------------------- |
+| **Summary** | Add expense                            |
+| **Auth**    | Bearer Token                           |
+| **Headers** | `Authorization`, `X-Tenant`            |
+| **Roles**   | ClinicOwner, ClinicManager, SuperAdmin |
 
 **Request Body:**
+
 ```json
 {
   "category": "Medical Supplies",
-  "amount": 1500.00,
+  "amount": 1500.0,
   "notes": "Gloves, syringes, bandages",
   "expenseDate": "2026-02-08T00:00:00Z"
 }
@@ -1815,32 +1880,32 @@
 
 ### `PUT /api/clinic/expenses/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Update expense |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
+| Property    | Value                                  |
+| ----------- | -------------------------------------- |
+| **Summary** | Update expense                         |
+| **Auth**    | Bearer Token                           |
+| **Roles**   | ClinicOwner, ClinicManager, SuperAdmin |
 
 ---
 
 ### `DELETE /api/clinic/expenses/{id}`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Delete expense |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, SuperAdmin |
+| Property    | Value                   |
+| ----------- | ----------------------- |
+| **Summary** | Delete expense          |
+| **Auth**    | Bearer Token            |
+| **Roles**   | ClinicOwner, SuperAdmin |
 
 ---
 
 ### `GET /api/clinic/expenses`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | List expenses (filterable) |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
-| **Query** | `from`, `to`, `category`, `pageNumber`, `pageSize` |
+| Property    | Value                                              |
+| ----------- | -------------------------------------------------- |
+| **Summary** | List expenses (filterable)                         |
+| **Auth**    | Bearer Token                                       |
+| **Roles**   | ClinicOwner, ClinicManager, SuperAdmin             |
+| **Query**   | `from`, `to`, `category`, `pageNumber`, `pageSize` |
 
 **Response 200:** `ApiResponse<PagedResult<ExpenseDto>>`
 
@@ -1850,23 +1915,24 @@
 
 ### `GET /api/clinic/finance/daily`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Daily revenue summary |
-| **Auth** | Bearer Token |
-| **Headers** | `Authorization`, `X-Tenant` |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
-| **Query** | `date` (optional, defaults to today) |
+| Property    | Value                                  |
+| ----------- | -------------------------------------- |
+| **Summary** | Daily revenue summary                  |
+| **Auth**    | Bearer Token                           |
+| **Headers** | `Authorization`, `X-Tenant`            |
+| **Roles**   | ClinicOwner, ClinicManager, SuperAdmin |
+| **Query**   | `date` (optional, defaults to today)   |
 
 **Response 200:**
+
 ```json
 {
   "success": true,
   "data": {
     "date": "2026-02-08",
-    "totalRevenue": 5000.00,
-    "totalPaid": 3500.00,
-    "totalUnpaid": 1500.00,
+    "totalRevenue": 5000.0,
+    "totalPaid": 3500.0,
+    "totalUnpaid": 1500.0,
     "invoiceCount": 12,
     "paymentCount": 10
   }
@@ -1877,14 +1943,15 @@
 
 ### `GET /api/clinic/finance/by-doctor`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Revenue breakdown by doctor |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
-| **Query** | `date` (optional), `doctorId` (optional, filter to single doctor) |
+| Property    | Value                                                             |
+| ----------- | ----------------------------------------------------------------- |
+| **Summary** | Revenue breakdown by doctor                                       |
+| **Auth**    | Bearer Token                                                      |
+| **Roles**   | ClinicOwner, ClinicManager, SuperAdmin                            |
+| **Query**   | `date` (optional), `doctorId` (optional, filter to single doctor) |
 
 **Response 200:**
+
 ```json
 {
   "success": true,
@@ -1892,8 +1959,8 @@
     {
       "doctorId": "guid",
       "doctorName": "Dr. Khaled",
-      "totalRevenue": 3000.00,
-      "totalPaid": 2500.00,
+      "totalRevenue": 3000.0,
+      "totalPaid": 2500.0,
       "visitCount": 8
     }
   ]
@@ -1904,24 +1971,25 @@
 
 ### `GET /api/clinic/finance/monthly`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                                 |
+| ----------- | ------------------------------------- |
 | **Summary** | Monthly revenue summary with expenses |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, SuperAdmin |
-| **Query** | `year` (optional), `month` (optional) |
+| **Auth**    | Bearer Token                          |
+| **Roles**   | ClinicOwner, SuperAdmin               |
+| **Query**   | `year` (optional), `month` (optional) |
 
 **Response 200:**
+
 ```json
 {
   "success": true,
   "data": {
     "year": 2026,
     "month": 2,
-    "totalRevenue": 50000.00,
-    "totalPaid": 42000.00,
-    "totalExpenses": 15000.00,
-    "netProfit": 27000.00,
+    "totalRevenue": 50000.0,
+    "totalPaid": 42000.0,
+    "totalExpenses": 15000.0,
+    "netProfit": 27000.0,
     "invoiceCount": 120
   }
 }
@@ -1931,14 +1999,15 @@
 
 ### `GET /api/clinic/finance/yearly`
 
-| Property | Value |
-|----------|-------|
+| Property    | Value                                         |
+| ----------- | --------------------------------------------- |
 | **Summary** | Yearly revenue summary with monthly breakdown |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, SuperAdmin |
-| **Query** | `year` (optional, defaults to current year) |
+| **Auth**    | Bearer Token                                  |
+| **Roles**   | ClinicOwner, SuperAdmin                       |
+| **Query**   | `year` (optional, defaults to current year)   |
 
 **Response 200:**
+
 ```json
 {
   "success": true,
@@ -1958,14 +2027,15 @@
 
 ### `GET /api/clinic/finance/profit`
 
-| Property | Value |
-|----------|-------|
-| **Summary** | Profit report for a date range |
-| **Auth** | Bearer Token |
-| **Roles** | ClinicOwner, ClinicManager, SuperAdmin |
-| **Query** | `from` (optional), `to` (optional) |
+| Property    | Value                                  |
+| ----------- | -------------------------------------- |
+| **Summary** | Profit report for a date range         |
+| **Auth**    | Bearer Token                           |
+| **Roles**   | ClinicOwner, ClinicManager, SuperAdmin |
+| **Query**   | `from` (optional), `to` (optional)     |
 
 **Response 200:**
+
 ```json
 {
   "success": true,
@@ -1988,33 +2058,37 @@
 ## ENUMS (Phase 3)
 
 ### TicketStatus
-| Value | Description |
-|-------|-------------|
-| `Waiting` | Patient in queue, waiting to be called |
-| `Called` | Doctor has called the patient |
-| `InVisit` | Patient is with the doctor |
-| `Completed` | Visit finished |
-| `Skipped` | Patient didn't respond when called |
-| `NoShow` | Session closed, patient never seen |
-| `Cancelled` | Ticket was cancelled |
+
+| Value       | Description                            |
+| ----------- | -------------------------------------- |
+| `Waiting`   | Patient in queue, waiting to be called |
+| `Called`    | Doctor has called the patient          |
+| `InVisit`   | Patient is with the doctor             |
+| `Completed` | Visit finished                         |
+| `Skipped`   | Patient didn't respond when called     |
+| `NoShow`    | Session closed, patient never seen     |
+| `Cancelled` | Ticket was cancelled                   |
 
 ### VisitStatus
-| Value | Description |
-|-------|-------------|
-| `Open` | Visit in progress |
-| `Completed` | Visit finished |
+
+| Value       | Description       |
+| ----------- | ----------------- |
+| `Open`      | Visit in progress |
+| `Completed` | Visit finished    |
 
 ### InvoiceStatus
-| Value | Description |
-|-------|-------------|
-| `Unpaid` | No payments recorded |
+
+| Value           | Description                              |
+| --------------- | ---------------------------------------- |
+| `Unpaid`        | No payments recorded                     |
 | `PartiallyPaid` | Some payment received, balance remaining |
-| `Paid` | Fully paid, remaining = 0 |
+| `Paid`          | Fully paid, remaining = 0                |
 
 ### LabRequestType
-| Value | Description |
-|-------|-------------|
-| `Lab` | Laboratory test (blood, urine, etc.) |
+
+| Value     | Description                          |
+| --------- | ------------------------------------ |
+| `Lab`     | Laboratory test (blood, urine, etc.) |
 | `Imaging` | Imaging study (X-ray, MRI, CT, etc.) |
 
 ---
@@ -2027,10 +2101,12 @@
 > **Purpose:** Public-facing endpoints for clinic profiles, SEO, and patient-facing booking pages
 
 ### GET `/api/public/{slug}/clinic`
+
 - **Description:** Get public clinic profile by tenant slug
 - **Response 200:** Clinic profile data
 - **Response 404:** Returns `{"success": false, "message": "Clinic not found"}` when slug is invalid or tenant not found
 - **Response:**
+
 ```json
 {
   "success": true,
@@ -2047,16 +2123,19 @@
 ```
 
 ### GET `/api/public/{slug}/doctors`
+
 - **Description:** List active doctors for a clinic (public)
 - **Response 200:** `data` is array of `PublicDoctorDto` with name, specialty, bio, photoUrl, services[]
 - **Response 404:** Clinic not found
 
 ### GET `/api/public/{slug}/services`
+
 - **Description:** List active services for a clinic (public)
 - **Response 200:** `data` is array of `PublicDoctorServiceDto` with serviceName, price, durationMinutes, doctorName
 - **Response 404:** Clinic not found
 
 ### GET `/api/public/{slug}/working-hours`
+
 - **Description:** Get working hours for a clinic (public)
 - **Response 200:** `data` is array of `PublicWorkingHourDto` with dayOfWeek, startTime, endTime, isOpen
 - **Response 404:** Clinic not found
@@ -2071,9 +2150,11 @@
 > **Purpose:** Online appointment booking with full lifecycle
 
 ### POST `/api/clinic/bookings`
+
 - **Roles:** Patient, ClinicOwner, ClinicManager, Receptionist, SuperAdmin
 - **Feature Flag:** `OnlineBooking` must be enabled
 - **Request:**
+
 ```json
 {
   "doctorId": "guid",
@@ -2084,32 +2165,39 @@
   "notes": "optional"
 }
 ```
+
 - **Validations:** Future date, doctor exists, no duplicate (same doctor+date+time), booking enabled in clinic settings. `patientId` is required for staff/manager/receptionist workflows.
 - **Response:** `BookingDto` with status `Confirmed`
 
 ### POST `/api/clinic/bookings/{id}/cancel`
+
 - **Request:** `{ "cancellationReason": "string" }`
 - **Validations:** Only `Confirmed` bookings, within cancellation window
 - **Response:** `BookingDto` with status `Cancelled`
 
 ### POST `/api/clinic/bookings/{id}/reschedule`
+
 - **Request:** `{ "bookingDate": "2026-03-05", "bookingTime": "11:00" }`
 - **Validations:** Only `Confirmed` bookings, new time must be future
 - **Response:** `BookingDto` with status `Confirmed` (re-confirmed after reschedule)
 
 ### GET `/api/clinic/bookings/{id}`
+
 - **Response:** Single `BookingDto`
 
 ### GET `/api/clinic/bookings`
+
 - **Roles:** ClinicOwner, ClinicManager, Receptionist, Doctor, SuperAdmin
 - **Query:** `?pageNumber=1&pageSize=10&doctorId=guid&status=Confirmed`
 - **Response:** `PagedResult<BookingDto>`
 
 ### GET `/api/clinic/bookings/my`
+
 - **Roles:** Patient
 - **Response:** Array of `BookingDto` for the authenticated patient
 
 ### BookingDto
+
 ```json
 {
   "id": "guid",
@@ -2141,8 +2229,10 @@
 > **Purpose:** Queue and track WhatsApp/PWA messages
 
 ### POST `/api/clinic/messages/send`
+
 - **Roles:** ClinicOwner, ClinicManager, Receptionist, Doctor, SuperAdmin
 - **Request:**
+
 ```json
 {
   "templateName": "patient_credentials",
@@ -2152,22 +2242,27 @@
   "variables": { "patientName": "Ahmad", "clinicName": "Demo Clinic" }
 }
 ```
+
 - **Valid Templates:** `patient_credentials`, `queue_ticket_issued`, `your_turn`, `visit_summary`, `followup_reminder`, `medication_reminder`, `password_reset`, `booking_confirmation`, `booking_cancellation`, `booking_reminder`
 - **WhatsApp requires:** `recipientPhone`
 - **Response:** `MessageLogDto` with status `Sent`
 
 ### POST `/api/clinic/messages/{id}/retry`
+
 - **Validations:** Only `Failed` messages, max 3 attempts
 - **Response:** `MessageLogDto` with incremented attemptCount
 
 ### GET `/api/clinic/messages/{id}`
+
 - **Response:** Single `MessageLogDto`
 
 ### GET `/api/clinic/messages`
+
 - **Query:** `?pageNumber=1&pageSize=10&templateName=patient_credentials&channel=WhatsApp&status=Sent`
 - **Response:** `PagedResult<MessageLogDto>`
 
 ### MessageLogDto
+
 ```json
 {
   "id": "guid",
@@ -2196,25 +2291,30 @@
 > **Purpose:** Doctor-to-reception messaging with read tracking
 
 ### POST `/api/clinic/doctor-notes`
+
 - **Roles:** Doctor
 - **Request:** `{ "message": "Please prepare room 3 for procedure" }`
 - **Validations:** Message cannot be empty, caller must have a Doctor profile
 - **Response:** `DoctorNoteDto` with isRead=false
 
 ### GET `/api/clinic/doctor-notes/unread`
+
 - **Description:** Get all unread notes
 - **Response:** Array of `DoctorNoteDto`
 
 ### GET `/api/clinic/doctor-notes`
+
 - **Query:** `?pageNumber=1&pageSize=10&unreadOnly=true`
 - **Response:** `PagedResult<DoctorNoteDto>`
 
 ### POST `/api/clinic/doctor-notes/{id}/read`
+
 - **Description:** Mark a note as read
 - **Validations:** Cannot re-mark already-read notes
 - **Response:** `DoctorNoteDto` with isRead=true, readAt set
 
 ### DoctorNoteDto
+
 ```json
 {
   "id": "guid",
@@ -2238,8 +2338,10 @@
 > **Purpose:** PWA push notification subscription management
 
 ### POST `/api/clinic/notifications/subscribe`
+
 - **Feature Flag:** `PwaNotifications` must be enabled
 - **Request:**
+
 ```json
 {
   "endpoint": "https://fcm.googleapis.com/fcm/send/...",
@@ -2247,20 +2349,25 @@
   "auth": "base64-auth"
 }
 ```
+
 - **Behavior:** Duplicate endpoint reactivates existing subscription
 - **Response:** `NotificationSubscriptionDto`
 
 ### DELETE `/api/clinic/notifications/{id}`
+
 - **Description:** Unsubscribe (soft delete)
 - **Response:** Success message
 
 ### GET `/api/clinic/notifications/my`
+
 - **Description:** List caller's active subscriptions
 - **Response:** Array of `NotificationSubscriptionDto`
 
 ### POST `/api/clinic/notifications/send`
+
 - **Roles:** ClinicOwner, ClinicManager, Receptionist, Doctor, SuperAdmin
 - **Request:**
+
 ```json
 {
   "userId": "guid",
@@ -2269,6 +2376,7 @@
   "templateName": "medication_reminder (optional)"
 }
 ```
+
 - **Validations:** Target user must have an active subscription
 - **Response:** `MessageLogDto` (logged as PWA channel)
 
@@ -2277,29 +2385,32 @@
 ## ENUMS (Phase 4)
 
 ### BookingStatus
-| Value | Description |
-|-------|-------------|
-| `Confirmed` | Booking confirmed and active |
-| `Cancelled` | Booking cancelled by patient or staff |
+
+| Value         | Description                                        |
+| ------------- | -------------------------------------------------- |
+| `Confirmed`   | Booking confirmed and active                       |
+| `Cancelled`   | Booking cancelled by patient or staff              |
 | `Rescheduled` | Booking rescheduled (transitional, auto-confirmed) |
-| `Completed` | Booking completed (linked to visit) |
+| `Completed`   | Booking completed (linked to visit)                |
 
 ### MessageChannel
-| Value | Description |
-|-------|-------------|
+
+| Value      | Description                   |
+| ---------- | ----------------------------- |
 | `WhatsApp` | WhatsApp message via template |
-| `PWA` | PWA push notification |
+| `PWA`      | PWA push notification         |
 
 ### MessageStatus
-| Value | Description |
-|-------|-------------|
-| `Pending` | Queued, not yet sent |
-| `Sending` | Currently being sent |
-| `Sent` | Successfully sent |
-| `Delivered` | Confirmed delivered |
-| `Read` | Confirmed read by recipient |
-| `Failed` | Send attempt failed |
-| `Retrying` | Retry in progress |
+
+| Value       | Description                 |
+| ----------- | --------------------------- |
+| `Pending`   | Queued, not yet sent        |
+| `Sending`   | Currently being sent        |
+| `Sent`      | Successfully sent           |
+| `Delivered` | Confirmed delivered         |
+| `Read`      | Confirmed read by recipient |
+| `Failed`    | Send attempt failed         |
+| `Retrying`  | Retry in progress           |
 
 ---
 
@@ -2311,4 +2422,4 @@ Endpoint documentation will be added as each phase is implemented. No aspiration
 
 ---
 
-*This document is updated at every phase. Swagger UI reflects the actual implementation.*
+_This document is updated at every phase. Swagger UI reflects the actual implementation._

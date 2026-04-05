@@ -1,11 +1,17 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { UpdateSettingsInput } from '@/validation/settings'
-import { UseFormReturn } from 'react-hook-form'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { UpdateSettingsInput } from "@/validation/settings";
+import { UseFormReturn } from "react-hook-form";
 
 interface GeneralSettingsSectionProps {
-  form: UseFormReturn<UpdateSettingsInput>
+  form: UseFormReturn<UpdateSettingsInput>;
 }
 
 export function GeneralSettingsSection({ form }: GeneralSettingsSectionProps) {
@@ -14,10 +20,10 @@ export function GeneralSettingsSection({ form }: GeneralSettingsSectionProps) {
       <CardHeader>
         <CardTitle>البيانات الأساسية</CardTitle>
       </CardHeader>
-      <CardContent className='space-y-6'>
+      <CardContent className="space-y-6">
         <FormField
           control={form.control}
-          name='clinicName'
+          name="clinicName"
           render={({ field }) => (
             <FormItem>
               <FormLabel>اسم العيادة</FormLabel>
@@ -29,10 +35,10 @@ export function GeneralSettingsSection({ form }: GeneralSettingsSectionProps) {
           )}
         />
 
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
-            name='city'
+            name="city"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>المدينة</FormLabel>
@@ -46,7 +52,7 @@ export function GeneralSettingsSection({ form }: GeneralSettingsSectionProps) {
 
           <FormField
             control={form.control}
-            name='address'
+            name="address"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>العنوان</FormLabel>
@@ -60,5 +66,5 @@ export function GeneralSettingsSection({ form }: GeneralSettingsSectionProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,19 +1,23 @@
-'use client'
+"use client";
 
-import { AppHeader } from '@/components/app-header'
-import { AppSidebar } from '@/components/app-sidebar'
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+import { AppHeader } from "@/components/app-header";
+import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
-export default function DashboardLayoutClient({ children }: { children: React.ReactNode }) {
+export default function DashboardLayoutClient({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className='h-screen overflow-hidden flex flex-col'>
+      <SidebarInset className="flex h-screen flex-col overflow-hidden">
         <AppHeader />
-        <main className='flex-1 overflow-y-auto no-scrollbar p-6'>
+        <main className="no-scrollbar flex-1 overflow-y-auto p-6">
           <div>{children}</div>
         </main>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

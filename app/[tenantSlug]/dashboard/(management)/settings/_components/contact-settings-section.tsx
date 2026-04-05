@@ -1,11 +1,17 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { UpdateSettingsInput } from '@/validation/settings'
-import { UseFormReturn } from 'react-hook-form'
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { UpdateSettingsInput } from "@/validation/settings";
+import { UseFormReturn } from "react-hook-form";
 
 interface ContactSettingsSectionProps {
-  form: UseFormReturn<UpdateSettingsInput>
+  form: UseFormReturn<UpdateSettingsInput>;
 }
 
 export function ContactSettingsSection({ form }: ContactSettingsSectionProps) {
@@ -14,15 +20,15 @@ export function ContactSettingsSection({ form }: ContactSettingsSectionProps) {
       <CardHeader>
         <CardTitle>أرقام التواصل</CardTitle>
       </CardHeader>
-      <CardContent className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+      <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <FormField
           control={form.control}
-          name='phone'
+          name="phone"
           render={({ field }) => (
             <FormItem>
               <FormLabel>رقم هاتف العيادة</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || ''} />
+                <Input {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -31,12 +37,12 @@ export function ContactSettingsSection({ form }: ContactSettingsSectionProps) {
 
         <FormField
           control={form.control}
-          name='supportPhoneNumber'
+          name="supportPhoneNumber"
           render={({ field }) => (
             <FormItem>
               <FormLabel>رقم هاتف الدعم</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || ''} />
+                <Input {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -45,12 +51,12 @@ export function ContactSettingsSection({ form }: ContactSettingsSectionProps) {
 
         <FormField
           control={form.control}
-          name='whatsAppSenderNumber'
+          name="whatsAppSenderNumber"
           render={({ field }) => (
             <FormItem>
               <FormLabel>رقم مرسل واتساب</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || ''} />
+                <Input {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -59,12 +65,12 @@ export function ContactSettingsSection({ form }: ContactSettingsSectionProps) {
 
         <FormField
           control={form.control}
-          name='supportWhatsAppNumber'
+          name="supportWhatsAppNumber"
           render={({ field }) => (
             <FormItem>
               <FormLabel>رقم واتساب الدعم (للمرضى)</FormLabel>
               <FormControl>
-                <Input {...field} value={field.value || ''} />
+                <Input {...field} value={field.value || ""} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -72,5 +78,5 @@ export function ContactSettingsSection({ form }: ContactSettingsSectionProps) {
         />
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,79 +1,85 @@
-'use client'
+"use client";
 
-import { Clock, HeartHandshake, Shield } from 'lucide-react'
-import { motion } from 'framer-motion'
-import { fadeInUp, staggerContainer } from '@/animation'
-import { Typography } from '@/components/ui/typography'
+import { Clock, HeartHandshake, Shield } from "lucide-react";
+import { motion } from "framer-motion";
+import { fadeInUp, staggerContainer } from "@/animation";
+import { Typography } from "@/components/ui/typography";
 
 // داتا حقيقية ومقنعة لأي عيادة بدون مبالغات
 const standards = [
   {
     id: 1,
-    title: 'معايير أمان صارمة',
-    description: 'نطبق بروتوكولات تعقيم عالمية لضمان بيئة طبية آمنة تماماً لك ولأسرتك.',
+    title: "معايير أمان صارمة",
+    description:
+      "نطبق بروتوكولات تعقيم عالمية لضمان بيئة طبية آمنة تماماً لك ولأسرتك.",
     icon: Shield,
   },
   {
     id: 2,
-    title: 'رعاية إنسانية',
-    description: 'نستمع لمخاوفك بعناية ونضع راحتك النفسية والجسدية على رأس أولوياتنا.',
+    title: "رعاية إنسانية",
+    description:
+      "نستمع لمخاوفك بعناية ونضع راحتك النفسية والجسدية على رأس أولوياتنا.",
     icon: HeartHandshake,
   },
   {
     id: 3,
-    title: 'احترام وقتك',
-    description: 'نظام إدارة حجوزات دقيق يضمن لك الدخول في موعدك دون فترات انتظار مزعجة.',
+    title: "احترام وقتك",
+    description:
+      "نظام إدارة حجوزات دقيق يضمن لك الدخول في موعدك دون فترات انتظار مزعجة.",
     icon: Clock,
   },
-]
+];
 
 export default function ClinicStandardsSection() {
   return (
     // ادينا السكشن ده خلفية مختلفة سنة صغيرة عشان يفصل عن اللي قبله بس يفضل سيمبل
-    <section className='py-24 md:py-32 relative overflow-hidden '>
+    <section className="relative overflow-hidden py-24 md:py-32">
       <motion.div
-        className='container mx-auto px-4 md:px-6 flex flex-col items-center text-center space-y-16 relative z-10'
+        className="relative z-10 container mx-auto flex flex-col items-center space-y-16 px-4 text-center md:px-6"
         variants={staggerContainer}
-        initial='hidden'
-        whileInView='visible'
-        viewport={{ once: true, margin: '-100px' }}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
       >
         {/* العناوين (نفس الستايل المينيمال) */}
-        <div className='space-y-4 flex flex-col items-center w-full max-w-3xl'>
+        <div className="flex w-full max-w-3xl flex-col items-center space-y-4">
           <motion.div variants={fadeInUp}>
             <Typography
-              variant='h2'
-              className='text-3xl md:text-5xl font-bold tracking-tight text-foreground w-full'
+              variant="h2"
+              className="text-foreground w-full text-3xl font-bold tracking-tight md:text-5xl"
             >
-              لماذا يثق بنا <span className='text-primary'>المرضى</span>
-              <span className='text-muted-foreground'>؟</span>
+              لماذا يثق بنا <span className="text-primary">المرضى</span>
+              <span className="text-muted-foreground">؟</span>
             </Typography>
           </motion.div>
 
           <motion.div variants={fadeInUp}>
-            <Typography variant='p' className='text-muted-foreground text-lg max-w-2xl mx-auto'>
-              لا نقدم مجرد علاج، بل نصنع تجربة رعاية طبية متكاملة تضعك في المركز الأول وتضمن لك راحة
-              البال.
+            <Typography
+              variant="p"
+              className="text-muted-foreground mx-auto max-w-2xl text-lg"
+            >
+              لا نقدم مجرد علاج، بل نصنع تجربة رعاية طبية متكاملة تضعك في المركز
+              الأول وتضمن لك راحة البال.
             </Typography>
           </motion.div>
         </div>
 
         {/* الكروت (نفس ستايل Vercel / shadcn بالحرف) */}
-        <div className='grid gap-6 w-full grid-cols-1 md:grid-cols-3 max-w-5xl mx-auto'>
+        <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
           {standards.map((item) => (
             <motion.div
               key={item.id}
               variants={fadeInUp}
               whileTap={{ scale: 0.98 }}
               // نفس الكلاسات بالضبط: rounded-xl, border, bg-card, hover:bg-muted/50
-              className=' flex flex-col items-center justify-center gap-3 p-8 rounded-xl border bg-card text-card-foreground shadow-sm hover:bg-muted/50 transition-colors duration-200'
+              className="bg-card text-card-foreground hover:bg-muted/50 flex flex-col items-center justify-center gap-3 rounded-xl border p-8 shadow-sm transition-colors duration-200"
             >
-              <item.icon className='h-6 w-6 text-muted-foreground' />
-              <div className='space-y-2 text-center mt-2'>
-                <h3 className='font-semibold text-lg text-foreground tracking-wide'>
+              <item.icon className="text-muted-foreground h-6 w-6" />
+              <div className="mt-2 space-y-2 text-center">
+                <h3 className="text-foreground text-lg font-semibold tracking-wide">
                   {item.title}
                 </h3>
-                <p className='text-sm font-medium text-muted-foreground leading-relaxed'>
+                <p className="text-muted-foreground text-sm leading-relaxed font-medium">
                   {item.description}
                 </p>
               </div>
@@ -82,5 +88,5 @@ export default function ClinicStandardsSection() {
         </div>
       </motion.div>
     </section>
-  )
+  );
 }

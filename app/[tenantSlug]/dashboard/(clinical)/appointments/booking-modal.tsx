@@ -1,23 +1,23 @@
-'use client'
+"use client";
 
-import { valibotResolver } from '@hookform/resolvers/valibot'
-import { format } from 'date-fns'
-import { ar } from 'date-fns/locale'
-import { AlertCircle, CalendarIcon, Loader2, User, Users } from 'lucide-react'
-import { useParams } from 'next/navigation'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { toast } from 'sonner'
+import { valibotResolver } from "@hookform/resolvers/valibot";
+import { format } from "date-fns";
+import { ar } from "date-fns/locale";
+import { AlertCircle, CalendarIcon, Loader2, User, Users } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
-import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -25,113 +25,117 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
-import { createBookingAction } from '@/actions/booking/create-booking'
-import { IDoctor } from '@/types/doctor'
-import { IPatient } from '@/types/patient'
-import { CreateBookingInput, createBookingSchema } from '@/validation/booking'
-import { PatientSearch } from '@/components/patient-search'
+import { createBookingAction } from "@/actions/booking/create-booking";
+import { IDoctor } from "@/types/doctor";
+import { IPatient } from "@/types/patient";
+import { CreateBookingInput, createBookingSchema } from "@/validation/booking";
+import { PatientSearch } from "@/components/patient-search";
 
 interface Props {
-  doctors: IDoctor[]
+  doctors: IDoctor[];
 }
 
 export function BookingModal({ doctors = [] }: Props) {
-  const [open, setOpen] = useState(false)
-  const { tenantSlug } = useParams()
+  const [open, setOpen] = useState(false);
+  const { tenantSlug } = useParams();
 
-  const safeDoctors = doctors.filter((doctor) => doctor.isEnabled) || []
-  const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null)
+  const safeDoctors = doctors.filter((doctor) => doctor.isEnabled) || [];
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
 
   // 🔥 ستيت حفظ الأكونت لعرض أفراد العائلة
-  const [selectedAccount, setSelectedAccount] = useState<IPatient | null>(null)
+  const [selectedAccount, setSelectedAccount] = useState<IPatient | null>(null);
 
   const form = useForm<CreateBookingInput>({
     resolver: valibotResolver(createBookingSchema),
     defaultValues: {
-      patientId: '',
-      doctorId: '',
-      doctorServiceId: '',
-      notes: '',
-      bookingTime: '09:00',
+      patientId: "",
+      doctorId: "",
+      doctorServiceId: "",
+      notes: "",
+      bookingTime: "09:00",
       bookingDate: new Date(),
     },
-  })
+  });
 
-  const activeDoctor = safeDoctors.find((d) => d.id === selectedDoctorId)
-  const hasServices = activeDoctor && (activeDoctor.services?.length ?? 0) > 0
+  const activeDoctor = safeDoctors.find((d) => d.id === selectedDoctorId);
+  const hasServices = activeDoctor && (activeDoctor.services?.length ?? 0) > 0;
 
   const onSubmit = async (values: CreateBookingInput) => {
     if (!hasServices) {
-      toast.error('لا يمكن الحجز لدكتور ليس لديه خدمات معرفة')
-      return
+      toast.error("لا يمكن الحجز لدكتور ليس لديه خدمات معرفة");
+      return;
     }
 
     try {
-      const result = await createBookingAction(values, tenantSlug as string)
+      const result = await createBookingAction(values, tenantSlug as string);
       if (result.success) {
-        toast.success(result.message)
-        setOpen(false)
-        form.reset()
-        setSelectedDoctorId(null)
-        setSelectedAccount(null)
+        toast.success(result.message);
+        setOpen(false);
+        form.reset();
+        setSelectedDoctorId(null);
+        setSelectedAccount(null);
       } else {
-        toast.error(result.message)
+        toast.error(result.message);
       }
     } catch (error) {
-      if (error instanceof Error) toast.error('حدث خطأ أثناء الاتصال بالسيرفر')
+      if (error instanceof Error) toast.error("حدث خطأ أثناء الاتصال بالسيرفر");
     }
-  }
+  };
 
   return (
     <Dialog
       open={open}
       onOpenChange={(isOpen) => {
-        setOpen(isOpen)
+        setOpen(isOpen);
         if (!isOpen) {
-          form.reset()
-          setSelectedAccount(null)
+          form.reset();
+          setSelectedAccount(null);
         }
       }}
     >
       <DialogTrigger asChild>
         <Button>حجز موعد جديد</Button>
       </DialogTrigger>
-      <DialogContent className='sm:max-w-125 max-h-[90vh] overflow-y-auto'>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-125">
         <DialogHeader>
           <DialogTitle>حجز موعد جديد</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {/* 1. المريض واختيار أفراد العائلة */}
             <FormField
               control={form.control}
-              name='patientId'
+              name="patientId"
               render={({ field }) => (
-                <div className='space-y-3'>
-                  <FormItem className='flex flex-col'>
+                <div className="space-y-3">
+                  <FormItem className="flex flex-col">
                     <FormLabel>المريض (أو ولي الأمر)</FormLabel>
                     <FormControl>
                       <PatientSearch
                         tenantSlug={tenantSlug as string}
                         selectedPatientId={selectedAccount?.id}
                         onSelect={(patient) => {
-                          setSelectedAccount(patient)
-                          field.onChange(patient.id)
+                          setSelectedAccount(patient);
+                          field.onChange(patient.id);
                         }}
                       />
                     </FormControl>
@@ -142,26 +146,30 @@ export function BookingModal({ doctors = [] }: Props) {
                   {selectedAccount &&
                     selectedAccount.subProfiles &&
                     selectedAccount.subProfiles.length > 0 && (
-                      <div className='p-4 border rounded-lg bg-muted/10 space-y-3 animate-in fade-in slide-in-from-top-2'>
-                        <h4 className='text-sm font-bold flex items-center gap-2'>
-                          <Users className='w-4 h-4 text-primary' />
+                      <div className="bg-muted/10 animate-in fade-in slide-in-from-top-2 space-y-3 rounded-lg border p-4">
+                        <h4 className="flex items-center gap-2 text-sm font-bold">
+                          <Users className="text-primary h-4 w-4" />
                           الحجز لمن بالظبط؟
                         </h4>
-                        <div className='grid grid-cols-2 gap-3'>
+                        <div className="grid grid-cols-2 gap-3">
                           {/* كارت الأب */}
                           <div
                             onClick={() => field.onChange(selectedAccount.id)}
                             className={cn(
-                              'p-3 border rounded-md cursor-pointer transition-all flex flex-col',
+                              "flex cursor-pointer flex-col rounded-md border p-3 transition-all",
                               field.value === selectedAccount.id
-                                ? 'border-primary bg-primary/5 ring-1 ring-primary'
-                                : 'hover:border-primary/50 hover:bg-muted/50 bg-background',
+                                ? "border-primary bg-primary/5 ring-primary ring-1"
+                                : "hover:border-primary/50 hover:bg-muted/50 bg-background",
                             )}
                           >
-                            <span className='font-bold text-sm flex items-center gap-2 truncate'>
-                              <User className='w-4 h-4 shrink-0' /> {selectedAccount.name}
+                            <span className="flex items-center gap-2 truncate text-sm font-bold">
+                              <User className="h-4 w-4 shrink-0" />{" "}
+                              {selectedAccount.name}
                             </span>
-                            <Badge variant='secondary' className='w-fit mt-2 text-[10px]'>
+                            <Badge
+                              variant="secondary"
+                              className="mt-2 w-fit text-[10px]"
+                            >
                               صاحب الحساب
                             </Badge>
                           </div>
@@ -172,17 +180,20 @@ export function BookingModal({ doctors = [] }: Props) {
                               key={sub.id}
                               onClick={() => field.onChange(sub.id)}
                               className={cn(
-                                'p-3 border rounded-md cursor-pointer transition-all flex flex-col',
+                                "flex cursor-pointer flex-col rounded-md border p-3 transition-all",
                                 field.value === sub.id
-                                  ? 'border-primary bg-primary/5 ring-1 ring-primary'
-                                  : 'hover:border-primary/50 hover:bg-muted/50 bg-background',
+                                  ? "border-primary bg-primary/5 ring-primary ring-1"
+                                  : "hover:border-primary/50 hover:bg-muted/50 bg-background",
                               )}
                             >
-                              <span className='font-bold text-sm flex items-center gap-2 truncate'>
-                                <User className='w-4 h-4 shrink-0' /> {sub.name}
+                              <span className="flex items-center gap-2 truncate text-sm font-bold">
+                                <User className="h-4 w-4 shrink-0" /> {sub.name}
                               </span>
-                              <Badge variant='outline' className='w-fit mt-2 text-[10px]'>
-                                {sub.gender === 'Male' ? 'ذكر' : 'أنثى'} • تابع
+                              <Badge
+                                variant="outline"
+                                className="mt-2 w-fit text-[10px]"
+                              >
+                                {sub.gender === "Male" ? "ذكر" : "أنثى"} • تابع
                               </Badge>
                             </div>
                           ))}
@@ -196,27 +207,31 @@ export function BookingModal({ doctors = [] }: Props) {
             {/* 2. اختيار الطبيب (بدون تغيير) */}
             <FormField
               control={form.control}
-              name='doctorId'
+              name="doctorId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>الطبيب المعالج</FormLabel>
                   <Select
                     onValueChange={(val) => {
-                      field.onChange(val)
-                      setSelectedDoctorId(val)
-                      form.setValue('doctorServiceId', '')
+                      field.onChange(val);
+                      setSelectedDoctorId(val);
+                      form.setValue("doctorServiceId", "");
                     }}
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger className='text-right h-11'>
-                        <SelectValue placeholder='اختر الطبيب' />
+                      <SelectTrigger className="h-11 text-right">
+                        <SelectValue placeholder="اختر الطبيب" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {safeDoctors.map((doc) => (
-                        <SelectItem key={doc.id} value={doc.id} className='text-right'>
-                          {doc.name} - {doc.specialty || 'تخصص عام'}
+                        <SelectItem
+                          key={doc.id}
+                          value={doc.id}
+                          className="text-right"
+                        >
+                          {doc.name} - {doc.specialty || "تخصص عام"}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -230,28 +245,35 @@ export function BookingModal({ doctors = [] }: Props) {
             {selectedDoctorId && (
               <FormField
                 control={form.control}
-                name='doctorServiceId'
+                name="doctorServiceId"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>الخدمة المطلوبة</FormLabel>
                     {hasServices ? (
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
                         <FormControl>
-                          <SelectTrigger className='text-right h-11'>
-                            <SelectValue placeholder='اختر نوع الخدمة/الكشف' />
+                          <SelectTrigger className="h-11 text-right">
+                            <SelectValue placeholder="اختر نوع الخدمة/الكشف" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {activeDoctor.services?.map((svc) => (
-                            <SelectItem key={svc.id} value={svc.id!} className='text-right'>
+                            <SelectItem
+                              key={svc.id}
+                              value={svc.id!}
+                              className="text-right"
+                            >
                               {svc.serviceName} ({svc.price} ج.م)
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     ) : (
-                      <div className='flex items-center gap-2 p-3 text-xs bg-destructive/10 text-destructive rounded-md border border-destructive/20'>
-                        <AlertCircle className='h-4 w-4' />
+                      <div className="bg-destructive/10 text-destructive border-destructive/20 flex items-center gap-2 rounded-md border p-3 text-xs">
+                        <AlertCircle className="h-4 w-4" />
                         عذراً، هذا الطبيب ليس لديه خدمات متاحة حالياً.
                       </div>
                     )}
@@ -262,38 +284,40 @@ export function BookingModal({ doctors = [] }: Props) {
             )}
 
             {/* 4. التاريخ والوقت (بدون تغيير) */}
-            <div className='grid grid-cols-2 gap-4'>
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name='bookingDate'
+                name="bookingDate"
                 render={({ field }) => (
-                  <FormItem className='flex flex-col'>
+                  <FormItem className="flex flex-col">
                     <FormLabel>التاريخ</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
-                            variant={'outline'}
+                            variant={"outline"}
                             className={cn(
-                              'w-full pl-3 text-right font-normal h-11',
-                              !field.value && 'text-muted-foreground',
+                              "h-11 w-full pl-3 text-right font-normal",
+                              !field.value && "text-muted-foreground",
                             )}
                           >
                             {field.value ? (
-                              format(field.value, 'PPP', { locale: ar })
+                              format(field.value, "PPP", { locale: ar })
                             ) : (
                               <span>اختر يوم</span>
                             )}
-                            <CalendarIcon className='mr-auto h-4 w-4 opacity-50' />
+                            <CalendarIcon className="mr-auto h-4 w-4 opacity-50" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className='w-auto p-0' align='start'>
+                      <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
-                          mode='single'
+                          mode="single"
                           selected={field.value}
                           onSelect={field.onChange}
-                          disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                          disabled={(date) =>
+                            date < new Date(new Date().setHours(0, 0, 0, 0))
+                          }
                           initialFocus
                           locale={ar}
                         />
@@ -306,15 +330,15 @@ export function BookingModal({ doctors = [] }: Props) {
 
               <FormField
                 control={form.control}
-                name='bookingTime'
+                name="bookingTime"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>الساعة</FormLabel>
                     <FormControl>
                       <Input
-                        type='time'
+                        type="time"
                         {...field}
-                        className='text-right cursor-pointer h-11'
+                        className="h-11 cursor-pointer text-right"
                         onClick={(e) => e.currentTarget.showPicker?.()}
                       />
                     </FormControl>
@@ -327,15 +351,15 @@ export function BookingModal({ doctors = [] }: Props) {
             {/* 5. ملاحظات */}
             <FormField
               control={form.control}
-              name='notes'
+              name="notes"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>ملاحظات (اختياري)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder='أي تفاصيل إضافية...'
+                      placeholder="أي تفاصيل إضافية..."
                       {...field}
-                      className='text-right resize-none'
+                      className="resize-none text-right"
                     />
                   </FormControl>
                   <FormMessage />
@@ -344,19 +368,22 @@ export function BookingModal({ doctors = [] }: Props) {
             />
 
             <Button
-              type='submit'
-              className='w-full h-11 text-lg font-bold'
-              disabled={form.formState.isSubmitting || (selectedDoctorId !== null && !hasServices)}
+              type="submit"
+              className="h-11 w-full text-lg font-bold"
+              disabled={
+                form.formState.isSubmitting ||
+                (selectedDoctorId !== null && !hasServices)
+              }
             >
               {form.formState.isSubmitting ? (
-                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                'تأكيد الحجز'
+                "تأكيد الحجز"
               )}
             </Button>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

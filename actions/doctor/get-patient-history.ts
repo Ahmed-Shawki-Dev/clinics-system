@@ -1,8 +1,8 @@
-'use server'
+"use server";
 
-import { fetchApi } from '@/lib/fetchApi'
-import { BaseApiResponse, IPaginatedData } from '@/types/api'
-import { IVisit } from '@/types/visit'
+import { fetchApi } from "@/lib/fetchApi";
+import { BaseApiResponse, IPaginatedData } from "@/types/api";
+import { IVisit } from "@/types/visit";
 
 export async function getMyPatientHistoryAction(
   tenantSlug: string,
@@ -13,14 +13,14 @@ export async function getMyPatientHistoryAction(
   const params = new URLSearchParams({
     pageNumber: pageNumber.toString(),
     pageSize: pageSize.toString(), // 👈 وبنبعتها هنا
-  })
+  });
 
   return await fetchApi<IPaginatedData<IVisit>>(
     `/api/clinic/doctors/me/patients/${patientId}/history?${params.toString()}`,
     {
-      method: 'GET',
+      method: "GET",
       tenantSlug,
-      cache: 'no-store',
+      cache: "no-store",
     },
-  )
+  );
 }

@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,8 +9,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Input } from '@/components/ui/input'
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -18,77 +18,102 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { IInvoice } from '@/types/visit'
-import { Calculator, MoreHorizontal, Plus, Search, Undo2 } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
-import { GenericPagination } from '../../../../../components/shared/pagination'
-import { InvoiceAdjustmentDialog } from './invoice-adjustment-modal'
-import { InvoiceDetailsAction } from './invoice-details-modal'
-import { PaymentDialog } from './payment-modal'
-import { RefundInvoiceDialog } from './refund-invoice-modal'
+} from "@/components/ui/table";
+import { IInvoice } from "@/types/visit";
+import { Calculator, MoreHorizontal, Plus, Search, Undo2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { GenericPagination } from "../../../../../components/shared/pagination";
+import { InvoiceAdjustmentDialog } from "./invoice-adjustment-modal";
+import { InvoiceDetailsAction } from "./invoice-details-modal";
+import { PaymentDialog } from "./payment-modal";
+import { RefundInvoiceDialog } from "./refund-invoice-modal";
 
 interface InvoicesClientProps {
-  initialInvoices: IInvoice[]
-  tenantSlug: string
+  initialInvoices: IInvoice[];
+  tenantSlug: string;
   pagination: {
-    pageNumber: number
-    totalPages: number
-    hasNextPage: boolean
-    hasPreviousPage: boolean
-  }
+    pageNumber: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
 }
 
-export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: InvoicesClientProps) {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('invoiceNumber') || '')
+export function InvoicesClient({
+  initialInvoices,
+  tenantSlug,
+  pagination,
+}: InvoicesClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("invoiceNumber") || "",
+  );
 
-  const [adjustingInvoice, setAdjustingInvoice] = useState<IInvoice | null>(null)
-  const [payingInvoice, setPayingInvoice] = useState<IInvoice | null>(null)
-  const [refundingInvoice, setRefundingInvoice] = useState<IInvoice | null>(null)
+  const [adjustingInvoice, setAdjustingInvoice] = useState<IInvoice | null>(
+    null,
+  );
+  const [payingInvoice, setPayingInvoice] = useState<IInvoice | null>(null);
+  const [refundingInvoice, setRefundingInvoice] = useState<IInvoice | null>(
+    null,
+  );
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    const params = new URLSearchParams(searchParams.toString())
-    if (searchQuery.trim()) params.set('invoiceNumber', searchQuery.trim())
-    else params.delete('invoiceNumber')
+    e.preventDefault();
+    const params = new URLSearchParams(searchParams.toString());
+    if (searchQuery.trim()) params.set("invoiceNumber", searchQuery.trim());
+    else params.delete("invoiceNumber");
 
-    params.set('page', '1')
-    router.push(`?${params.toString()}`)
-  }
+    params.set("page", "1");
+    router.push(`?${params.toString()}`);
+  };
 
   return (
-    <div className='space-y-4'>
+    <div className="space-y-4">
       {/* Search Form */}
-      <form onSubmit={handleSearch} className='flex items-center gap-2 max-w-sm'>
-        <div className='relative flex-1'>
-          <Search className='absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground' />
+      <form
+        onSubmit={handleSearch}
+        className="flex max-w-sm items-center gap-2"
+      >
+        <div className="relative flex-1">
+          <Search className="text-muted-foreground absolute top-2.5 right-2.5 h-4 w-4" />
           <Input
-            placeholder='ابحث برقم الفاتورة...'
-            className='pr-9'
+            placeholder="ابحث برقم الفاتورة..."
+            className="pr-9"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Button type='submit' variant='secondary'>
+        <Button type="submit" variant="secondary">
           بحث
         </Button>
       </form>
 
       {/* Table */}
-      <div className='border rounded-md overflow-hidden shadow-sm '>
+      <div className="overflow-hidden rounded-md border shadow-sm">
         <Table>
-          <TableHeader className='bg-muted/50 h-12'>
+          <TableHeader className="bg-muted/50 h-12">
             <TableRow>
-              <TableHead className='font-bold text-muted-foreground'>رقم الفاتورة</TableHead>
-              <TableHead className='font-bold text-muted-foreground'>التاريخ</TableHead>
-              <TableHead className='font-bold text-muted-foreground'>المريض</TableHead>
-              <TableHead className='font-bold text-muted-foreground'>الإجمالي</TableHead>
-              <TableHead className='font-bold text-muted-foreground'>المتبقي</TableHead>
-              <TableHead className='font-bold text-muted-foreground'>الحالة</TableHead>
-              <TableHead className='font-bold text-center w-16 text-muted-foreground'>
+              <TableHead className="text-muted-foreground font-bold">
+                رقم الفاتورة
+              </TableHead>
+              <TableHead className="text-muted-foreground font-bold">
+                التاريخ
+              </TableHead>
+              <TableHead className="text-muted-foreground font-bold">
+                المريض
+              </TableHead>
+              <TableHead className="text-muted-foreground font-bold">
+                الإجمالي
+              </TableHead>
+              <TableHead className="text-muted-foreground font-bold">
+                المتبقي
+              </TableHead>
+              <TableHead className="text-muted-foreground font-bold">
+                الحالة
+              </TableHead>
+              <TableHead className="text-muted-foreground w-16 text-center font-bold">
                 إجراءات
               </TableHead>
             </TableRow>
@@ -97,51 +122,58 @@ export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: Invo
             {initialInvoices.length > 0 ? (
               initialInvoices.map((inv) => (
                 <TableRow key={inv.id}>
-                  <TableCell className='text-xs text-muted-foreground font-bold'>
+                  <TableCell className="text-muted-foreground text-xs font-bold">
                     {inv.invoiceNumber}
                   </TableCell>
-                  <TableCell className='text-sm whitespace-nowrap'>
-                    {new Date(inv.createdAt).toLocaleDateString('en')}
+                  <TableCell className="text-sm whitespace-nowrap">
+                    {new Date(inv.createdAt).toLocaleDateString("en")}
                   </TableCell>
-                  <TableCell className='font-bold'>{inv.patientName}</TableCell>
-                  <TableCell className='font-bold'>{inv.amount} ج.م</TableCell>
-                  <TableCell className='font-bold text-destructive'>
+                  <TableCell className="font-bold">{inv.patientName}</TableCell>
+                  <TableCell className="font-bold">{inv.amount} ج.م</TableCell>
+                  <TableCell className="text-destructive font-bold">
                     {inv.remainingAmount} ج.م
                   </TableCell>
                   <TableCell>
                     <StatusBadge status={inv.status} />
                   </TableCell>
-                  <TableCell className='text-center'>
+                  <TableCell className="text-center">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant='ghost' size='icon'>
-                          <MoreHorizontal className='h-4 w-4' />
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align='end' className='w-48'>
-                        <DropdownMenuLabel className='text-xs'>خيارات الفاتورة</DropdownMenuLabel>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuLabel className="text-xs">
+                          خيارات الفاتورة
+                        </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <InvoiceDetailsAction invoiceId={inv.id} tenantSlug={tenantSlug} />
+                        <InvoiceDetailsAction
+                          invoiceId={inv.id}
+                          tenantSlug={tenantSlug}
+                        />
 
                         <DropdownMenuItem
                           onClick={() => setAdjustingInvoice(inv)}
-                          className='cursor-pointer'
+                          className="cursor-pointer"
                         >
-                          <Calculator className='h-4 w-4' /> الرسوم الإضافية
+                          <Calculator className="h-4 w-4" /> الرسوم الإضافية
                         </DropdownMenuItem>
 
-                        {inv.status !== 'Paid' && (
-                          <DropdownMenuItem onClick={() => setPayingInvoice(inv)}>
-                            <Plus className='h-4 w-4' /> تسجيل دفعة
+                        {inv.status !== "Paid" && (
+                          <DropdownMenuItem
+                            onClick={() => setPayingInvoice(inv)}
+                          >
+                            <Plus className="h-4 w-4" /> تسجيل دفعة
                           </DropdownMenuItem>
                         )}
 
                         {inv.paidAmount > 0 && (
                           <DropdownMenuItem
                             onClick={() => setRefundingInvoice(inv)}
-                            variant='destructive'
+                            variant="destructive"
                           >
-                            <Undo2 className='h-4 w-4 ml-2' /> استرداد مبلغ
+                            <Undo2 className="ml-2 h-4 w-4" /> استرداد مبلغ
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>
@@ -153,7 +185,7 @@ export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: Invo
               <TableRow>
                 <TableCell
                   colSpan={7}
-                  className='h-32 text-center text-muted-foreground font-medium'
+                  className="text-muted-foreground h-32 text-center font-medium"
                 >
                   لا توجد فواتير لعرضها
                 </TableCell>
@@ -198,18 +230,22 @@ export function InvoicesClient({ initialInvoices, tenantSlug, pagination }: Invo
         />
       )}
     </div>
-  )
+  );
 }
 
 function StatusBadge({ status }: { status: string }) {
-  if (status === 'Paid')
+  if (status === "Paid")
     return (
-      <Badge variant='secondary' className='bg-primary/10 text-primary hover:bg-primary/20'>
+      <Badge
+        variant="secondary"
+        className="bg-primary/10 text-primary hover:bg-primary/20"
+      >
         مدفوعة
       </Badge>
-    )
+    );
 
-  if (status === 'PartiallyPaid') return <Badge variant='secondary'>دفع جزئي</Badge>
-  if (status === 'Refunded') return <Badge variant='secondary'>مرتجع</Badge>
-  return <Badge variant='destructive'>غير مدفوعة</Badge>
+  if (status === "PartiallyPaid")
+    return <Badge variant="secondary">دفع جزئي</Badge>;
+  if (status === "Refunded") return <Badge variant="secondary">مرتجع</Badge>;
+  return <Badge variant="destructive">غير مدفوعة</Badge>;
 }

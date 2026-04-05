@@ -1,8 +1,8 @@
-'use server'
+"use server";
 
-import { BaseApiResponse } from '@/types/api'
-import { fetchApi } from '../../lib/fetchApi'
-import { IChronicConditions } from '../../types/patient'
+import { BaseApiResponse } from "@/types/api";
+import { fetchApi } from "../../lib/fetchApi";
+import { IChronicConditions } from "../../types/patient";
 
 export async function updateChronicConditionsAction(
   patientId: string,
@@ -12,10 +12,10 @@ export async function updateChronicConditionsAction(
   return await fetchApi<IChronicConditions>(
     `/api/clinic/patients/${patientId}/chronic-conditions`,
     {
-      method: 'PUT',
+      method: "PUT",
       body: JSON.stringify(data),
       tenantSlug,
-      authType: 'staff',
+      authType: "staff",
     },
-  )
+  );
 }

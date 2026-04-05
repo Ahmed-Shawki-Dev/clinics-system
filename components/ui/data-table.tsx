@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import {
   ColumnDef,
@@ -10,19 +10,19 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from '@tanstack/react-table'
-import type { ReactNode } from 'react'
-import * as React from 'react'
+} from "@tanstack/react-table";
+import type { ReactNode } from "react";
+import * as React from "react";
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -30,15 +30,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { ChevronLeft, ChevronRight, Search, X } from 'lucide-react'
+} from "@/components/ui/table";
+import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
-  searchKey: string
-  filterColumn?: string
-  filterOptions?: string[]
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  searchKey: string;
+  filterColumn?: string;
+  filterOptions?: string[];
 }
 
 export function DataTable<TData, TValue>({
@@ -48,8 +48,10 @@ export function DataTable<TData, TValue>({
   filterColumn,
   filterOptions,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
 
   const table = useReactTable({
     data,
@@ -64,42 +66,49 @@ export function DataTable<TData, TValue>({
       sorting,
       columnFilters,
     },
-  })
+  });
 
   // دالة مساعدة للتأكد من وجود العمود قبل محاولة الوصول إليه (منع الـ Console Error)
   const safeGetColumn = (key: string | undefined) => {
-    if (!key) return null
-    return table.getColumn(key)
-  }
+    if (!key) return null;
+    return table.getColumn(key);
+  };
 
   return (
-    <div className='space-y-4'>
-      <div className='flex items-center justify-between gap-4'>
-        <div className='relative max-w-sm w-full'>
-          <Search className='absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-4">
+        <div className="relative w-full max-w-sm">
+          <Search className="text-muted-foreground absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2" />
           {/* تأمين حقل البحث */}
           <Input
-            placeholder='بحث سريع...'
-            value={(safeGetColumn(searchKey)?.getFilterValue() as string) ?? ''}
-            onChange={(event) => safeGetColumn(searchKey)?.setFilterValue(event.target.value)}
-            className='pr-10 pl-3 w-full md:w-75 text-right'
+            placeholder="بحث سريع..."
+            value={(safeGetColumn(searchKey)?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              safeGetColumn(searchKey)?.setFilterValue(event.target.value)
+            }
+            className="w-full pr-10 pl-3 text-right md:w-75"
           />
         </div>
 
-        <div className='flex items-center'>
+        <div className="flex items-center">
           {/* تأمين حقل الفلترة (التخصص) */}
           {filterColumn && filterOptions && safeGetColumn(filterColumn) && (
             <Select
-              value={(safeGetColumn(filterColumn)?.getFilterValue() as string) ?? 'all'}
+              value={
+                (safeGetColumn(filterColumn)?.getFilterValue() as string) ??
+                "all"
+              }
               onValueChange={(value) =>
-                safeGetColumn(filterColumn)?.setFilterValue(value === 'all' ? undefined : value)
+                safeGetColumn(filterColumn)?.setFilterValue(
+                  value === "all" ? undefined : value,
+                )
               }
             >
-              <SelectTrigger className='w-45'>
-                <SelectValue placeholder='تصفية بالتخصص' />
+              <SelectTrigger className="w-45">
+                <SelectValue placeholder="تصفية بالتخصص" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value='all'>كل التخصصات</SelectItem>
+                <SelectItem value="all">كل التخصصات</SelectItem>
                 {filterOptions.map((option) => (
                   <SelectItem key={option} value={option}>
                     {option}
@@ -111,22 +120,27 @@ export function DataTable<TData, TValue>({
 
           {/* زرار مسح الفلاتر: التأكد من وجود القيم قبل العرض */}
           {(!!safeGetColumn(searchKey)?.getFilterValue() ||
-            (filterColumn && !!safeGetColumn(filterColumn)?.getFilterValue())) && (
-            <Button variant='link' onClick={() => table.resetColumnFilters()} className='px-2'>
-              <X className='h-4 w-4' />
+            (filterColumn &&
+              !!safeGetColumn(filterColumn)?.getFilterValue())) && (
+            <Button
+              variant="link"
+              onClick={() => table.resetColumnFilters()}
+              className="px-2"
+            >
+              <X className="h-4 w-4" />
             </Button>
           )}
         </div>
       </div>
 
-      <div className='rounded-md border'>
+      <div className="rounded-md border">
         <Table>
-          <TableHeader className='h-12 bg-muted/50 '>
+          <TableHeader className="bg-muted/50 h-12">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} >
+              <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} className='font-bold '>
+                    <TableHead key={header.id} className="font-bold">
                       {header.isPlaceholder
                         ? null
                         : (flexRender(
@@ -134,7 +148,7 @@ export function DataTable<TData, TValue>({
                             header.getContext(),
                           ) as ReactNode)}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -142,17 +156,28 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext()) as ReactNode}
+                      {
+                        flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        ) as ReactNode
+                      }
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className='h-24 text-center'>
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   لا يوجد بيانات لعرضها
                 </TableCell>
               </TableRow>
@@ -161,29 +186,30 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      <div className='flex items-center justify-end gap-2 py-4'>
-        <div className='text-sm text-muted-foreground ml-4'>
-          صفحة {table.getState().pagination.pageIndex + 1} من {table.getPageCount()}
+      <div className="flex items-center justify-end gap-2 py-4">
+        <div className="text-muted-foreground ml-4 text-sm">
+          صفحة {table.getState().pagination.pageIndex + 1} من{" "}
+          {table.getPageCount()}
         </div>
 
         <Button
-          variant='outline'
-          size='icon'
+          variant="outline"
+          size="icon"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
         >
-          <ChevronRight className='h-4 w-4' />
+          <ChevronRight className="h-4 w-4" />
         </Button>
 
         <Button
-          variant='outline'
-          size='icon'
+          variant="outline"
+          size="icon"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
         >
-          <ChevronLeft className='h-4 w-4' />
+          <ChevronLeft className="h-4 w-4" />
         </Button>
       </div>
     </div>
-  )
+  );
 }

@@ -1,8 +1,8 @@
-'use server'
+"use server";
 
-import { fetchApi } from '@/lib/fetchApi'
-import { IPaginatedData } from '@/types/api'
-import { IBooking } from '@/types/booking'
+import { fetchApi } from "@/lib/fetchApi";
+import { IPaginatedData } from "@/types/api";
+import { IBooking } from "@/types/booking";
 
 export async function getBookingsAction(
   tenantSlug: string,
@@ -12,20 +12,20 @@ export async function getBookingsAction(
   const queryParams = new URLSearchParams({
     pageNumber: pageNumber.toString(),
     pageSize: pageSize.toString(),
-  })
+  });
 
   const res = await fetchApi<IPaginatedData<IBooking>>(
     `/api/clinic/bookings?${queryParams.toString()}`,
     {
-      method: 'GET',
+      method: "GET",
       tenantSlug,
-      cache: 'no-store',
+      cache: "no-store",
     },
-  )
+  );
 
   if (!res.success || !res.data) {
-    return null
+    return null;
   }
 
-  return res.data
+  return res.data;
 }

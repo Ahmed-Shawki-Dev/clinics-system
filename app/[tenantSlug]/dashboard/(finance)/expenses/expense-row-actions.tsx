@@ -1,9 +1,9 @@
-'use client'
+"use client";
 
-import { Edit, MoreHorizontal, Trash2, Loader2 } from 'lucide-react'
-import { useState, useTransition } from 'react'
-import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
+import { Edit, MoreHorizontal, Trash2, Loader2 } from "lucide-react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,8 +11,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,54 +27,66 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { IExpense } from '@/types/expense'
-import { ExpenseForm } from './expense-form'
-import { ExpenseInput } from '@/validation/expense'
-import { deleteExpenseAction, updateExpenseAction } from '../../../../../actions/finance/expenses'
+} from "@/components/ui/alert-dialog";
+import { IExpense } from "@/types/expense";
+import { ExpenseForm } from "./expense-form";
+import { ExpenseInput } from "@/validation/expense";
+import {
+  deleteExpenseAction,
+  updateExpenseAction,
+} from "../../../../../actions/finance/expenses";
 
-export function ExpenseRowActions({ exp, tenantSlug }: { exp: IExpense; tenantSlug: string }) {
-  const [isEditOpen, setIsEditOpen] = useState(false)
-  const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const [isPending, startTransition] = useTransition()
+export function ExpenseRowActions({
+  exp,
+  tenantSlug,
+}: {
+  exp: IExpense;
+  tenantSlug: string;
+}) {
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
   const onEdit = async (data: ExpenseInput) => {
-    const res = await updateExpenseAction(tenantSlug, exp.id, data)
+    const res = await updateExpenseAction(tenantSlug, exp.id, data);
     if (res.success) {
-      toast.success('تم التعديل')
-      setIsEditOpen(false)
-    } else toast.error(res.message)
-  }
+      toast.success("تم التعديل");
+      setIsEditOpen(false);
+    } else toast.error(res.message);
+  };
 
   const onDelete = () => {
     startTransition(async () => {
-      const res = await deleteExpenseAction(tenantSlug, exp.id)
+      const res = await deleteExpenseAction(tenantSlug, exp.id);
       if (res.success) {
-        toast.success('تم الحذف')
-        setIsDeleteOpen(false)
-      } else toast.error(res.message)
-    })
-  }
+        toast.success("تم الحذف");
+        setIsDeleteOpen(false);
+      } else toast.error(res.message);
+    });
+  };
 
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant='ghost' className='h-8 w-8 p-0'>
-            <MoreHorizontal className='h-4 w-4' />
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align='end'>
+        <DropdownMenuContent align="end">
           <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setIsEditOpen(true)} className='gap-2 cursor-pointer'>
-            <Edit className='h-4 w-4 text-muted-foreground' /> تعديل
+          <DropdownMenuItem
+            onClick={() => setIsEditOpen(true)}
+            className="cursor-pointer gap-2"
+          >
+            <Edit className="text-muted-foreground h-4 w-4" /> تعديل
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setIsDeleteOpen(true)}
-            className='text-destructive gap-2 cursor-pointer focus:text-destructive'
+            className="text-destructive focus:text-destructive cursor-pointer gap-2"
           >
-            <Trash2 className='h-4 w-4' /> حذف
+            <Trash2 className="h-4 w-4" /> حذف
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -80,7 +97,12 @@ export function ExpenseRowActions({ exp, tenantSlug }: { exp: IExpense; tenantSl
             <DialogTitle>تعديل المصروف</DialogTitle>
           </DialogHeader>
           <ExpenseForm
-            initialData={{ ...exp, expenseDate: exp.expenseDate.split('T')[0] } as ExpenseInput}
+            initialData={
+              {
+                ...exp,
+                expenseDate: exp.expenseDate.split("T")[0],
+              } as ExpenseInput
+            }
             onSubmit={onEdit}
             isSubmitting={false}
           />
@@ -88,7 +110,7 @@ export function ExpenseRowActions({ exp, tenantSlug }: { exp: IExpense; tenantSl
       </Dialog>
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent dir='rtl'>
+        <AlertDialogContent dir="rtl">
           <AlertDialogHeader>
             <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
             <AlertDialogDescription>
@@ -98,18 +120,22 @@ export function ExpenseRowActions({ exp, tenantSlug }: { exp: IExpense; tenantSl
           <AlertDialogFooter>
             <AlertDialogCancel>تراجع</AlertDialogCancel>
             <AlertDialogAction
-            variant={'destructive'}
+              variant={"destructive"}
               onClick={(e) => {
-                e.preventDefault()
-                onDelete()
+                e.preventDefault();
+                onDelete();
               }}
               disabled={isPending}
             >
-              {isPending ? <Loader2 className='h-4 w-4 animate-spin' /> : 'نعم، احذف'}
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "نعم، احذف"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </>
-  )
+  );
 }

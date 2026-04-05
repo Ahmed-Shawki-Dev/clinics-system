@@ -1,21 +1,21 @@
-'use server'
+"use server";
 
-import { fetchApi } from '@/lib/fetchApi'
-import { IPatient } from '@/types/patient'
-import { IVisit } from '@/types/visit'
+import { fetchApi } from "@/lib/fetchApi";
+import { IPatient } from "@/types/patient";
+import { IVisit } from "@/types/visit";
 
 interface GetPatientProfileResult {
-  success: boolean
-  message: string
-  patient?: IPatient | null
-  visits?: IVisit[]
+  success: boolean;
+  message: string;
+  patient?: IPatient | null;
+  visits?: IVisit[];
   pagination?: {
-    pageNumber: number
-    totalPages: number
-    totalCount: number
-    hasNextPage: boolean
-    hasPreviousPage: boolean
-  }
+    pageNumber: number;
+    totalPages: number;
+    totalCount: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
 }
 
 export async function getPatientProfileAction(
@@ -26,41 +26,44 @@ export async function getPatientProfileAction(
 ): Promise<GetPatientProfileResult> {
   try {
     // 1. جلب بيانات المريض
-    const patientRes = await fetchApi<IPatient>(`/api/clinic/patients/${patientId}`, {
-      method: 'GET',
-      tenantSlug,
-      cache: 'no-store',
-    })
+    const patientRes = await fetchApi<IPatient>(
+      `/api/clinic/patients/${patientId}`,
+      {
+        method: "GET",
+        tenantSlug,
+        cache: "no-store",
+      },
+    );
 
     if (!patientRes.success || !patientRes.data) {
       return {
         success: false,
-        message: patientRes.message || 'فشل في جلب بيانات المريض',
-      }
+        message: patientRes.message || "فشل في جلب بيانات المريض",
+      };
     }
 
     // 2. جلب الزيارات
     const queryParams = new URLSearchParams({
       pageNumber: page.toString(),
       pageSize: pageSize.toString(),
-    })
+    });
 
     const visitsRes = await fetchApi<{
-      items: IVisit[]
-      pageNumber: number
-      totalPages: number
-      totalCount: number
-      hasNextPage: boolean
-      hasPreviousPage: boolean
+      items: IVisit[];
+      pageNumber: number;
+      totalPages: number;
+      totalCount: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
     }>(`/api/clinic/patients/${patientId}/visits?${queryParams.toString()}`, {
-      method: 'GET',
+      method: "GET",
       tenantSlug,
-      cache: 'no-store',
-    })
+      cache: "no-store",
+    });
 
     return {
       success: true,
-      message: 'تم جلب البيانات بنجاح',
+      message: "تم جلب البيانات بنجاح",
       patient: patientRes.data,
       visits: visitsRes.success ? visitsRes.data?.items : [],
       pagination: visitsRes.success
@@ -72,12 +75,12 @@ export async function getPatientProfileAction(
             hasPreviousPage: visitsRes.data?.hasPreviousPage || false,
           }
         : undefined,
-    }
+    };
   } catch (error) {
-    console.error('Error in getPatientProfileAction:', error)
+    console.error("Error in getPatientProfileAction:", error);
     return {
       success: false,
-      message: 'حدث خطأ غير متوقع',
-    }
+      message: "حدث خطأ غير متوقع",
+    };
   }
 }

@@ -1,13 +1,12 @@
-import { NextConfig } from 'next'
-import withSerwistInit from '@serwist/next'
+import { NextConfig } from "next";
+import withSerwistInit from "@serwist/next";
 
 const withSerwist = withSerwistInit({
-  swSrc: 'app/sw.ts',
-  swDest: 'public/sw.js',
+  swSrc: "app/sw.ts",
+  swDest: "public/sw.js",
   // ضيف السطر ده عشان توقف الـ Warning بتاع التيربو باك
-  disable: process.env.NODE_ENV === 'development',
-})
-
+  disable: process.env.NODE_ENV === "development",
+});
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -17,21 +16,21 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'files.edgestore.dev',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "files.edgestore.dev",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: '**',
+        protocol: "https",
+        hostname: "**",
       },
     ],
   },
-}
+};
 
-export default withSerwist(nextConfig)
+export default withSerwist(nextConfig);

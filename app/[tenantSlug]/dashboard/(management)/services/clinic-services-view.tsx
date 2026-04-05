@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { GenericPagination } from '@/components/shared/pagination'
-import { Badge } from '@/components/ui/badge'
+import { GenericPagination } from "@/components/shared/pagination";
+import { Badge } from "@/components/ui/badge";
 import {
   Table,
   TableBody,
@@ -9,60 +9,63 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { IPaginatedData } from '@/types/api'
-import { IClinicService } from '@/types/services'
+} from "@/components/ui/table";
+import { IPaginatedData } from "@/types/api";
+import { IClinicService } from "@/types/services";
 
-import { ServiceRowActions } from './service-row-actions'
+import { ServiceRowActions } from "./service-row-actions";
 
 interface Props {
-  paginatedData: IPaginatedData<IClinicService> | null
-  tenantSlug: string
+  paginatedData: IPaginatedData<IClinicService> | null;
+  tenantSlug: string;
 }
 
 export function ClinicServicesView({ paginatedData, tenantSlug }: Props) {
-  const services = paginatedData?.items || []
+  const services = paginatedData?.items || [];
 
   return (
-    <div className='space-y-6' dir='rtl'>
-      <div className='rounded-xl border  overflow-hidden'>
+    <div className="space-y-6" dir="rtl">
+      <div className="overflow-hidden rounded-xl border">
         <Table>
-          <TableHeader className='bg-muted/50'>
+          <TableHeader className="bg-muted/50">
             <TableRow>
-              <TableHead className='text-right'>اسم الخدمة</TableHead>
-              <TableHead className='text-right'>السعر الافتراضي</TableHead>
-              <TableHead className='text-right'>المدة التقريبية</TableHead>
-              <TableHead className='text-right'>الحالة</TableHead>
-              <TableHead className='text-left w-24'>الإجراءات</TableHead>
+              <TableHead className="text-right">اسم الخدمة</TableHead>
+              <TableHead className="text-right">السعر الافتراضي</TableHead>
+              <TableHead className="text-right">المدة التقريبية</TableHead>
+              <TableHead className="text-right">الحالة</TableHead>
+              <TableHead className="w-24 text-left">الإجراءات</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {services.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className='h-32 text-center text-muted-foreground'>
+                <TableCell
+                  colSpan={5}
+                  className="text-muted-foreground h-32 text-center"
+                >
                   لا توجد خدمات مضافة حتى الآن.
                 </TableCell>
               </TableRow>
             ) : (
               services.map((svc) => (
-                <TableRow key={svc.id} className='hover:bg-muted/30'>
-                  <TableCell className='font-bold'>{svc.name}</TableCell>
-                  <TableCell className='font-mono text-primary font-bold'>
+                <TableRow key={svc.id} className="hover:bg-muted/30">
+                  <TableCell className="font-bold">{svc.name}</TableCell>
+                  <TableCell className="text-primary font-mono font-bold">
                     {svc.defaultPrice} ج.م
                   </TableCell>
-                  <TableCell className='text-muted-foreground'>
+                  <TableCell className="text-muted-foreground">
                     {svc.defaultDurationMinutes} دقيقة
                   </TableCell>
                   <TableCell>
                     {svc.isActive ? (
-                      <Badge className='bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border-0'>
+                      <Badge className="border-0 bg-emerald-100 text-emerald-700 hover:bg-emerald-200">
                         مفعلة
                       </Badge>
                     ) : (
-                      <Badge variant='secondary'>غير مفعلة</Badge>
+                      <Badge variant="secondary">غير مفعلة</Badge>
                     )}
                   </TableCell>
-                  <TableCell className='text-left'>
+                  <TableCell className="text-left">
                     <ServiceRowActions service={svc} tenantSlug={tenantSlug} />
                   </TableCell>
                 </TableRow>
@@ -73,7 +76,7 @@ export function ClinicServicesView({ paginatedData, tenantSlug }: Props) {
       </div>
 
       {paginatedData && paginatedData.totalPages > 1 && (
-        <div className='p-4 border-t bg-muted/10 mt-4 rounded-xl border'>
+        <div className="bg-muted/10 mt-4 rounded-xl border border-t p-4">
           <GenericPagination
             currentPage={paginatedData.pageNumber}
             totalPages={paginatedData.totalPages}
@@ -83,5 +86,5 @@ export function ClinicServicesView({ paginatedData, tenantSlug }: Props) {
         </div>
       )}
     </div>
-  )
+  );
 }

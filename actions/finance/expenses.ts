@@ -1,10 +1,10 @@
-'use server'
+"use server";
 
-import { fetchApi } from '@/lib/fetchApi'
-import { BaseApiResponse, IPaginatedData } from '@/types/api'
-import { revalidatePath } from 'next/cache'
-import { IExpense } from '../../types/expense'
-import { ExpenseInput } from '../../validation/expense'
+import { fetchApi } from "@/lib/fetchApi";
+import { BaseApiResponse, IPaginatedData } from "@/types/api";
+import { revalidatePath } from "next/cache";
+import { IExpense } from "../../types/expense";
+import { ExpenseInput } from "../../validation/expense";
 
 export async function getExpensesAction(
   tenantSlug: string,
@@ -14,50 +14,54 @@ export async function getExpensesAction(
   to?: string,
   category?: string,
 ): Promise<BaseApiResponse<IPaginatedData<IExpense>>> {
-  let url = `/api/clinic/expenses?pageNumber=${pageNumber}&pageSize=${pageSize}`
-  if (from) url += `&from=${from}`
-  if (to) url += `&to=${to}`
-  if (category) url += `&category=${encodeURIComponent(category)}`
+  let url = `/api/clinic/expenses?pageNumber=${pageNumber}&pageSize=${pageSize}`;
+  if (from) url += `&from=${from}`;
+  if (to) url += `&to=${to}`;
+  if (category) url += `&category=${encodeURIComponent(category)}`;
 
   return await fetchApi<IPaginatedData<IExpense>>(url, {
     tenantSlug,
-    authType: 'staff',
-    cache: 'no-store',
-  })
+    authType: "staff",
+    cache: "no-store",
+  });
 }
 
 export async function addExpenseAction(
   tenantSlug: string,
   payload: ExpenseInput,
 ): Promise<BaseApiResponse<IExpense>> {
-  const result = await fetchApi<IExpense>('/api/clinic/expenses', {
-    method: 'POST',
+  const result = await fetchApi<IExpense>("/api/clinic/expenses", {
+    method: "POST",
     tenantSlug,
-    authType: 'staff',
+    authType: "staff",
     body: JSON.stringify(payload),
-  })
+  });
 
   if (result.success) {
-    revalidatePath(`/${tenantSlug}/dashboard/expenses`)
+    revalidatePath(`/${tenantSlug}/dashboard/expenses`);
   }
-  return result
+  return result;
 }
 
-export async function updateExpenseAction(tenantSlug: string, id: string, data: ExpenseInput) {
+export async function updateExpenseAction(
+  tenantSlug: string,
+  id: string,
+  data: ExpenseInput,
+) {
   const res = await fetchApi<IExpense>(`/api/clinic/expenses/${id}`, {
-    method: 'PUT',
+    method: "PUT",
     tenantSlug,
     body: JSON.stringify(data),
-  })
-  if (res.success) revalidatePath(`/${tenantSlug}/dashboard/finance/expenses`)
-  return res
+  });
+  if (res.success) revalidatePath(`/${tenantSlug}/dashboard/finance/expenses`);
+  return res;
 }
 
 export async function deleteExpenseAction(tenantSlug: string, id: string) {
   const res = await fetchApi(`/api/clinic/expenses/${id}`, {
-    method: 'DELETE',
+    method: "DELETE",
     tenantSlug,
-  })
-  if (res.success) revalidatePath(`/${tenantSlug}/dashboard/finance/expenses`)
-  return res
+  });
+  if (res.success) revalidatePath(`/${tenantSlug}/dashboard/finance/expenses`);
+  return res;
 }

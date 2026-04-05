@@ -1,113 +1,123 @@
-'use client'
+"use client";
 
-import { fadeInUp, staggerContainer } from '@/animation'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import { fadeInUp, staggerContainer } from "@/animation";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from '@/components/ui/carousel'
-import { Typography } from '@/components/ui/typography'
-import { motion } from 'framer-motion'
-import { IPublicDoctor } from '../../types/public'
-import { ClinicImage } from '../shared/clinic-image' // 👈 استيراد المكون الموحد
+} from "@/components/ui/carousel";
+import { Typography } from "@/components/ui/typography";
+import { motion } from "framer-motion";
+import { IPublicDoctor } from "../../types/public";
+import { ClinicImage } from "../shared/clinic-image"; // 👈 استيراد المكون الموحد
 
-export default function DoctorsSection({ doctors }: { doctors: IPublicDoctor[] }) {
-  if (!doctors || doctors.length <= 1) return null
+export default function DoctorsSection({
+  doctors,
+}: {
+  doctors: IPublicDoctor[];
+}) {
+  if (!doctors || doctors.length <= 1) return null;
 
   return (
     <section
-      id='doctors'
-      className='py-24 md:py-32 relative overflow-hidden bg-muted/30'
-      dir='rtl'
+      id="doctors"
+      className="bg-muted/30 relative overflow-hidden py-24 md:py-32"
+      dir="rtl"
     >
       {/* إضاءة خلفية ناعمة */}
 
       <motion.div
-        className='container mx-auto px-4 md:px-6'
+        className="container mx-auto px-4 md:px-6"
         variants={staggerContainer}
-        initial='hidden'
-        whileInView='visible'
-        viewport={{ once: true, margin: '-100px' }}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
       >
         {/* --- Header --- */}
-        <div className='flex flex-col items-center justify-center text-center space-y-4 mb-12 md:mb-16'>
+        <div className="mb-12 flex flex-col items-center justify-center space-y-4 text-center md:mb-16">
           <motion.div variants={fadeInUp}>
             <Typography
-              variant='h2'
-              className='text-3xl md:text-5xl font-black tracking-tight text-foreground'
+              variant="h2"
+              className="text-foreground text-3xl font-black tracking-tight md:text-5xl"
             >
-              أطباء{' '}
-              <span className='text-transparent bg-clip-text bg-linear-to-r from-primary to-primary/60'>
+              أطباء{" "}
+              <span className="from-primary to-primary/60 bg-linear-to-r bg-clip-text text-transparent">
                 العيادة
               </span>
             </Typography>
           </motion.div>
 
           <motion.div variants={fadeInUp}>
-            <Typography variant='lead' className='max-w-2xl text-muted-foreground'>
-              فريق طبي متميز بتخصصات دقيقة لضمان أفضل تشخيص وعلاج. نجمع بين الخبرة العالية والرعاية
-              الإنسانية.
+            <Typography
+              variant="lead"
+              className="text-muted-foreground max-w-2xl"
+            >
+              فريق طبي متميز بتخصصات دقيقة لضمان أفضل تشخيص وعلاج. نجمع بين
+              الخبرة العالية والرعاية الإنسانية.
             </Typography>
           </motion.div>
         </div>
 
         {/* --- Carousel --- */}
-        <motion.div variants={fadeInUp} className='max-w-7xl mx-auto w-full relative'>
+        <motion.div
+          variants={fadeInUp}
+          className="relative mx-auto w-full max-w-7xl"
+        >
           <Carousel
             opts={{
-              align: 'center',
+              align: "center",
               loop: true,
-              direction:"rtl"
+              direction: "rtl",
             }}
-            className='w-full'
+            className="w-full"
           >
-            <CarouselContent className='-ml-2 md:-ml-4'>
+            <CarouselContent className="-ml-2 md:-ml-4">
               {doctors.map((doctor) => (
                 <CarouselItem
                   key={doctor.id}
-                  className='pl-2 md:pl-4 basis-[85%] sm:basis-1/2 lg:basis-1/3'
+                  className="basis-[85%] pl-2 sm:basis-1/2 md:pl-4 lg:basis-1/3"
                 >
-                  <Card className='group p-0 flex flex-col h-full rounded-4xl border border-border/50 bg-card/60 backdrop-blur-sm hover:bg-card shadow-sm hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 overflow-hidden cursor-grab active:cursor-grabbing'>
+                  <Card className="group border-border/50 bg-card/60 hover:bg-card hover:shadow-primary/10 flex h-full cursor-grab flex-col overflow-hidden rounded-4xl border p-0 shadow-sm backdrop-blur-sm transition-all duration-500 hover:shadow-2xl active:cursor-grabbing">
                     {/* Image Container */}
-                    <div className='relative w-full aspect-square md:aspect-4/3 overflow-hidden bg-muted/50'>
+                    <div className="bg-muted/50 relative aspect-square w-full overflow-hidden md:aspect-4/3">
                       {/* 👈 استخدام المكون الموحد: بيتعامل مع المسار الـ relative والـ absolute لوحده */}
                       <ClinicImage
                         src={doctor.photoUrl}
                         alt={doctor.name}
                         fill
-                        fallbackType='doctor'
-                        className='object-cover select-none object-top transition-transform duration-700 group-hover:scale-110'
+                        fallbackType="doctor"
+                        className="object-cover object-top transition-transform duration-700 select-none group-hover:scale-110"
                       />
 
                       {/* Gradient Overlay */}
-                      <div className='absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500' />
+                      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent opacity-60 transition-opacity duration-500 group-hover:opacity-80" />
 
                       {/* Floating Specialty Badge */}
-                      <div className='absolute bottom-4 right-4 z-10'>
-                        <Badge className='bg-primary text-primary-foreground shadow-lg backdrop-blur-md px-3 py-1 font-bold text-sm border-none'>
-                          {doctor.specialty || 'طبيب متخصص'}
+                      <div className="absolute right-4 bottom-4 z-10">
+                        <Badge className="bg-primary text-primary-foreground border-none px-3 py-1 text-sm font-bold shadow-lg backdrop-blur-md">
+                          {doctor.specialty || "طبيب متخصص"}
                         </Badge>
                       </div>
                     </div>
 
                     {/* Card Body */}
-                    <CardContent className='flex flex-col flex-1 p-6 text-right'>
+                    <CardContent className="flex flex-1 flex-col p-6 text-right">
                       <Typography
-                        variant='h4'
-                        className='font-black text-xl mb-3 text-foreground group-hover:text-primary transition-colors'
+                        variant="h4"
+                        className="text-foreground group-hover:text-primary mb-3 text-xl font-black transition-colors"
                       >
                         {doctor.name}
                       </Typography>
 
                       <Typography
-                        variant='muted'
-                        className='line-clamp-3 leading-relaxed text-sm mb-4 flex-1'
+                        variant="muted"
+                        className="mb-4 line-clamp-3 flex-1 text-sm leading-relaxed"
                       >
-                        {doctor.bio || 'لا توجد نبذة مختصرة.'}
+                        {doctor.bio || "لا توجد نبذة مختصرة."}
                       </Typography>
                     </CardContent>
                   </Card>
@@ -115,13 +125,13 @@ export default function DoctorsSection({ doctors }: { doctors: IPublicDoctor[] }
               ))}
             </CarouselContent>
 
-            <div className='hidden md:flex items-center justify-center gap-4 mt-10'>
-              <CarouselNext className='static translate-y-0 translate-x-0 h-12 w-12 border-border/50 bg-card hover:bg-primary hover:text-primary-foreground transition-colors' />
-              <CarouselPrevious className='static translate-y-0 translate-x-0 h-12 w-12 border-border/50 bg-card hover:bg-primary hover:text-primary-foreground transition-colors' />
+            <div className="mt-10 hidden items-center justify-center gap-4 md:flex">
+              <CarouselNext className="border-border/50 bg-card hover:bg-primary hover:text-primary-foreground static h-12 w-12 translate-x-0 translate-y-0 transition-colors" />
+              <CarouselPrevious className="border-border/50 bg-card hover:bg-primary hover:text-primary-foreground static h-12 w-12 translate-x-0 translate-y-0 transition-colors" />
             </div>
           </Carousel>
         </motion.div>
       </motion.div>
     </section>
-  )
+  );
 }

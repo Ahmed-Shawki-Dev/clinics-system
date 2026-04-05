@@ -45,7 +45,16 @@ Yes (POST/PUT/PATCH)
 Every response uses this shape:
 
 ```json
-{  "success": true,  "message": "string",  "data": {},  "errors": [],  "meta": {    "timestamp": "2026-02-06T10:00:00Z",    "requestId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"  }}
+{
+  "success": true,
+  "message": "string",
+  "data": {},
+  "errors": [],
+  "meta": {
+    "timestamp": "2026-02-06T10:00:00Z",
+    "requestId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+  }
+}
 ```
 
 ### Paginated Response
@@ -102,18 +111,24 @@ Internal server error
 
 ### Tenant Blocked Behavior
 
--   **Clinic (authenticated) routes** → HTTP 403:
-    
-    ```json
-    { "success": false, "message": "Tenant is suspended. Contact platform support.", "errors": [] }
-    ```
-    
--   **Public SEO routes** → HTTP 200 always:
-    
-    ```json
-    { "success": true, "data": { "isActive": false, "clinicName": "...", "renewalMessage": "..." } }
-    ```
-    
+- **Clinic (authenticated) routes** → HTTP 403:
+
+  ```json
+  {
+    "success": false,
+    "message": "Tenant is suspended. Contact platform support.",
+    "errors": []
+  }
+  ```
+
+- **Public SEO routes** → HTTP 200 always:
+
+  ```json
+  {
+    "success": true,
+    "data": { "isActive": false, "clinicName": "...", "renewalMessage": "..." }
+  }
+  ```
 
 ---
 
@@ -127,14 +142,21 @@ Internal server error
 GET /api/health
 ```
 
--   **Auth:** None
--   **Headers:** None required
--   **Response:**
-    
-    ```json
-    {  "success": true,  "data": {    "status": "Healthy",    "database": "Connected",    "version": "0.0.1",    "timestamp": "2026-02-06T10:00:00Z"  }}
-    ```
-    
+- **Auth:** None
+- **Headers:** None required
+- **Response:**
+
+  ```json
+  {
+    "success": true,
+    "data": {
+      "status": "Healthy",
+      "database": "Connected",
+      "version": "0.0.1",
+      "timestamp": "2026-02-06T10:00:00Z"
+    }
+  }
+  ```
 
 #### 2. SuperAdmin Login
 
@@ -142,28 +164,43 @@ GET /api/health
 POST /api/auth/login
 ```
 
--   **Auth:** None (produces a token)
--   **Headers:** `Content-Type: application/json`
--   **X-Tenant:** Not required (platform route)
--   **Request:**
-    
-    ```json
-    {  "username": "superadmin",  "password": "Admin@123456"}
-    ```
-    
--   **Response (200):**
-    
-    ```json
-    {  "success": true,  "message": "Login successful",  "data": {    "token": "eyJhbGciOiJIUzI1NiIs...",    "refreshToken": "a1b2c3d4-e5f6-...",    "expiresAt": "2026-02-06T22:00:00Z",    "user": {      "id": "guid",      "username": "superadmin",      "displayName": "Platform Admin",      "role": "SuperAdmin",      "tenantId": null    }  }}
-    ```
-    
--   **Response (401 — bad credentials):**
-    
-    ```json
-    {  "success": false,  "message": "Invalid username or password",  "errors": []}
-    ```
-    
--   **UI Expectation:** Login form with username + password. No "forgot password via email" link. No OTP.
+- **Auth:** None (produces a token)
+- **Headers:** `Content-Type: application/json`
+- **X-Tenant:** Not required (platform route)
+- **Request:**
+
+  ```json
+  { "username": "superadmin", "password": "Admin@123456" }
+  ```
+
+- **Response (200):**
+
+  ```json
+  {
+    "success": true,
+    "message": "Login successful",
+    "data": {
+      "token": "eyJhbGciOiJIUzI1NiIs...",
+      "refreshToken": "a1b2c3d4-e5f6-...",
+      "expiresAt": "2026-02-06T22:00:00Z",
+      "user": {
+        "id": "guid",
+        "username": "superadmin",
+        "displayName": "Platform Admin",
+        "role": "SuperAdmin",
+        "tenantId": null
+      }
+    }
+  }
+  ```
+
+- **Response (401 — bad credentials):**
+
+  ```json
+  { "success": false, "message": "Invalid username or password", "errors": [] }
+  ```
+
+- **UI Expectation:** Login form with username + password. No "forgot password via email" link. No OTP.
 
 #### 3. Tenant Staff/Doctor Login
 
@@ -171,15 +208,15 @@ POST /api/auth/login
 POST /api/auth/login
 ```
 
--   **Same endpoint** as SuperAdmin login.
--   **Headers:** `X-Tenant: nile-dental` (required for tenant users)
--   **Request:**
-    
-    ```json
-    {  "username": "dr.ahmed",  "password": "Doctor@123"}
-    ```
-    
--   **Response:** Same shape as above, but `user.role` will be `ClinicOwner`, `ClinicManager`, `Reception`, or `Doctor`, and `user.tenantId` will be populated.
+- **Same endpoint** as SuperAdmin login.
+- **Headers:** `X-Tenant: nile-dental` (required for tenant users)
+- **Request:**
+
+  ```json
+  { "username": "dr.ahmed", "password": "Doctor@123" }
+  ```
+
+- **Response:** Same shape as above, but `user.role` will be `ClinicOwner`, `ClinicManager`, `Reception`, or `Doctor`, and `user.tenantId` will be populated.
 
 #### 4. Patient Login
 
@@ -187,20 +224,38 @@ POST /api/auth/login
 POST /api/auth/patient/login
 ```
 
--   **Headers:** `X-Tenant: nile-dental` (required)
--   **Request:**
-    
-    ```json
-    {  "username": "patient_20001",  "password": "Welcome@1"}
-    ```
-    
--   **Response (200):**
-    
-    ```json
-    {  "success": true,  "data": {    "token": "eyJ...",    "refreshToken": "...",    "expiresAt": "2027-02-06T00:00:00Z",    "user": {      "id": "guid",      "username": "patient_20001",      "displayName": "Ahmed Mohamed",      "role": "Patient",      "tenantId": "guid",      "profiles": [        { "id": "guid", "name": "Ahmed Mohamed", "isDefault": true },        { "id": "guid", "name": "Sara Ahmed (child)", "isDefault": false }      ]    }  }}
-    ```
-    
--   **UI Expectation:** Patient token has very long expiry (365 days). Frontend should NEVER show a logout button for patients. Auto-refresh token silently.
+- **Headers:** `X-Tenant: nile-dental` (required)
+- **Request:**
+
+  ```json
+  { "username": "patient_20001", "password": "Welcome@1" }
+  ```
+
+- **Response (200):**
+
+  ```json
+  {
+    "success": true,
+    "data": {
+      "token": "eyJ...",
+      "refreshToken": "...",
+      "expiresAt": "2027-02-06T00:00:00Z",
+      "user": {
+        "id": "guid",
+        "username": "patient_20001",
+        "displayName": "Ahmed Mohamed",
+        "role": "Patient",
+        "tenantId": "guid",
+        "profiles": [
+          { "id": "guid", "name": "Ahmed Mohamed", "isDefault": true },
+          { "id": "guid", "name": "Sara Ahmed (child)", "isDefault": false }
+        ]
+      }
+    }
+  }
+  ```
+
+- **UI Expectation:** Patient token has very long expiry (365 days). Frontend should NEVER show a logout button for patients. Auto-refresh token silently.
 
 #### 5. Refresh Token
 
@@ -208,14 +263,14 @@ POST /api/auth/patient/login
 POST /api/auth/refresh
 ```
 
--   **Auth:** None (uses refresh token)
--   **Request:**
-    
-    ```json
-    {  "refreshToken": "a1b2c3d4-e5f6-..."}
-    ```
-    
--   **Response:** Same shape as login response with new token + refreshToken.
+- **Auth:** None (uses refresh token)
+- **Request:**
+
+  ```json
+  { "refreshToken": "a1b2c3d4-e5f6-..." }
+  ```
+
+- **Response:** Same shape as login response with new token + refreshToken.
 
 #### 6. Get Current User (Me)
 
@@ -223,14 +278,24 @@ POST /api/auth/refresh
 GET /api/auth/me
 ```
 
--   **Auth:** Bearer token required
--   **Headers:** `X-Tenant` required for tenant users, not for SuperAdmin
--   **Response (200):**
-    
-    ```json
-    {  "success": true,  "data": {    "id": "guid",    "username": "dr.ahmed",    "displayName": "Dr. Ahmed Hassan",    "role": "Doctor",    "tenantId": "guid",    "tenantSlug": "nile-dental",    "permissions": ["queue.view", "visit.create", "visit.own"]  }}
-    ```
-    
+- **Auth:** Bearer token required
+- **Headers:** `X-Tenant` required for tenant users, not for SuperAdmin
+- **Response (200):**
+
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": "guid",
+      "username": "dr.ahmed",
+      "displayName": "Dr. Ahmed Hassan",
+      "role": "Doctor",
+      "tenantId": "guid",
+      "tenantSlug": "nile-dental",
+      "permissions": ["queue.view", "visit.create", "visit.own"]
+    }
+  }
+  ```
 
 ---
 
@@ -247,16 +312,22 @@ GET /api/auth/me
 POST /api/platform/tenants
 ```
 
--   **Request:**
-    
-    ```json
-    {  "name": "Nile Dental Clinic",  "slug": "nile-dental",  "contactPhone": "+201234567890",  "address": "123 Main St, Cairo",  "logoUrl": "https://example.com/logo.png"}
-    ```
-    
--   **Response (201):** `ApiResponse<TenantDto>` — includes `id`, `name`, `slug`, `status` (0=Active), `contactPhone`, `createdAt`
--   **Response (400):** Duplicate slug, invalid slug format, missing name
--   **Validation:** Slug must match `^[a-z0-9-]+$`, max 100 chars. Name required, max 200 chars.
--   **Side effect:** Feature flags are auto-created with PLAN.md §13 defaults
+- **Request:**
+
+  ```json
+  {
+    "name": "Nile Dental Clinic",
+    "slug": "nile-dental",
+    "contactPhone": "+201234567890",
+    "address": "123 Main St, Cairo",
+    "logoUrl": "https://example.com/logo.png"
+  }
+  ```
+
+- **Response (201):** `ApiResponse<TenantDto>` — includes `id`, `name`, `slug`, `status` (0=Active), `contactPhone`, `createdAt`
+- **Response (400):** Duplicate slug, invalid slug format, missing name
+- **Validation:** Slug must match `^[a-z0-9-]+$`, max 100 chars. Name required, max 200 chars.
+- **Side effect:** Feature flags are auto-created with PLAN.md §13 defaults
 
 #### 2. List Tenants
 
@@ -264,14 +335,32 @@ POST /api/platform/tenants
 GET /api/platform/tenants?pageNumber=1&pageSize=10&searchTerm=nile
 ```
 
--   **Response (200):** `ApiResponse<PagedResult<TenantDto>>`
-    
-    ```json
-    {  "success": true,  "data": {    "items": [ { "id": "guid", "name": "...", "slug": "...", "status": 0, "contactPhone": "...", "createdAt": "..." } ],    "totalCount": 8,    "pageNumber": 1,    "pageSize": 10,    "totalPages": 1  }}
-    ```
-    
--   **Params:** `pageNumber` (default 1), `pageSize` (default 10), `searchTerm` (filters by name/slug)
--   **Note:** Soft-deleted tenants excluded
+- **Response (200):** `ApiResponse<PagedResult<TenantDto>>`
+
+  ```json
+  {
+    "success": true,
+    "data": {
+      "items": [
+        {
+          "id": "guid",
+          "name": "...",
+          "slug": "...",
+          "status": 0,
+          "contactPhone": "...",
+          "createdAt": "..."
+        }
+      ],
+      "totalCount": 8,
+      "pageNumber": 1,
+      "pageSize": 10,
+      "totalPages": 1
+    }
+  }
+  ```
+
+- **Params:** `pageNumber` (default 1), `pageSize` (default 10), `searchTerm` (filters by name/slug)
+- **Note:** Soft-deleted tenants excluded
 
 #### 3. Get Tenant Details
 
@@ -279,8 +368,8 @@ GET /api/platform/tenants?pageNumber=1&pageSize=10&searchTerm=nile
 GET /api/platform/tenants/{id}
 ```
 
--   **Response (200):** `ApiResponse<TenantDetailDto>` — adds `address`, `logoUrl`, `updatedAt` beyond list DTO
--   **Response (404):** Tenant not found
+- **Response (200):** `ApiResponse<TenantDetailDto>` — adds `address`, `logoUrl`, `updatedAt` beyond list DTO
+- **Response (404):** Tenant not found
 
 #### 4. Update Tenant
 
@@ -288,15 +377,20 @@ GET /api/platform/tenants/{id}
 PUT /api/platform/tenants/{id}
 ```
 
--   **Request:**
-    
-    ```json
-    {  "name": "Updated Name",  "contactPhone": "+201111111111",  "address": "New Address",  "logoUrl": "https://example.com/new-logo.png"}
-    ```
-    
--   **Response (200):** Updated `TenantDetailDto`
--   **Response (404):** Tenant not found
--   **Note:** Slug is NOT in the update DTO — it is immutable
+- **Request:**
+
+  ```json
+  {
+    "name": "Updated Name",
+    "contactPhone": "+201111111111",
+    "address": "New Address",
+    "logoUrl": "https://example.com/new-logo.png"
+  }
+  ```
+
+- **Response (200):** Updated `TenantDetailDto`
+- **Response (404):** Tenant not found
+- **Note:** Slug is NOT in the update DTO — it is immutable
 
 #### 5. Status Changes
 
@@ -304,10 +398,10 @@ PUT /api/platform/tenants/{id}
 POST /api/platform/tenants/{id}/activatePOST /api/platform/tenants/{id}/suspendPOST /api/platform/tenants/{id}/block
 ```
 
--   **Request:** No body
--   **Response (200):** `{ "success": true, "message": "Tenant activated/suspended/blocked successfully" }`
--   **Response (404):** Tenant not found
--   **Note:** Uses POST (not PATCH)
+- **Request:** No body
+- **Response (200):** `{ "success": true, "message": "Tenant activated/suspended/blocked successfully" }`
+- **Response (404):** Tenant not found
+- **Note:** Uses POST (not PATCH)
 
 #### 6. Delete Tenant (Soft)
 
@@ -315,9 +409,9 @@ POST /api/platform/tenants/{id}/activatePOST /api/platform/tenants/{id}/suspendP
 DELETE /api/platform/tenants/{id}
 ```
 
--   **Response (200):** `{ "success": true, "message": "Tenant deleted successfully" }`
--   **Response (404):** Tenant not found or already deleted
--   **Note:** Soft-delete only (IsDeleted=true). No physical deletion.
+- **Response (200):** `{ "success": true, "message": "Tenant deleted successfully" }`
+- **Response (404):** Tenant not found or already deleted
+- **Note:** Soft-delete only (IsDeleted=true). No physical deletion.
 
 #### 7. Create Subscription
 
@@ -325,15 +419,23 @@ DELETE /api/platform/tenants/{id}
 POST /api/platform/subscriptions
 ```
 
--   **Request:**
-    
-    ```json
-    {  "tenantId": "guid",  "planName": "Premium Annual",  "startDate": "2026-01-01",  "endDate": "2027-01-01",  "amount": 12000.00,  "currency": "EGP",  "notes": "First year subscription"}
-    ```
-    
--   **Response (201):** `ApiResponse<SubscriptionDto>` — `id`, `tenantId`, `tenantName`, `planName`, `startDate`, `endDate`, `amount`, `currency`, `isPaid` (false), `status` (0=Active), `createdAt`
--   **Response (400):** Tenant not found, EndDate before StartDate, missing required fields
--   **Note:** TenantId is in the body, not the URL
+- **Request:**
+
+  ```json
+  {
+    "tenantId": "guid",
+    "planName": "Premium Annual",
+    "startDate": "2026-01-01",
+    "endDate": "2027-01-01",
+    "amount": 12000.0,
+    "currency": "EGP",
+    "notes": "First year subscription"
+  }
+  ```
+
+- **Response (201):** `ApiResponse<SubscriptionDto>` — `id`, `tenantId`, `tenantName`, `planName`, `startDate`, `endDate`, `amount`, `currency`, `isPaid` (false), `status` (0=Active), `createdAt`
+- **Response (400):** Tenant not found, EndDate before StartDate, missing required fields
+- **Note:** TenantId is in the body, not the URL
 
 #### 8. List Subscriptions
 
@@ -341,8 +443,8 @@ POST /api/platform/subscriptions
 GET /api/platform/subscriptions?pageNumber=1&pageSize=10&tenantId={guid}
 ```
 
--   **Response (200):** `ApiResponse<PagedResult<SubscriptionDto>>`
--   **Params:** `tenantId` optional (filters by tenant)
+- **Response (200):** `ApiResponse<PagedResult<SubscriptionDto>>`
+- **Params:** `tenantId` optional (filters by tenant)
 
 #### 9. Extend Subscription
 
@@ -350,14 +452,14 @@ GET /api/platform/subscriptions?pageNumber=1&pageSize=10&tenantId={guid}
 POST /api/platform/subscriptions/{id}/extend
 ```
 
--   **Request:**
-    
-    ```json
-    {  "newEndDate": "2028-01-01",  "notes": "Extended for renewal"}
-    ```
-    
--   **Response (200):** Updated `SubscriptionDto`
--   **Response (400):** Not found, or cannot extend cancelled subscription
+- **Request:**
+
+  ```json
+  { "newEndDate": "2028-01-01", "notes": "Extended for renewal" }
+  ```
+
+- **Response (200):** Updated `SubscriptionDto`
+- **Response (400):** Not found, or cannot extend cancelled subscription
 
 #### 10. Cancel Subscription
 
@@ -365,14 +467,14 @@ POST /api/platform/subscriptions/{id}/extend
 POST /api/platform/subscriptions/{id}/cancel
 ```
 
--   **Request:**
-    
-    ```json
-    {  "cancelReason": "Customer requested cancellation"}
-    ```
-    
--   **Response (200):** Updated `SubscriptionDto` with `status=2` (Cancelled), `cancelledAt`, `cancelReason`
--   **Response (400):** Not found, or already cancelled
+- **Request:**
+
+  ```json
+  { "cancelReason": "Customer requested cancellation" }
+  ```
+
+- **Response (200):** Updated `SubscriptionDto` with `status=2` (Cancelled), `cancelledAt`, `cancelReason`
+- **Response (400):** Not found, or already cancelled
 
 #### 11. Mark Subscription Paid
 
@@ -380,14 +482,18 @@ POST /api/platform/subscriptions/{id}/cancel
 POST /api/platform/subscriptions/{id}/mark-paid
 ```
 
--   **Request:**
-    
-    ```json
-    {  "paymentMethod": "Cash",  "paymentReference": "RECEIPT-001",  "paidAt": "2026-02-07T10:00:00Z"}
-    ```
-    
--   **Response (200):** Updated `SubscriptionDto` with `isPaid=true`
--   **Response (400):** Not found, or already paid
+- **Request:**
+
+  ```json
+  {
+    "paymentMethod": "Cash",
+    "paymentReference": "RECEIPT-001",
+    "paidAt": "2026-02-07T10:00:00Z"
+  }
+  ```
+
+- **Response (200):** Updated `SubscriptionDto` with `isPaid=true`
+- **Response (400):** Not found, or already paid
 
 #### 12. Get Feature Flags
 
@@ -395,13 +501,26 @@ POST /api/platform/subscriptions/{id}/mark-paid
 GET /api/platform/feature-flags/{tenantId}
 ```
 
--   **Response (200):**
-    
-    ```json
-    {  "success": true,  "data": {    "id": "guid",    "tenantId": "guid",    "onlineBooking": false,    "whatsappAutomation": true,    "pwaNotifications": false,    "expensesModule": true,    "advancedMedicalTemplates": false,    "ratings": false,    "export": false  }}
-    ```
-    
--   **Response (404):** Tenant or flags not found
+- **Response (200):**
+
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": "guid",
+      "tenantId": "guid",
+      "onlineBooking": false,
+      "whatsappAutomation": true,
+      "pwaNotifications": false,
+      "expensesModule": true,
+      "advancedMedicalTemplates": false,
+      "ratings": false,
+      "export": false
+    }
+  }
+  ```
+
+- **Response (404):** Tenant or flags not found
 
 #### 13. Update Feature Flags
 
@@ -409,15 +528,23 @@ GET /api/platform/feature-flags/{tenantId}
 PUT /api/platform/feature-flags/{tenantId}
 ```
 
--   **Request:**
-    
-    ```json
-    {  "onlineBooking": true,  "whatsappAutomation": true,  "pwaNotifications": false,  "expensesModule": true,  "advancedMedicalTemplates": false,  "ratings": true,  "export": false}
-    ```
-    
--   **Response (200):** Updated `FeatureFlagDto`
--   **Response (400):** Tenant not found
--   **IMPORTANT:** All 7 boolean fields are required. No partial update.
+- **Request:**
+
+  ```json
+  {
+    "onlineBooking": true,
+    "whatsappAutomation": true,
+    "pwaNotifications": false,
+    "expensesModule": true,
+    "advancedMedicalTemplates": false,
+    "ratings": true,
+    "export": false
+  }
+  ```
+
+- **Response (200):** Updated `FeatureFlagDto`
+- **Response (400):** Tenant not found
+- **IMPORTANT:** All 7 boolean fields are required. No partial update.
 
 #### Phase 1 — Frontend Integration Notes
 
@@ -462,37 +589,152 @@ Status changes and subscription actions use POST (not PATCH)
 #### ClinicSettingsDto**​**
 
 ```json
-{  "id": "5fa85f64-5717-4562-b3fc-2c963f66afa6",  "tenantId": "guid",  "clinicName": "Demo Dental Clinic",  "phone": "+201000000099",  "whatsAppSenderNumber": null,  "supportWhatsAppNumber": null,  "supportPhoneNumber": null,  "address": "123 Main St",  "city": "Cairo",  "logoUrl": null,  "bookingEnabled": true,  "cancellationWindowHours": 2,  "workingHours": [    {      "id": "guid",      "dayOfWeek": 0,      "startTime": "09:00:00",      "endTime": "17:00:00",      "isActive": true    }  ]}
+{
+  "id": "5fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "tenantId": "guid",
+  "clinicName": "Demo Dental Clinic",
+  "phone": "+201000000099",
+  "whatsAppSenderNumber": null,
+  "supportWhatsAppNumber": null,
+  "supportPhoneNumber": null,
+  "address": "123 Main St",
+  "city": "Cairo",
+  "logoUrl": null,
+  "bookingEnabled": true,
+  "cancellationWindowHours": 2,
+  "workingHours": [
+    {
+      "id": "guid",
+      "dayOfWeek": 0,
+      "startTime": "09:00:00",
+      "endTime": "17:00:00",
+      "isActive": true
+    }
+  ]
+}
 ```
 
 #### UpdateClinicSettingsRequest
 
 ```json
-{  "clinicName": "string (required, max 200)",  "phone": "string? (max 20)",  "whatsAppSenderNumber": "string? (max 20)",  "supportWhatsAppNumber": "string? (max 20)",  "supportPhoneNumber": "string? (max 20)",  "address": "string?",  "city": "string? (max 100)",  "bookingEnabled": "bool",  "cancellationWindowHours": "int (0-168, default 2)",  "workingHours": [    {      "dayOfWeek": "int (0-6)",      "startTime": "string (HH:MM:SS)",      "endTime": "string (HH:MM:SS)",      "isActive": "bool"    }  ]}
+{
+  "clinicName": "string (required, max 200)",
+  "phone": "string? (max 20)",
+  "whatsAppSenderNumber": "string? (max 20)",
+  "supportWhatsAppNumber": "string? (max 20)",
+  "supportPhoneNumber": "string? (max 20)",
+  "address": "string?",
+  "city": "string? (max 100)",
+  "bookingEnabled": "bool",
+  "cancellationWindowHours": "int (0-168, default 2)",
+  "workingHours": [
+    {
+      "dayOfWeek": "int (0-6)",
+      "startTime": "string (HH:MM:SS)",
+      "endTime": "string (HH:MM:SS)",
+      "isActive": "bool"
+    }
+  ]
+}
 ```
 
 #### StaffDto
 
 ```json
-{  "id": "guid",  "userId": "guid",  "name": "Sara Ali",  "phone": "+201234567890",  "role": "ClinicManager",  "username": "staff_sara",  "salary": 3500,  "hireDate": "2025-01-15",  "notes": null,  "isEnabled": true,  "createdAt": "2026-02-07T10:00:00Z"}
+{
+  "id": "guid",
+  "userId": "guid",
+  "name": "Sara Ali",
+  "phone": "+201234567890",
+  "role": "ClinicManager",
+  "username": "staff_sara",
+  "salary": 3500,
+  "hireDate": "2025-01-15",
+  "notes": null,
+  "isEnabled": true,
+  "createdAt": "2026-02-07T10:00:00Z"
+}
 ```
 
 #### DoctorDto
 
 ```json
-{  "id": "guid",  "userId": "guid",  "name": "Dr. Khaled",  "specialty": "Pediatrics",  "phone": "+201234567890",  "bio": null,  "photoUrl": null,  "username": "dr_khaled",  "isEnabled": true,  "urgentCaseMode": 0,  "avgVisitDurationMinutes": 15,  "services": [    {      "id": "guid",      "serviceName": "General Check-up",      "price": 150,      "durationMinutes": 15,      "isActive": true    }  ],  "visitFieldConfig": {    "bloodPressure": false,    "heartRate": false,    "temperature": true,    "weight": true,    "height": false,    "bmi": false,    "bloodSugar": false,    "oxygenSaturation": false,    "respiratoryRate": false  },  "createdAt": "2026-02-07T10:00:00Z"}
+{
+  "id": "guid",
+  "userId": "guid",
+  "name": "Dr. Khaled",
+  "specialty": "Pediatrics",
+  "phone": "+201234567890",
+  "bio": null,
+  "photoUrl": null,
+  "username": "dr_khaled",
+  "isEnabled": true,
+  "urgentCaseMode": 0,
+  "avgVisitDurationMinutes": 15,
+  "services": [
+    {
+      "id": "guid",
+      "serviceName": "General Check-up",
+      "price": 150,
+      "durationMinutes": 15,
+      "isActive": true
+    }
+  ],
+  "visitFieldConfig": {
+    "bloodPressure": false,
+    "heartRate": false,
+    "temperature": true,
+    "weight": true,
+    "height": false,
+    "bmi": false,
+    "bloodSugar": false,
+    "oxygenSaturation": false,
+    "respiratoryRate": false
+  },
+  "createdAt": "2026-02-07T10:00:00Z"
+}
 ```
 
 #### PatientDto
 
 ```json
-{  "id": "guid",  "userId": "guid",  "name": "Mohamed Ali",  "phone": "+201234567890",  "dateOfBirth": "1990-05-15",  "gender": 0,  "address": "456 Elm St",  "notes": null,  "isDefault": true,  "parentPatientId": null,  "username": "patient_demo-clinic_1",  "subProfiles": [    {      "id": "guid",      "name": "Child of Mohamed",      "phone": "+201234567891",      "dateOfBirth": "2020-01-01",      "gender": 1,      "isDefault": false    }  ],  "createdAt": "2026-02-07T10:00:00Z"}
+{
+  "id": "guid",
+  "userId": "guid",
+  "name": "Mohamed Ali",
+  "phone": "+201234567890",
+  "dateOfBirth": "1990-05-15",
+  "gender": 0,
+  "address": "456 Elm St",
+  "notes": null,
+  "isDefault": true,
+  "parentPatientId": null,
+  "username": "patient_demo-clinic_1",
+  "subProfiles": [
+    {
+      "id": "guid",
+      "name": "Child of Mohamed",
+      "phone": "+201234567891",
+      "dateOfBirth": "2020-01-01",
+      "gender": 1,
+      "isDefault": false
+    }
+  ],
+  "createdAt": "2026-02-07T10:00:00Z"
+}
 ```
 
 #### CreatePatientRequest
 
 ```json
-{  "name": "string (required, max 200)",  "phone": "string (required, max 20)",  "dateOfBirth": "datetime?",  "gender": "int (0=Male, 1=Female, default 0)",  "address": "string?",  "notes": "string?"}
+{
+  "name": "string (required, max 200)",
+  "phone": "string (required, max 20)",
+  "dateOfBirth": "datetime?",
+  "gender": "int (0=Male, 1=Female, default 0)",
+  "address": "string?",
+  "notes": "string?"
+}
 ```
 
 #### CreatePatientResponse
@@ -504,7 +746,22 @@ Status changes and subscription actions use POST (not PATCH)
 #### PatientLoginResponse
 
 ```json
-{  "token": "eyJ0eXAiOiJKV1QiLCJhbGc...",  "refreshToken": "eyJ0eXAiOiJKV1QiLCJhbGc...",  "expiresAt": "2027-02-08T08:00:00Z",  "user": {    "id": "guid",    "username": "patient_demo-clinic_1",    "displayName": "Mohamed Ali",    "role": "Patient",    "tenantId": "guid",    "profiles": [      {        "id": "guid",        "name": "Mohamed Ali",        "isDefault": true      },      {        "id": "guid",        "name": "Child of Mohamed",        "isDefault": false      }    ]  }}
+{
+  "token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+  "refreshToken": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+  "expiresAt": "2027-02-08T08:00:00Z",
+  "user": {
+    "id": "guid",
+    "username": "patient_demo-clinic_1",
+    "displayName": "Mohamed Ali",
+    "role": "Patient",
+    "tenantId": "guid",
+    "profiles": [
+      { "id": "guid", "name": "Mohamed Ali", "isDefault": true },
+      { "id": "guid", "name": "Child of Mohamed", "isDefault": false }
+    ]
+  }
+}
 ```
 
 #### Phase 2 — Frontend Integration Notes
@@ -757,4 +1014,4 @@ User from Tenant A sends `X-Tenant: tenant-b`
 
 ---
 
-*Updated per phase. Frontend team should reference this document for integration.*
+_Updated per phase. Frontend team should reference this document for integration._

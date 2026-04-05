@@ -1,19 +1,19 @@
-import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import { ILogin } from '../types/auth'
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { ILogin } from "../types/auth";
 
 // 🔴 البيانات اللي محتاجينها فعلاً في الكلاينت (UI فقط)
 interface TenantAuthData {
-  user: ILogin['user'] | null
-  activeProfileId: string | null
-  isAuthenticated: boolean
+  user: ILogin["user"] | null;
+  activeProfileId: string | null;
+  isAuthenticated: boolean;
 }
 
 interface PatientAuthState {
-  tenants: Record<string, TenantAuthData>
-  setPatientAuth: (tenantSlug: string, data: ILogin) => void
-  setActiveProfile: (tenantSlug: string, profileId: string) => void
-  logout: (tenantSlug: string) => void
+  tenants: Record<string, TenantAuthData>;
+  setPatientAuth: (tenantSlug: string, data: ILogin) => void;
+  setActiveProfile: (tenantSlug: string, profileId: string) => void;
+  logout: (tenantSlug: string) => void;
 }
 
 export const usePatientAuthStore = create<PatientAuthState>()(
@@ -22,8 +22,8 @@ export const usePatientAuthStore = create<PatientAuthState>()(
       tenants: {},
 
       setPatientAuth: (tenantSlug, data) => {
-        const profiles = data.user.profiles || []
-        const defaultProfile = profiles.find((p) => p.isDefault)
+        const profiles = data.user.profiles || [];
+        const defaultProfile = profiles.find((p) => p.isDefault);
 
         set((state) => ({
           tenants: {
@@ -34,7 +34,7 @@ export const usePatientAuthStore = create<PatientAuthState>()(
               isAuthenticated: true,
             },
           },
-        }))
+        }));
       },
 
       setActiveProfile: (tenantSlug, profileId) =>
@@ -50,11 +50,11 @@ export const usePatientAuthStore = create<PatientAuthState>()(
 
       logout: (tenantSlug) =>
         set((state) => {
-          const newTenants = { ...state.tenants }
-          delete newTenants[tenantSlug]
-          return { tenants: newTenants }
+          const newTenants = { ...state.tenants };
+          delete newTenants[tenantSlug];
+          return { tenants: newTenants };
         }),
     }),
-    { name: 'patient-auth-storage' },
+    { name: "patient-auth-storage" },
   ),
-)
+);

@@ -1,30 +1,30 @@
-'use server'
+"use server";
 
-import { fetchApi } from '@/lib/fetchApi'
-import { IPaginatedData } from '@/types/api'
-import { IPatient } from '@/types/patient'
+import { fetchApi } from "@/lib/fetchApi";
+import { IPaginatedData } from "@/types/api";
+import { IPatient } from "@/types/patient";
 
 export async function getPatientsAction(
   tenantSlug: string,
   pageNumber: number = 1,
   pageSize: number = 10,
-  search: string = '',
+  search: string = "",
 ): Promise<IPaginatedData<IPatient>> {
   const queryParams = new URLSearchParams({
     pageNumber: pageNumber.toString(),
     pageSize: pageSize.toString(),
-  })
+  });
 
-  if (search) queryParams.append('search', search)
+  if (search) queryParams.append("search", search);
 
   const res = await fetchApi<IPaginatedData<IPatient>>(
     `/api/clinic/patients?${queryParams.toString()}`,
     {
-      method: 'GET',
+      method: "GET",
       tenantSlug,
-      cache: 'no-store',
+      cache: "no-store",
     },
-  )
+  );
 
   if (!res.success || !res.data) {
     return {
@@ -35,8 +35,8 @@ export async function getPatientsAction(
       totalPages: 0,
       hasPreviousPage: false,
       hasNextPage: false,
-    }
+    };
   }
 
-  return res.data
+  return res.data;
 }
