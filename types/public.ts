@@ -1,3 +1,10 @@
+import type {
+  PublicClinicDto,
+  PublicDoctorDto,
+  PublicDoctorServiceDto,
+  PublicWorkingHourDto,
+} from "@/types/backend-types";
+
 export const DAYS_AR: Record<string, string> = {
   Saturday: "السبت",
   Sunday: "الأحد",
@@ -19,43 +26,7 @@ export const DAY_ORDER: Record<string, number> = {
   Friday: 6,
 };
 
-export interface IPublicClinic {
-  clinicName: string;
-  phone: string | null;
-  supportWhatsAppNumber: string | null;
-  supportPhoneNumber: string | null;
-  address: string | null;
-  city: string | null;
-  logoUrl: string | null;
-  imgUrl: string | null;
-  description: string | null;
-  socialLinks: Record<string, string> | null;
-  bookingEnabled: boolean;
-  tenantSlug: string;
-  isActive: boolean;
-}
-
-export interface IPublicService {
-  id: string;
-  serviceName: string;
-  price: number;
-  durationMinutes: number;
-}
-
-export interface IPublicDoctor {
-  id: string;
-  name: string;
-  specialty: string;
-  bio: string | null;
-  photoUrl: string | null;
-  isEnabled: boolean;
-  avgVisitDurationMinutes: number;
-  services: IPublicService[];
-}
-
-export interface IPublicWorkingHour {
-  dayOfWeek: keyof typeof DAY_ORDER;
-  startTime: string;
-  endTime: string;
-  isActive: boolean;
-}
+export type IPublicClinic = PublicClinicDto;
+export type IPublicService = PublicDoctorServiceDto;
+export type IPublicDoctor = PublicDoctorDto;
+export type IPublicWorkingHour = PublicWorkingHourDto;
