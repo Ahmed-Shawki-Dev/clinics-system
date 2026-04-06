@@ -113,18 +113,29 @@ export function AppointmentsCalendar({ bookingsList }: Props) {
   };
 
   // تحويل البيانات
-  const events = bookingsList.map((booking) => ({
-    id: booking.id,
-    title: booking.patientName,
-    start: `${booking.bookingDate.split("T")[0]}T${booking.bookingTime}`,
-    end: new Date(
-      new Date(
-        `${booking.bookingDate.split("T")[0]}T${booking.bookingTime}`,
-      ).getTime() +
-        30 * 60000,
-    ),
-    extendedProps: { ...booking },
-  }));
+  const events = bookingsList
+    // 1. استبعاد أي حجز مفيهوش تاريخ أو وقت عشان الكاليندر متضربش
+    .filter(
+      (booking) => booking.bookingDate != null && booking.bookingTime != null,
+    )
+    .map((booking) => {
+      // 2. هنا الـ TS بقى متأكد إنهم مش null/undefined بفضل الفلتر
+      const datePart = booking.bookingDate!.split("T")[0];
+      const timePart = booking.bookingTime!;
+      const startString = `${datePart}T${timePart}`;
+
+      const startDate = new Date(startString);
+      // حساب وقت النهاية (بنزود 30 دقيقة)
+      const endDate = new Date(startDate.getTime() + 30 * 60000);
+
+      return {
+        id: booking.id,
+        title: booking.patientName || "بدون اسم",
+        start: startString,
+        end: endDate,
+        extendedProps: { ...booking },
+      };
+    });
 
   return (
     <div className="flex h-full flex-col space-y-4">
