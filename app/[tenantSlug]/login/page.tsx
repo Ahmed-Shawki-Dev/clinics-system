@@ -29,7 +29,7 @@ export default async function LoginPage({
         <div className="mx-auto w-full max-w-100">
           <LoginForm
             tenantSlug={tenantSlug}
-            clinicName={clinic?.clinicName}
+            clinicName={clinic?.clinicName ?? ""}
             logoUrl={clinic?.logoUrl as string}
           />
         </div>

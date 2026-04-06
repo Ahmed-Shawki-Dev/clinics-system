@@ -48,9 +48,9 @@ export function BookingRowActions({ booking }: Props) {
 
   // Reschedule State
   const [newDate, setNewDate] = useState<string>(
-    booking.bookingDate.split("T")[0],
+    booking.bookingDate?.split("T")[0] ?? "",
   );
-  const [newTime, setNewTime] = useState<string>(booking.bookingTime);
+  const [newTime, setNewTime] = useState<string>(booking.bookingTime??'');
 
   const [isPending, startTransition] = useTransition();
   const { tenantSlug } = useParams();
@@ -63,7 +63,7 @@ export function BookingRowActions({ booking }: Props) {
     }
     startTransition(async () => {
       const res = await cancelBookingAction(
-        booking.id,
+        booking.id??'',
         cancelReason,
         tenantSlug as string,
       );
@@ -81,7 +81,7 @@ export function BookingRowActions({ booking }: Props) {
     startTransition(async () => {
       // دمج التاريخ والوقت لـ ISO لو الباك اند محتاجه كدة، أو ابعتهم منفصلين حسب الـ Action
       const res = await rescheduleBookingAction(
-        booking.id,
+        booking.id??'',
         newDate,
         newTime,
         tenantSlug as string,
@@ -107,7 +107,7 @@ export function BookingRowActions({ booking }: Props) {
         <DropdownMenuContent align="end" className="text-right">
           <DropdownMenuLabel>الإجراءات</DropdownMenuLabel>
           <DropdownMenuItem
-            onClick={() => navigator.clipboard.writeText(booking.patientPhone)}
+            onClick={() => navigator.clipboard.writeText(booking.patientPhone??'')}
           >
             نسخ رقم الهاتف
           </DropdownMenuItem>

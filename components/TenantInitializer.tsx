@@ -10,8 +10,8 @@ export function TenantInitializer({ clinic }: { clinic: IPublicClinic }) {
   useEffect(() => {
     // بتخزن الاسم واللوجو واي حاجة هتحتاجها قدام
     setConfig({
-      name: clinic.clinicName,
-      logoUrl: clinic.logoUrl, // أو حسب اسم الحقل عندك في الـ API
+      name: clinic.clinicName ?? "",
+      logoUrl: clinic.logoUrl ?? "", // أو حسب اسم الحقل عندك في الـ API
     });
   }, [clinic, setConfig]);
 

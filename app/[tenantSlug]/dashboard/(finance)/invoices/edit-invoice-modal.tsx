@@ -26,22 +26,23 @@ export function EditInvoiceDialog({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) {
-  const [amount, setAmount] = useState<string>(invoice.amount.toString());
+  const [amount, setAmount] = useState<string>((invoice.amount ?? "").toString());
   const [loading, setLoading] = useState(false);
+  const paidAmount = invoice.paidAmount ?? 0;
 
   const handleEdit = async () => {
     const numericAmount = Number(amount);
     if (!amount || isNaN(numericAmount) || numericAmount <= 0)
       return toast.error("أدخل مبلغ صحيح");
 
-    if (numericAmount < invoice.paidAmount) {
+    if (numericAmount < paidAmount) {
       return toast.error(
-        `لا يمكن تقليل الإجمالي عن المبلغ المدفوع مسبقاً (${invoice.paidAmount} ج.م)`,
+        `لا يمكن تقليل الإجمالي عن المبلغ المدفوع مسبقاً (${paidAmount} ج.م)`,
       );
     }
 
     setLoading(true);
-    const res = await editInvoiceAction(tenantSlug, invoice.id, {
+    const res = await editInvoiceAction(tenantSlug, invoice.id ?? "", {
       amount: numericAmount,
     });
     setLoading(false);
@@ -63,7 +64,7 @@ export function EditInvoiceDialog({
         <div className="space-y-4 py-4">
           <div className="bg-muted flex justify-between rounded-lg p-3 text-sm font-bold">
             <span>المدفوع مسبقاً:</span>
-            <span className="text-primary">{invoice.paidAmount} ج.م</span>
+            <span className="text-primary">{paidAmount} ج.م</span>
           </div>
           <div className="space-y-2">
             <label className="text-xs font-bold">الإجمالي الجديد (ج.م)</label>

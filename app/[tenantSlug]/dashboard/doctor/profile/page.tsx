@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { getDoctorMeAction } from "../../../../../actions/Profiles/doctor-profile";
 import { VISIT_CONFIG_LABELS } from "../../../../../constants/visit-fields";
 import { ClinicImage } from "../../../../../components/shared/clinic-image";
+import { DoctorVisitFieldConfig } from "../../../../../types/visit";
 
 export default async function DoctorProfilePage({
   params,
@@ -20,6 +21,7 @@ export default async function DoctorProfilePage({
 
   const response = await getDoctorMeAction(tenantSlug);
   const doctor = response?.data;
+  const services = doctor?.services ?? [];
 
   if (!doctor) {
     return (
@@ -147,7 +149,7 @@ export default async function DoctorProfilePage({
         </h3>
         <div className="bg-background border-border/40 rounded-xl border p-6 shadow-sm">
           <div className="flex flex-wrap gap-3">
-            {Object.entries(doctor.visitFieldConfig).map(([key, isEnabled]) => {
+            {Object.entries(doctor.visitFieldConfig as DoctorVisitFieldConfig).map(([key, isEnabled]) => {
               const configKey = key as keyof typeof VISIT_CONFIG_LABELS;
 
               return (
@@ -194,7 +196,7 @@ export default async function DoctorProfilePage({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {doctor.services.length === 0 ? (
+              {services.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={4}
@@ -204,7 +206,7 @@ export default async function DoctorProfilePage({
                   </TableCell>
                 </TableRow>
               ) : (
-                doctor.services.map((service) => (
+                services.map((service) => (
                   <TableRow
                     key={service.id}
                     className="border-border/30 hover:bg-muted/5"
@@ -222,7 +224,7 @@ export default async function DoctorProfilePage({
                     <TableCell className="py-3 text-left">
                       <div className="flex items-baseline justify-end gap-1">
                         <span className="text-foreground font-mono text-sm font-bold">
-                          {service.price.toLocaleString()}
+                          {service.price?.toLocaleString()}
                         </span>
                         <span className="text-muted-foreground text-[10px] font-bold">
                           EGP

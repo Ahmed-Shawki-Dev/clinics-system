@@ -147,7 +147,7 @@ export function LinkServiceModal({
                       {catalogServices.map((svc) => (
                         <SelectItem
                           key={svc.id}
-                          value={svc.id}
+                          value={svc.id ?? ""}
                           className="text-right"
                         >
                           {svc.name} - ({svc.defaultPrice} ج.م)

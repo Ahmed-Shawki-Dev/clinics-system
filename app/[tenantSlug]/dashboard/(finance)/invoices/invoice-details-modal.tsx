@@ -78,7 +78,7 @@ export function InvoiceDetailsAction({
                   <span className="text-muted-foreground font-mono text-sm tracking-widest uppercase">
                     INV-{invoice.invoiceNumber}
                   </span>
-                  <StatusBadge status={invoice.status} />
+                  <StatusBadge status={invoice.status ?? ""} />
                 </div>
               )}
             </div>
@@ -187,7 +187,7 @@ export function InvoiceDetailsAction({
                               >
                                 <TableCell className="text-muted-foreground py-3 font-mono text-xs">
                                   {new Date(
-                                    payment.createdAt,
+                                    payment.createdAt ?? "",
                                   ).toLocaleDateString("ar-EG")}
                                 </TableCell>
                                 <TableCell className="py-3">
@@ -249,13 +249,13 @@ export function InvoiceDetailsAction({
                         </span>
                       </div>
 
-                      {invoice.pendingSettlementAmount > 0 && (
+                      {(invoice.pendingSettlementAmount ?? 0) > 0 && (
                         <div className="mt-2 flex justify-between rounded bg-amber-500/10 p-2 text-xs text-amber-600">
                           <span className="font-semibold">
                             مبلغ معلق (خدمات إضافية)
                           </span>
                           <span className="font-mono font-bold">
-                            {invoice.pendingSettlementAmount} ج.م
+                            {invoice.pendingSettlementAmount ?? 0} ج.م
                           </span>
                         </div>
                       )}

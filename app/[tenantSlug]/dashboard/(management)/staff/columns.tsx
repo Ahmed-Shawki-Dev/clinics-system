@@ -80,9 +80,17 @@ export const columns = [
   // تاريخ الإضافة
   columnHelper.accessor("createdAt", {
     header: "تاريخ الإضافة",
-    cell: (info) => (
-      <span>{new Date(info.getValue()).toLocaleDateString("ar-EG")}</span>
-    ),
+    cell: (info) => {
+      const createdAt = info.getValue();
+
+      return (
+        <span>
+          {createdAt
+            ? new Date(createdAt).toLocaleDateString("ar-EG")
+            : "غير متاح"}
+        </span>
+      );
+    },
   }),
 
   // الإجراءات

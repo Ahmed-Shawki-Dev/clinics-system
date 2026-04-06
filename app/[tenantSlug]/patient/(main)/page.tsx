@@ -166,10 +166,13 @@ export default function PatientHomePage() {
                     <p className="text-sm font-bold">د. {visit.doctorName}</p>
                     <div className="text-muted-foreground flex items-center gap-1.5 text-[10px] font-medium">
                       <CalendarDays className="h-3 w-3" />
-                      {new Date(visit.startedAt).toLocaleDateString("ar-EG", {
-                        day: "numeric",
-                        month: "short",
-                      })}
+                      {new Date(visit.startedAt ?? "").toLocaleDateString(
+                        "ar-EG",
+                        {
+                          day: "numeric",
+                          month: "short",
+                        },
+                      )}
                     </div>
                   </div>
                   <Badge

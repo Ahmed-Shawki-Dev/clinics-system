@@ -73,10 +73,10 @@ export function EditPatientModal({ patient }: { patient: IPatient }) {
   const form = useForm({
     resolver: valibotResolver(UpdatePatientSchema),
     defaultValues: {
-      name: patient.name,
-      phone: patient.phone,
+      name: patient.name??'',
+      phone: patient.phone??'',
       gender: (patient.gender as "Male" | "Female") || "Male",
-      dateOfBirth: new Date(patient.dateOfBirth),
+      dateOfBirth: new Date(patient.dateOfBirth??''),
       address: patient.address || "",
       notes: patient.notes || "",
       diabetes: false,
@@ -93,7 +93,7 @@ export function EditPatientModal({ patient }: { patient: IPatient }) {
       const fetchChronicData = async () => {
         setIsLoadingChronic(true);
         const res = await getChronicConditionsAction(
-          patient.id,
+          patient.id??'',
           tenantSlug as string,
         );
         if (res.success && res.data) {
@@ -129,7 +129,7 @@ export function EditPatientModal({ patient }: { patient: IPatient }) {
     try {
       // 1. تحديث البيانات الأساسية
       const result = await updatePatientAction(
-        patient.id,
+        patient.id??'',
         values,
         tenantSlug as string,
       );
@@ -145,7 +145,7 @@ export function EditPatientModal({ patient }: { patient: IPatient }) {
 
         if (hasChronicChanges) {
           await updateChronicConditionsAction(
-            patient.id,
+            patient.id??'',
             {
               diabetes: values.diabetes || false,
               hypertension: values.hypertension || false,

@@ -27,7 +27,7 @@ export default async function Page({
 
   const summaryResponse = await getPatientSummaryAction(
     tenantSlug,
-    visit.patientId,
+    visit.patientId ?? "",
   );
   const summary = summaryResponse.success ? summaryResponse.data : null;
 

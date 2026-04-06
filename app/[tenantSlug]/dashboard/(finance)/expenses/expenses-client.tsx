@@ -74,11 +74,13 @@ export function ExpensesClient({
                   className="hover:bg-muted/20 transition-colors"
                 >
                   <TableCell className="text-muted-foreground text-sm">
-                    {new Date(exp.expenseDate).toLocaleDateString("ar-EG")}
+                    {new Date(exp.expenseDate ?? "").toLocaleDateString(
+                      "ar-EG",
+                    )}
                   </TableCell>
                   <TableCell className="font-bold">{exp.category}</TableCell>
                   <TableCell className="text-lg font-bold">
-                    {exp.amount.toLocaleString()}
+                    {exp.amount?.toLocaleString()}
                     <span className="font-sans text-[10px]">ج.م</span>
                   </TableCell>
                   <TableCell className="text-xs font-medium">

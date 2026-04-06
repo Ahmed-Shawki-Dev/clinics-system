@@ -48,7 +48,7 @@ export function ExpenseRowActions({
   const [isPending, startTransition] = useTransition();
 
   const onEdit = async (data: ExpenseInput) => {
-    const res = await updateExpenseAction(tenantSlug, exp.id, data);
+    const res = await updateExpenseAction(tenantSlug, exp.id??'', data);
     if (res.success) {
       toast.success("تم التعديل");
       setIsEditOpen(false);
@@ -57,7 +57,7 @@ export function ExpenseRowActions({
 
   const onDelete = () => {
     startTransition(async () => {
-      const res = await deleteExpenseAction(tenantSlug, exp.id);
+      const res = await deleteExpenseAction(tenantSlug, exp.id??'');
       if (res.success) {
         toast.success("تم الحذف");
         setIsDeleteOpen(false);
@@ -100,7 +100,7 @@ export function ExpenseRowActions({
             initialData={
               {
                 ...exp,
-                expenseDate: exp.expenseDate.split("T")[0],
+                expenseDate: exp.expenseDate ? exp.expenseDate.split("T")[0] : "",
               } as ExpenseInput
             }
             onSubmit={onEdit}

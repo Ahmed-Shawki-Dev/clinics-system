@@ -67,7 +67,7 @@ export function StaleVisitsTable({
 
               {/* 4. وقت البداية منسق */}
               <TableCell className="text-muted-foreground text-xs">
-                {format(new Date(visit.startedAt), "p - dd MMM", {
+                {format(new Date(visit.startedAt ?? ""), "p - dd MMM", {
                   locale: ar,
                 })}
               </TableCell>
@@ -79,7 +79,7 @@ export function StaleVisitsTable({
                   size="icon-sm"
                   className="text-destructive hover:bg-destructive/10"
                   disabled={isPending}
-                  onClick={() => onCloseVisit(visit.visitId)}
+                  onClick={() => onCloseVisit(visit.visitId ?? "")}
                   title="إغلاق إجباري"
                 >
                   <Power className="size-4" />

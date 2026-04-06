@@ -112,7 +112,7 @@ export function OpenSessionDialog({
                     <SelectContent>
                       {availableDoctors.length > 0 ? (
                         availableDoctors.map((doc) => (
-                          <SelectItem key={doc.id} value={doc.id}>
+                          <SelectItem key={doc.id} value={doc.id??''}>
                             د. {doc.name} ({doc.specialty})
                           </SelectItem>
                         ))

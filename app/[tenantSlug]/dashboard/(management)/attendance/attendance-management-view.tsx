@@ -33,11 +33,37 @@ export function AttendanceManagementView({
     initialAbsence,
   });
 
+  const workforceOptions = {
+    doctor: (model.workforceOptions?.doctor ?? [])
+      .filter((option): option is { id: string; label: string } =>
+        Boolean(option.id),
+      )
+      .map((option) => ({
+        id: option.id,
+        label: option.label ?? "",
+      })),
+    staff: (model.workforceOptions?.staff ?? [])
+      .filter((option): option is { id: string; label: string } =>
+        Boolean(option.id),
+      )
+      .map((option) => ({
+        id: option.id,
+        label: option.label ?? "",
+      })),
+  };
+
   return (
     <div className="space-y-4">
       <AttendanceFilterBar
         filters={model.filters}
-        personOptions={model.filterPersonOptions}
+        personOptions={model.filterPersonOptions
+          .filter((option): option is { id: string; label: string } =>
+            Boolean(option.id),
+          )
+          .map((option) => ({
+            id: option.id,
+            label: option.label ?? "",
+          }))}
         isRefreshing={model.isRefreshing}
         onChange={model.updateFilters}
         onReset={() =>
@@ -61,7 +87,7 @@ export function AttendanceManagementView({
             attendanceType={model.attendanceType}
             attendanceWorkerId={model.attendanceWorkerId}
             lateMinutes={model.lateMinutes}
-            workforceOptions={model.workforceOptions}
+            workforceOptions={workforceOptions}
             attendanceRows={model.attendanceRows}
             isSubmittingAttendance={model.isSubmittingAttendance}
             checkoutLoadingId={model.checkoutLoadingId}
@@ -89,7 +115,7 @@ export function AttendanceManagementView({
             absenceToDate={model.absenceToDate}
             absenceReason={model.absenceReason}
             absenceIsPaid={model.absenceIsPaid}
-            workforceOptions={model.workforceOptions}
+            workforceOptions={workforceOptions}
             absenceRows={model.absenceRows}
             isSubmittingAbsence={model.isSubmittingAbsence}
             onAbsenceTypeChange={(value) => {

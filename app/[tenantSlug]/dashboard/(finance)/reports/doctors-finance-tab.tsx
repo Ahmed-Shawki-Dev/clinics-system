@@ -85,7 +85,7 @@ export async function DoctorsFinanceTab({
                   <TableCell className="py-4 text-left">
                     <div className="flex items-baseline justify-end gap-1">
                       <span className="text-muted-foreground font-mono text-sm font-medium">
-                        {doc.totalPaid.toLocaleString()}
+                        {doc.totalPaid?.toLocaleString()}
                       </span>
                       <span className="text-muted-foreground/50 text-[10px] font-bold">
                         ج.م
@@ -96,7 +96,7 @@ export async function DoctorsFinanceTab({
                   <TableCell className="py-4 text-left">
                     <div className="flex items-baseline justify-end gap-1">
                       <span className="text-foreground font-mono text-sm font-bold">
-                        {doc.totalRevenue.toLocaleString()}
+                        {doc.totalRevenue?.toLocaleString()}
                       </span>
                       <span className="text-muted-foreground/70 text-[10px] font-bold">
                         ج.م

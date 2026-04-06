@@ -42,14 +42,14 @@ export function QueueView({
 
   const [selectedSessionId, setSelectedSessionId] = React.useState<
     string | null
-  >(activeSessions.length > 0 ? activeSessions[0].sessionId : null);
+  >(activeSessions[0]?.sessionId ?? null);
 
   React.useEffect(() => {
     if (
       activeSessions.length > 0 &&
       !activeSessions.find((s) => s.sessionId === selectedSessionId)
     ) {
-      setSelectedSessionId(activeSessions[0].sessionId);
+      setSelectedSessionId(activeSessions[0]?.sessionId ?? null);
     }
   }, [activeSessions, selectedSessionId]);
 
@@ -81,7 +81,7 @@ export function QueueView({
                   return (
                     <button
                       key={session.sessionId}
-                      onClick={() => setSelectedSessionId(session.sessionId)}
+                      onClick={() => setSelectedSessionId(session.sessionId??'')}
                       className={cn(
                         "flex items-center justify-between rounded-md border p-3 text-right text-sm transition-colors",
                         "min-w-50 md:min-w-0",

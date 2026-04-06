@@ -62,7 +62,7 @@ export function CurrentPatientCard({
     try {
       const summaryRes = await getPatientSummaryAction(
         tenantSlug,
-        currentTicket.patientId,
+        currentTicket.patientId ?? "",
       );
       if (summaryRes.success && summaryRes.data) {
         const activeVisit = summaryRes.data.recentVisits?.find(
@@ -161,7 +161,9 @@ export function CurrentPatientCard({
                     variant="outline"
                     className="h-12 flex-1 rounded-xl px-6 font-bold sm:flex-none"
                     disabled={isPending}
-                    onClick={() => onAction(skipTicketAction, currentTicket.id)}
+                    onClick={() =>
+                      onAction(skipTicketAction, currentTicket.id ?? "")
+                    }
                   >
                     <FastForward className="ml-2 h-4 w-4 opacity-60" /> تخطي
                     المريض
@@ -170,7 +172,9 @@ export function CurrentPatientCard({
                   <Button
                     className="shadow-primary/20 h-12 flex-1 rounded-xl px-8 font-bold shadow-lg sm:flex-none"
                     disabled={isPending}
-                    onClick={() => onAction(startVisitAction, currentTicket.id)}
+                    onClick={() =>
+                      onAction(startVisitAction, currentTicket.id ?? "")
+                    }
                   >
                     <PlayCircle className="ml-2 h-5 w-5" /> بدء الكشف
                   </Button>
@@ -197,7 +201,7 @@ export function CurrentPatientCard({
                     className="shadow-primary/20 h-12 flex-1 rounded-xl px-8 font-bold shadow-lg sm:flex-none"
                     disabled={isPending || isReturning}
                     onClick={() =>
-                      onAction(finishTicketAction, currentTicket.id)
+                      onAction(finishTicketAction, currentTicket.id ?? "")
                     }
                   >
                     <CheckCircle2 className="ml-2 h-5 w-5" /> إنهاء الزيارة
@@ -219,7 +223,9 @@ export function CurrentPatientCard({
               className="h-12 rounded-xl px-10 font-bold shadow-md"
               variant={waitingTickets.length > 0 ? "default" : "secondary"}
               disabled={waitingTickets.length === 0 || isPending}
-              onClick={() => onAction(callTicketAction, waitingTickets[0]?.id)}
+              onClick={() =>
+                onAction(callTicketAction, waitingTickets[0]?.id ?? "")
+              }
             >
               <PlayCircle className="ml-2 h-5 w-5" />
               {waitingTickets.length > 0

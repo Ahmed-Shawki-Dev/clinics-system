@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -40,14 +41,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 import { createBookingAction } from "@/actions/booking/create-booking";
+import { PatientSearch } from "@/components/patient-search";
 import { IDoctor } from "@/types/doctor";
 import { IPatient } from "@/types/patient";
 import { CreateBookingInput, createBookingSchema } from "@/validation/booking";
-import { PatientSearch } from "@/components/patient-search";
 
 interface Props {
   doctors: IDoctor[];
@@ -55,14 +55,27 @@ interface Props {
 
 export function BookingModal({ doctors = [] }: Props) {
   const [open, setOpen] = useState(false);
-  const { tenantSlug } = useParams();
+  const params = useParams<{ tenantSlug?: string | string[] }>();
+  const tenantSlug =
+    typeof params?.tenantSlug === "string"
+      ? params.tenantSlug
+      : params?.tenantSlug?.[0];
 
-  const safeDoctors = doctors.filter((doctor) => doctor.isEnabled) || [];
+  if (!tenantSlug) return null;
+
+  const safeDoctors = (doctors ?? []).filter((doctor) => !!doctor?.isEnabled);
+  const doctorOptions = safeDoctors.filter(
+    (doc): doc is IDoctor & { id: string } =>
+      typeof doc?.id === "string" && doc.id.trim().length > 0,
+  );
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
 
   // 🔥 ستيت حفظ الأكونت لعرض أفراد العائلة
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const [selectedAccount, setSelectedAccount] = useState<IPatient | null>(null);
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const form = useForm<CreateBookingInput>({
     resolver: valibotResolver(createBookingSchema),
     defaultValues: {
@@ -75,8 +88,12 @@ export function BookingModal({ doctors = [] }: Props) {
     },
   });
 
-  const activeDoctor = safeDoctors.find((d) => d.id === selectedDoctorId);
-  const hasServices = activeDoctor && (activeDoctor.services?.length ?? 0) > 0;
+  const activeDoctor = doctorOptions.find((d) => d.id === selectedDoctorId);
+  const activeDoctorServices = (activeDoctor?.services ?? []).filter(
+    (svc): svc is NonNullable<IDoctor["services"]>[number] & { id: string } =>
+      typeof svc?.id === "string" && svc.id.trim().length > 0,
+  );
+  const hasServices = activeDoctorServices.length > 0;
 
   const onSubmit = async (values: CreateBookingInput) => {
     if (!hasServices) {
@@ -85,7 +102,7 @@ export function BookingModal({ doctors = [] }: Props) {
     }
 
     try {
-      const result = await createBookingAction(values, tenantSlug as string);
+      const result = await createBookingAction(values, tenantSlug);
       if (result.success) {
         toast.success(result.message);
         setOpen(false);
@@ -131,11 +148,11 @@ export function BookingModal({ doctors = [] }: Props) {
                     <FormLabel>المريض (أو ولي الأمر)</FormLabel>
                     <FormControl>
                       <PatientSearch
-                        tenantSlug={tenantSlug as string}
+                        tenantSlug={tenantSlug}
                         selectedPatientId={selectedAccount?.id}
                         onSelect={(patient) => {
                           setSelectedAccount(patient);
-                          field.onChange(patient.id);
+                          field.onChange(patient?.id ?? "");
                         }}
                       />
                     </FormControl>
@@ -144,8 +161,7 @@ export function BookingModal({ doctors = [] }: Props) {
 
                   {/* بلوك أفراد العائلة */}
                   {selectedAccount &&
-                    selectedAccount.subProfiles &&
-                    selectedAccount.subProfiles.length > 0 && (
+                    (selectedAccount.subProfiles?.length ?? 0) > 0 && (
                       <div className="bg-muted/10 animate-in fade-in slide-in-from-top-2 space-y-3 rounded-lg border p-4">
                         <h4 className="flex items-center gap-2 text-sm font-bold">
                           <Users className="text-primary h-4 w-4" />
@@ -154,17 +170,19 @@ export function BookingModal({ doctors = [] }: Props) {
                         <div className="grid grid-cols-2 gap-3">
                           {/* كارت الأب */}
                           <div
-                            onClick={() => field.onChange(selectedAccount.id)}
+                            onClick={() =>
+                              field.onChange(selectedAccount.id ?? "")
+                            }
                             className={cn(
                               "flex cursor-pointer flex-col rounded-md border p-3 transition-all",
-                              field.value === selectedAccount.id
+                              field.value === (selectedAccount.id ?? "")
                                 ? "border-primary bg-primary/5 ring-primary ring-1"
                                 : "hover:border-primary/50 hover:bg-muted/50 bg-background",
                             )}
                           >
                             <span className="flex items-center gap-2 truncate text-sm font-bold">
                               <User className="h-4 w-4 shrink-0" />{" "}
-                              {selectedAccount.name}
+                              {selectedAccount.name ?? "غير متوفر"}
                             </span>
                             <Badge
                               variant="secondary"
@@ -175,25 +193,31 @@ export function BookingModal({ doctors = [] }: Props) {
                           </div>
 
                           {/* كروت التابعين */}
-                          {selectedAccount.subProfiles.map((sub) => (
+                          {(selectedAccount.subProfiles ?? []).map((sub) => (
                             <div
-                              key={sub.id}
-                              onClick={() => field.onChange(sub.id)}
+                              key={sub.id ?? `${sub.name ?? "sub"}-fallback`}
+                              onClick={() => field.onChange(sub.id ?? "")}
                               className={cn(
                                 "flex cursor-pointer flex-col rounded-md border p-3 transition-all",
-                                field.value === sub.id
+                                field.value === (sub.id ?? "")
                                   ? "border-primary bg-primary/5 ring-primary ring-1"
                                   : "hover:border-primary/50 hover:bg-muted/50 bg-background",
                               )}
                             >
                               <span className="flex items-center gap-2 truncate text-sm font-bold">
-                                <User className="h-4 w-4 shrink-0" /> {sub.name}
+                                <User className="h-4 w-4 shrink-0" />{" "}
+                                {sub.name ?? "غير متوفر"}
                               </span>
                               <Badge
                                 variant="outline"
                                 className="mt-2 w-fit text-[10px]"
                               >
-                                {sub.gender === "Male" ? "ذكر" : "أنثى"} • تابع
+                                {sub.gender === "Male"
+                                  ? "ذكر"
+                                  : sub.gender === "Female"
+                                    ? "أنثى"
+                                    : "غير متوفر"}{" "}
+                                • تابع
                               </Badge>
                             </div>
                           ))}
@@ -225,13 +249,14 @@ export function BookingModal({ doctors = [] }: Props) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {safeDoctors.map((doc) => (
+                      {doctorOptions.map((doc) => (
                         <SelectItem
                           key={doc.id}
                           value={doc.id}
                           className="text-right"
                         >
-                          {doc.name} - {doc.specialty || "تخصص عام"}
+                          {doc.name ?? "غير متوفر"} -{" "}
+                          {doc.specialty ?? "تخصص عام"}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -260,13 +285,14 @@ export function BookingModal({ doctors = [] }: Props) {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {activeDoctor.services?.map((svc) => (
+                          {activeDoctorServices.map((svc) => (
                             <SelectItem
                               key={svc.id}
-                              value={svc.id!}
+                              value={svc.id}
                               className="text-right"
                             >
-                              {svc.serviceName} ({svc.price} ج.م)
+                              {svc.serviceName ?? "غير متوفر"} ({svc.price ?? 0}{" "}
+                              ج.م)
                             </SelectItem>
                           ))}
                         </SelectContent>

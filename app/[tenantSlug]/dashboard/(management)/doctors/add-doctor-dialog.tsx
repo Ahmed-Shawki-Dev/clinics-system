@@ -95,7 +95,7 @@ export function AddDoctorDialog({ tenantSlug }: { tenantSlug: string }) {
           formData.append("file", selectedFile);
           const photoRes = await uploadDoctorPhotoAction(
             tenantSlug,
-            newDoctorId,
+            newDoctorId ?? "",
             formData,
           );
           if (!photoRes.success)

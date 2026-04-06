@@ -90,7 +90,7 @@ export default function Footer({ clinic, tenantSlug }: FooterProps) {
                 <div className="bg-background border-border relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border">
                   <ClinicImage
                     src={clinic.logoUrl}
-                    alt={clinic.clinicName}
+                    alt={clinic.clinicName ?? ""}
                     fill
                     fallbackType="logo"
                     className="object-contain p-1"

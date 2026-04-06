@@ -126,7 +126,7 @@ export function InvoicesClient({
                     {inv.invoiceNumber}
                   </TableCell>
                   <TableCell className="text-sm whitespace-nowrap">
-                    {new Date(inv.createdAt).toLocaleDateString("en")}
+                    {new Date(inv.createdAt ?? "").toLocaleDateString("en")}
                   </TableCell>
                   <TableCell className="font-bold">{inv.patientName}</TableCell>
                   <TableCell className="font-bold">{inv.amount} ج.م</TableCell>
@@ -134,7 +134,7 @@ export function InvoicesClient({
                     {inv.remainingAmount} ج.م
                   </TableCell>
                   <TableCell>
-                    <StatusBadge status={inv.status} />
+                    <StatusBadge status={inv.status ?? ""} />
                   </TableCell>
                   <TableCell className="text-center">
                     <DropdownMenu>
@@ -149,7 +149,7 @@ export function InvoicesClient({
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
                         <InvoiceDetailsAction
-                          invoiceId={inv.id}
+                          invoiceId={inv.id ?? ""}
                           tenantSlug={tenantSlug}
                         />
 
@@ -168,7 +168,7 @@ export function InvoicesClient({
                           </DropdownMenuItem>
                         )}
 
-                        {inv.paidAmount > 0 && (
+                        {(inv.paidAmount ?? 0) > 0 && (
                           <DropdownMenuItem
                             onClick={() => setRefundingInvoice(inv)}
                             variant="destructive"

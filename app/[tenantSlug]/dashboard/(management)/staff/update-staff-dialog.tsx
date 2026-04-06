@@ -23,13 +23,13 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { toggleStaffStatusAction } from "../../../../../actions/staff/toggle-staff-status";
+import { updateStaffAction } from "../../../../../actions/staff/update-staff";
 import { IStaff } from "../../../../../types/staff";
 import {
   UpdateStaffInput,
   updateStaffSchema,
 } from "../../../../../validation/staff";
-import { updateStaffAction } from "../../../../../actions/staff/update-staff";
-import { toggleStaffStatusAction } from "../../../../../actions/staff/toggle-staff-status";
 
 interface Props {
   staff: IStaff;
@@ -50,7 +50,7 @@ export function UpdateStaffDialog({
     resolver: valibotResolver(updateStaffSchema),
     defaultValues: {
       id: staff.id,
-      name: staff.name,
+      name: staff.name ?? "",
       phone: staff.phone || "",
       salary: staff.salary || 0,
       isEnabled: staff.isEnabled,
@@ -71,7 +71,7 @@ export function UpdateStaffDialog({
 
       if (!hasError && values.isEnabled !== staff.isEnabled) {
         const statusRes = await toggleStaffStatusAction(
-          staff.id,
+          staff.id ?? "",
           values.isEnabled,
           tenantSlug,
         );
@@ -139,7 +139,9 @@ export function UpdateStaffDialog({
                   <Input
                     value={
                       ROLE_CONFIG[staff.role as keyof typeof ROLE_CONFIG]
-                        ?.label || staff.role
+                        ?.label ??
+                      staff.role ??
+                      ""
                     }
                     disabled
                     className="bg-muted"

@@ -66,7 +66,11 @@ export function PrescriptionTab({
 
   const onSubmit = async (data: PrescriptionFormInput) => {
     if (isClosed) return;
-    const res = await createPrescriptionAction(tenantSlug, visit.id, data);
+    const res = await createPrescriptionAction(
+      tenantSlug,
+      visit.id ?? "",
+      data,
+    );
     if (res.success) {
       toast.success("تم إضافة الدواء");
       form.reset();
@@ -78,7 +82,7 @@ export function PrescriptionTab({
   };
 
   const handleDelete = async (id: string) => {
-    const res = await deletePrescriptionAction(tenantSlug, visit.id, id);
+    const res = await deletePrescriptionAction(tenantSlug, visit.id ?? "", id);
     if (res.success) toast.success("تم حذف الدواء");
     else toast.error(res.message);
   };
@@ -308,7 +312,7 @@ export function PrescriptionTab({
                       </AlertDialogCancel>
                       <AlertDialogAction
                         className="bg-destructive h-8 text-xs"
-                        onClick={() => handleDelete(p.id)}
+                        onClick={() => handleDelete(p.id ?? "")}
                       >
                         حذف
                       </AlertDialogAction>

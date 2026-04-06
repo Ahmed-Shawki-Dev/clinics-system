@@ -59,11 +59,15 @@ export function DashboardCharts({
   yearlyData,
   doctorsData,
 }: DashboardChartsProps) {
-  const formattedMonthlyData = yearlyData.months.map((m) => ({
-    name: arabicMonths[m.month - 1] || m.month.toString(),
-    revenue: m.totalRevenue,
-    paid: m.totalPaid,
-  }));
+  const formattedMonthlyData = (yearlyData.months ?? []).map((m) => {
+    const monthNumber = m.month ?? 0;
+
+    return {
+      name: arabicMonths[monthNumber - 1] || monthNumber.toString() || "غير محدد",
+      revenue: m.totalRevenue,
+      paid: m.totalPaid,
+    };
+  });
 
   const formattedDoctorsData = doctorsData.map((doc, index) => ({
     name: doc.doctorName,

@@ -63,7 +63,7 @@ export function ClinicalTab({
     if (isClosed) return;
     try {
       const loadingToast = toast.loading("جاري حفظ البيانات...");
-      const response = await updateVisit(tenantSlug, visit.id, data);
+      const response = await updateVisit(tenantSlug, visit.id ?? "", data);
       toast.dismiss(loadingToast);
 
       if (response.success) {

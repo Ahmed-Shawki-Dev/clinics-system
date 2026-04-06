@@ -89,7 +89,7 @@ export default function AboutDoctorSection({
           <div className="border-border/50 bg-muted group relative aspect-4/5 w-full max-w-100 overflow-hidden rounded-2xl border shadow-lg">
             <ClinicImage
               src={doctor.photoUrl}
-              alt={doctor.name}
+              alt={doctor.name ?? ""}
               fill
               fallbackType="doctor"
               className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"

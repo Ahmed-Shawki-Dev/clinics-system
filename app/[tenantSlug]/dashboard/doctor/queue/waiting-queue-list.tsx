@@ -69,7 +69,7 @@ export function WaitingQueueList({ waitingTickets, waitingCount }: Props) {
                   <span className="flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" />
                     {/* 🔥 التعديل هنا: استخدمنا issuedAt بدل calledAt لأن المريض لسه في الانتظار */}
-                    {new Date(ticket.issuedAt).toLocaleTimeString("ar-EG", {
+                    {new Date(ticket.issuedAt??'').toLocaleTimeString("ar-EG", {
                       hour: "2-digit",
                       minute: "2-digit",
                     })}

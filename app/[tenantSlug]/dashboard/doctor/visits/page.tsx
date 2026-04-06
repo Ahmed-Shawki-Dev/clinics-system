@@ -80,7 +80,7 @@ export default async function DoctorVisitsPage({ params }: Props) {
                   <TableCell className="text-muted-foreground text-sm">
                     <div className="flex items-center gap-1.5">
                       <Clock className="h-3.5 w-3.5" />
-                      {format(new Date(visit.startedAt), "hh:mm a", {
+                      {format(new Date(visit.startedAt ?? ""), "hh:mm a", {
                         locale: ar,
                       })}
                     </div>

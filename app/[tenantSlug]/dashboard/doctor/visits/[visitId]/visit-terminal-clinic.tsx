@@ -54,7 +54,7 @@ export function VisitTerminalClient({
         });
       }
 
-      const res = await completeVisitAction(tenantSlug, visit.id);
+      const res = await completeVisitAction(tenantSlug, visit.id ?? "");
 
       if (res.success) {
         toast.success("تم حفظ التعديلات وإنهاء الزيارة بنجاح");

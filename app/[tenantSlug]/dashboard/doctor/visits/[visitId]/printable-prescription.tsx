@@ -138,7 +138,9 @@ export default function PrintablePrescription({
                     <div>
                       <span style={{ color: "#888" }}>التاريخ: </span>
                       <span style={{ fontWeight: 600 }}>
-                        {new Date(visit.startedAt).toLocaleDateString("ar-EG")}
+                        {new Date(visit.startedAt ?? "").toLocaleDateString(
+                          "ar-EG",
+                        )}
                       </span>
                     </div>
                     <div>

@@ -66,9 +66,9 @@ export function SubProfilesList({ subProfiles }: SubProfilesListProps) {
               <div className="flex items-center gap-2">
                 <Calendar className="text-muted-foreground h-3 w-3" />
                 <span>
-                  {format(new Date(profile.dateOfBirth), "PPP", { locale: ar })}
+                  {format(new Date(profile.dateOfBirth??''), "PPP", { locale: ar })}
                   <span className="text-muted-foreground mr-1">
-                    ({calculateAge(profile.dateOfBirth)} سنة)
+                    ({calculateAge(profile.dateOfBirth??'')} سنة)
                   </span>
                 </span>
               </div>

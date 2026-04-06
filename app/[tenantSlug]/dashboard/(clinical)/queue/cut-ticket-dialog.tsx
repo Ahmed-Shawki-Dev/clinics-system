@@ -190,7 +190,7 @@ export function CutTicketDialog({
                       {activeSessions.map((session) => (
                         <SelectItem
                           key={session.sessionId}
-                          value={session.sessionId}
+                          value={session.sessionId??''}
                         >
                           عيادة د. {session.doctorName}
                           <span className="text-muted-foreground mr-2 text-xs"></span>

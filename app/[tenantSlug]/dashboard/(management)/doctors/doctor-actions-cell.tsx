@@ -23,6 +23,7 @@ import { IDoctor } from "../../../../../types/doctor";
 import { toggleDoctorStatusAction } from "@/actions/doctor/toggle-doctor-status";
 import { toast } from "sonner";
 import { EditDoctorDialog } from "./edit-doctor-dialog"; // <-- تأكد من المسار ده عندك
+import { DoctorVisitFieldConfigDto } from "../../../../../types/backend-types";
 
 export const DoctorActionsCell = ({ doctor }: { doctor: IDoctor }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -35,9 +36,9 @@ export const DoctorActionsCell = ({ doctor }: { doctor: IDoctor }) => {
   const handleToggleStatus = () => {
     startTransition(async () => {
       const result = await toggleDoctorStatusAction(
-        doctor.id,
+        doctor.id ?? "",
         tenantSlug,
-        doctor.isEnabled,
+        doctor.isEnabled ?? true,
       );
 
       if (result.success) {
@@ -108,8 +109,8 @@ export const DoctorActionsCell = ({ doctor }: { doctor: IDoctor }) => {
       {isModalOpen && (
         <VisitFieldsConfigModal
           tenantSlug={tenantSlug}
-          doctorId={doctor.id}
-          initialConfig={doctor.visitFieldConfig}
+          doctorId={doctor.id ?? ""}
+          initialConfig={doctor.visitFieldConfig as DoctorVisitFieldConfigDto}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
         />

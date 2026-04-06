@@ -30,7 +30,7 @@ export function DoctorSelect({ doctors, selectedId, onSelect }: Props) {
         <SelectContent>
           {activeDoctors.length > 0 ? (
             activeDoctors.map((doc) => (
-              <SelectItem key={doc.id} value={doc.id}>
+              <SelectItem key={doc.id} value={doc.id ?? ""}>
                 {doc.name}
               </SelectItem>
             ))

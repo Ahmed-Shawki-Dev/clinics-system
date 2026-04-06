@@ -41,7 +41,7 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
 
   const handleCloseSession = async () => {
     // الإنهاء الإجباري بيتبعت بس لو فيه مريض لسه بيكشف جوه الأوضة
-    const res = await closeQueueSession(tenantSlug, session.sessionId);
+    const res = await closeQueueSession(tenantSlug, session.sessionId??'');
     if (res.success) {
       toast.success(`تم إنهاء شفت د. ${session.doctorName}`);
       await mutate(["queueBoard", tenantSlug]);
@@ -206,14 +206,14 @@ export function DoctorQueueCard({ tenantSlug, session }: DoctorQueueCardProps) {
                       <DropdownMenuLabel>إجراءات</DropdownMenuLabel>
                       {!ticket.isUrgent && (
                         <DropdownMenuItem
-                          onClick={() => handleUrgent(ticket.id)}
+                          onClick={() => handleUrgent(ticket.id??'')}
                         >
                           <ArrowUp className="ml-2 h-4 w-4" /> استعجال
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
-                        onClick={() => handleCancel(ticket.id)}
+                        onClick={() => handleCancel(ticket.id??'')}
                         className="text-destructive focus:text-destructive"
                       >
                         <X className="ml-2 h-4 w-4" /> إلغاء التذكرة

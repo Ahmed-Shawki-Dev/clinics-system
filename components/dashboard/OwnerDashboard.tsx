@@ -58,15 +58,15 @@ export default async function OwnerDashboard({
   const statCards = [
     {
       title: "إجمالي الدخل اليومي",
-      value: `${totalPaid.toLocaleString()} ج.م`,
+      value: `${totalPaid?.toLocaleString()} ج.م`,
     },
     {
       title: "المحصل في الخزنة اليوم",
-      value: `${totalRevenue.toLocaleString()} ج.م`,
+      value: `${totalRevenue?.toLocaleString()} ج.م`,
     },
     {
       title: "المستحقات غير المدفوعة اليوم",
-      value: `${totalUnpaid.toLocaleString()} ج.م`,
+      value: `${totalUnpaid?.toLocaleString()} ج.م`,
     },
     {
       title: "فواتير العيادة اليوم",

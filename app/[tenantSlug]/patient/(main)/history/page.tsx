@@ -69,7 +69,7 @@ export default function PatientHistoryPage() {
             {visits.map((visit) => (
               <AccordionItem
                 key={visit.id}
-                value={visit.id}
+                value={visit.id ?? ""}
                 className="border-border/40 bg-background overflow-hidden rounded-2xl border px-4 shadow-sm"
               >
                 <AccordionTrigger className="py-4 hover:no-underline">
@@ -83,11 +83,14 @@ export default function PatientHistoryPage() {
                       </p>
                       <div className="text-muted-foreground flex items-center gap-2 text-[10px] font-medium">
                         <Calendar className="h-3 w-3" />
-                        {new Date(visit.startedAt).toLocaleDateString("ar-EG", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
+                        {new Date(visit.startedAt ?? "").toLocaleDateString(
+                          "ar-EG",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          },
+                        )}
                         <Badge
                           variant="outline"
                           className="h-4 py-0 text-[9px] leading-none font-bold"

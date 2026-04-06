@@ -52,7 +52,7 @@ export function Navbar({ clinic, tenantSlug }: NavbarProps) {
             <div className="relative h-8 w-8 shrink-0">
               <ClinicImage
                 src={clinic.logoUrl}
-                alt={clinic.clinicName}
+                alt={clinic.clinicName ?? ""}
                 fill
                 fallbackType="logo"
                 className="object-contain"
@@ -154,7 +154,7 @@ export function Navbar({ clinic, tenantSlug }: NavbarProps) {
                       <div className="relative h-20 w-20">
                         <ClinicImage
                           src={clinic.logoUrl}
-                          alt={clinic.clinicName}
+                          alt={clinic.clinicName ?? ""}
                           fill
                           fallbackType="logo"
                           className="object-contain"

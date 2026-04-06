@@ -85,7 +85,7 @@ export default function PatientBookingsPage() {
                         </p>
                       </div>
                     </div>
-                    <StatusBadge status={booking.status} />
+                    <StatusBadge status={booking.status ?? ""} />
                   </div>
 
                   {/* الجزء السفلي: الوقت والتاريخ (Vercel Divider Style) */}
@@ -95,7 +95,7 @@ export default function PatientBookingsPage() {
                         <Calendar className="text-primary h-3 w-3" />
                       </div>
                       <span className="text-[11px] font-bold">
-                        {new Date(booking.bookingDate).toLocaleDateString(
+                        {new Date(booking.bookingDate ?? "").toLocaleDateString(
                           "ar-EG",
                           {
                             day: "numeric",

@@ -47,14 +47,20 @@ export async function YearlyFinanceTab({
     );
   }
 
-  const report = {
+  const months = originalReport.months ?? [];
+
+  const report: IYearlyFinance = {
     ...originalReport,
-    totalRevenue: originalReport.totalPaid,
-    totalPaid: originalReport.totalRevenue,
-    months: originalReport.months.map((m: IMonthlyFinance) => ({
+    totalRevenue: originalReport.totalPaid ?? 0,
+    totalPaid: originalReport.totalRevenue ?? 0,
+    totalExpenses: originalReport.totalExpenses ?? 0,
+    netProfit: originalReport.netProfit ?? 0,
+    months: months.map((m: IMonthlyFinance) => ({
       ...m,
-      totalRevenue: m.totalPaid,
-      totalPaid: m.totalRevenue,
+      totalRevenue: m.totalPaid ?? 0,
+      totalPaid: m.totalRevenue ?? 0,
+      totalExpenses: m.totalExpenses ?? 0,
+      netProfit: m.netProfit ?? 0,
     })),
   };
 
@@ -69,8 +75,8 @@ export async function YearlyFinanceTab({
       <YearlyStatsCards report={report} />
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <YearlyHorizontalChart months={report.months} />
-        <YearlyDetailsTable months={report.months} />
+        <YearlyHorizontalChart months={report.months ?? []} />
+        <YearlyDetailsTable months={report.months ?? []} />
       </div>
     </div>
   );
@@ -80,7 +86,9 @@ export async function YearlyFinanceTab({
 // 2. Stats Component (Pure Typography, No Icons)
 // ============================================================================
 function YearlyStatsCards({ report }: { report: IYearlyFinance }) {
-  const isProfit = report.netProfit >= 0;
+  const netProfit = report.netProfit ?? 0;
+  const totalExpenses = report.totalExpenses ?? 0;
+  const isProfit = netProfit >= 0;
 
   return (
     <div className="bg-border/40 border-border/40 grid grid-cols-1 gap-px overflow-hidden rounded-xl border md:grid-cols-2 lg:grid-cols-4">
@@ -90,7 +98,7 @@ function YearlyStatsCards({ report }: { report: IYearlyFinance }) {
         </span>
         <div className="flex items-baseline gap-1">
           <span className="text-foreground font-mono text-2xl font-bold">
-            {report.totalRevenue.toLocaleString()}
+            {(report.totalRevenue ?? 0).toLocaleString()}
           </span>
           <span className="text-muted-foreground text-xs font-medium">EGP</span>
         </div>
@@ -102,7 +110,7 @@ function YearlyStatsCards({ report }: { report: IYearlyFinance }) {
         </span>
         <div className="flex items-baseline gap-1">
           <span className="text-foreground font-mono text-2xl font-bold">
-            {report.totalPaid.toLocaleString()}
+            {(report.totalPaid ?? 0).toLocaleString()}
           </span>
           <span className="text-muted-foreground text-xs font-medium">EGP</span>
         </div>
@@ -114,7 +122,7 @@ function YearlyStatsCards({ report }: { report: IYearlyFinance }) {
         </span>
         <div className="flex items-baseline gap-1">
           <span className="text-foreground font-mono text-2xl font-bold">
-            {report.totalExpenses.toLocaleString()}
+            {totalExpenses.toLocaleString()}
           </span>
           <span className="text-muted-foreground text-xs font-medium">EGP</span>
         </div>
@@ -142,7 +150,7 @@ function YearlyStatsCards({ report }: { report: IYearlyFinance }) {
             )}
           >
             {isProfit ? "+" : ""}
-            {report.netProfit.toLocaleString()}
+            {netProfit.toLocaleString()}
           </span>
           <span
             className={cn(
@@ -163,7 +171,7 @@ function YearlyStatsCards({ report }: { report: IYearlyFinance }) {
 // ============================================================================
 function YearlyHorizontalChart({ months }: { months: IMonthlyFinance[] }) {
   // بنجيب أعلى قيمة عشان نظبط عرض الـ Bars بالنسبة المئوية
-  const maxRevenue = Math.max(...months.map((m) => m.totalRevenue), 1);
+  const maxRevenue = Math.max(...months.map((m) => m.totalRevenue ?? 0), 1);
 
   return (
     <div className="flex flex-col space-y-4">
@@ -172,13 +180,20 @@ function YearlyHorizontalChart({ months }: { months: IMonthlyFinance[] }) {
       </h3>
       <div className="bg-background border-border/40 space-y-4 rounded-xl border p-6 shadow-sm">
         {months.map((month) => {
-          const widthPercent = (month.totalRevenue / maxRevenue) * 100;
+          const monthNumber = month.month;
+
+          if (!monthNumber) {
+            return null;
+          }
+
+          const totalRevenue = month.totalRevenue ?? 0;
+          const widthPercent = (totalRevenue / maxRevenue) * 100;
 
           return (
-            <div key={month.month} className="group flex items-center gap-4">
+            <div key={monthNumber} className="group flex items-center gap-4">
               {/* اسم الشهر */}
               <div className="text-muted-foreground w-12 shrink-0 text-xs font-bold">
-                {ARABIC_MONTHS[month.month - 1]}
+                {ARABIC_MONTHS[monthNumber - 1]}
               </div>
 
               {/* البار الأفقي */}
@@ -192,7 +207,7 @@ function YearlyHorizontalChart({ months }: { months: IMonthlyFinance[] }) {
               {/* القيمة */}
               <div className="w-24 shrink-0 text-left">
                 <span className="text-foreground font-mono text-sm font-bold">
-                  {month.totalRevenue.toLocaleString()}
+                  {totalRevenue.toLocaleString()}
                 </span>
               </div>
             </div>
@@ -232,22 +247,32 @@ function YearlyDetailsTable({ months }: { months: IMonthlyFinance[] }) {
           </TableHeader>
           <TableBody>
             {months.map((month) => {
-              const isProfit = month.netProfit >= 0;
+              const monthNumber = month.month;
+
+              if (!monthNumber) {
+                return null;
+              }
+
+              const totalRevenue = month.totalRevenue ?? 0;
+              const totalExpenses = month.totalExpenses ?? 0;
+              const netProfit = month.netProfit ?? 0;
+              const isProfit = netProfit >= 0;
+
               return (
                 <TableRow
-                  key={month.month}
+                  key={monthNumber}
                   className="border-border/30 hover:bg-muted/5"
                 >
                   <TableCell className="text-foreground py-3 text-xs font-bold">
-                    {ARABIC_MONTHS[month.month - 1]}
+                    {ARABIC_MONTHS[monthNumber - 1]}
                   </TableCell>
 
                   <TableCell className="text-foreground py-3 text-left font-mono text-sm">
-                    {month.totalRevenue.toLocaleString()}
+                    {totalRevenue.toLocaleString()}
                   </TableCell>
 
                   <TableCell className="text-muted-foreground py-3 text-left font-mono text-sm">
-                    {month.totalExpenses.toLocaleString()}
+                    {totalExpenses.toLocaleString()}
                   </TableCell>
 
                   <TableCell className="py-3 text-left">
@@ -258,7 +283,7 @@ function YearlyDetailsTable({ months }: { months: IMonthlyFinance[] }) {
                       )}
                     >
                       {isProfit ? "+" : ""}
-                      {month.netProfit.toLocaleString()}
+                      {netProfit.toLocaleString()}
                     </span>
                   </TableCell>
                 </TableRow>

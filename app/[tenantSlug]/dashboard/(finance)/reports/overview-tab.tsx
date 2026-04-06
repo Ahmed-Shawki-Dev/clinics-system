@@ -45,7 +45,14 @@ export async function OverviewTab({
     );
   }
 
-  const isProfit = report.netProfit >= 0;
+  const totalPaid = report.totalPaid ?? 0;
+  const totalRevenue = report.totalRevenue ?? 0;
+  const totalExpenses = report.totalExpenses ?? 0;
+  const invoiceCount = report.invoiceCount ?? 0;
+  const expenseCount = report.expenseCount ?? 0;
+  const byDoctor = report.byDoctor ?? [];
+  const netProfit = report.netProfit ?? 0;
+  const isProfit = netProfit >= 0;
 
   return (
     <div className="animate-in fade-in space-y-10 duration-500">
@@ -69,7 +76,7 @@ export async function OverviewTab({
             </span>
             <div className="flex items-baseline gap-1">
               <span className="text-foreground font-mono text-2xl font-black tracking-tight">
-                {report.totalPaid.toLocaleString()}
+                {totalPaid.toLocaleString()}
               </span>
               <span className="text-muted-foreground text-xs font-semibold">
                 ج.م
@@ -87,7 +94,7 @@ export async function OverviewTab({
             </span>
             <div className="flex items-baseline gap-1">
               <span className="text-foreground font-mono text-2xl font-black tracking-tight">
-                {report.totalRevenue.toLocaleString()}
+                {totalRevenue.toLocaleString()}
               </span>
               <span className="text-muted-foreground text-xs font-semibold">
                 ج.م
@@ -96,7 +103,7 @@ export async function OverviewTab({
             <span className="text-muted-foreground mt-1 text-xs">
               من إجمالي{" "}
               <span className="text-foreground font-bold">
-                {report.invoiceCount}
+                {invoiceCount}
               </span>{" "}
               فاتورة
             </span>
@@ -109,7 +116,7 @@ export async function OverviewTab({
             </span>
             <div className="flex items-baseline gap-1">
               <span className="text-foreground font-mono text-2xl font-black tracking-tight">
-                {report.totalExpenses.toLocaleString()}
+                {totalExpenses.toLocaleString()}
               </span>
               <span className="text-muted-foreground text-xs font-semibold">
                 ج.م
@@ -118,7 +125,7 @@ export async function OverviewTab({
             <span className="text-muted-foreground mt-1 text-xs">
               موزعة على{" "}
               <span className="text-foreground font-bold">
-                {report.expenseCount}
+                {expenseCount}
               </span>{" "}
               عملية صرف
             </span>
@@ -159,7 +166,7 @@ export async function OverviewTab({
                 )}
               >
                 {isProfit ? "+" : ""}
-                {report.netProfit.toLocaleString()}
+                {netProfit.toLocaleString()}
               </span>
               <span
                 className={cn(
@@ -204,7 +211,7 @@ export async function OverviewTab({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {report.byDoctor.length === 0 ? (
+              {byDoctor.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={4}
@@ -214,7 +221,7 @@ export async function OverviewTab({
                   </TableCell>
                 </TableRow>
               ) : (
-                report.byDoctor.map((doc) => (
+                byDoctor.map((doc) => (
                   <TableRow
                     key={doc.doctorId}
                     className="hover:bg-muted/10 border-border/30 transition-colors"
@@ -228,10 +235,10 @@ export async function OverviewTab({
                       </span>
                     </TableCell>
                     <TableCell className="text-muted-foreground py-3 text-left font-mono text-sm font-medium">
-                      {doc.totalPaid.toLocaleString()} ج.م
+                      {(doc.totalPaid ?? 0).toLocaleString()} ج.م
                     </TableCell>
                     <TableCell className="text-foreground py-3 text-left font-mono text-sm font-bold">
-                      {doc.totalRevenue.toLocaleString()} ج.م
+                      {(doc.totalRevenue ?? 0).toLocaleString()} ج.م
                     </TableCell>
                   </TableRow>
                 ))

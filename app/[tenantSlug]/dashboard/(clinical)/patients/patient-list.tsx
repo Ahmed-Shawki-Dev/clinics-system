@@ -92,8 +92,8 @@ export function PatientsList({ data }: PatientsListProps) {
                       </Link>
 
                       <AddSubProfileModal
-                        parentId={patient.id}
-                        parentName={patient.name}
+                        parentId={patient.id??''}
+                        parentName={patient.name??''}
                         tenantSlug={tenantSlug as string}
                       />
 
@@ -109,7 +109,7 @@ export function PatientsList({ data }: PatientsListProps) {
 
                       <DropdownMenuItem
                         onClick={() =>
-                          navigator.clipboard.writeText(patient.phone)
+                          navigator.clipboard.writeText(patient.phone??'')
                         }
                       >
                         <Copy className="h-4 w-4" />
@@ -122,8 +122,8 @@ export function PatientsList({ data }: PatientsListProps) {
                         allowedRoles={[ROLES.CLINIC_OWNER, ROLES.SUPER_ADMIN]}
                       >
                         <DeletePatientDialog
-                          patientId={patient.id}
-                          patientName={patient.name}
+                          patientId={patient.id??''}
+                          patientName={patient.name??''}
                         />
                       </PermissionGate>
                     </DropdownMenuContent>

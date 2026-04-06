@@ -64,10 +64,10 @@ export function ServiceRowActions({ service, tenantSlug }: Props) {
   const form = useForm({
     resolver: valibotResolver(ClinicServiceSchema),
     defaultValues: {
-      name: service.name,
+      name: service.name ?? "",
       description: service.description || "",
       defaultPrice: service.defaultPrice,
-      defaultDurationMinutes: service.defaultDurationMinutes,
+      defaultDurationMinutes: service.defaultDurationMinutes ?? 15,
       isActive: service.isActive,
     },
   });
@@ -76,7 +76,7 @@ export function ServiceRowActions({ service, tenantSlug }: Props) {
     try {
       const result = await updateClinicServiceAction(
         tenantSlug,
-        service.id,
+        service.id ?? "",
         values,
       );
       if (result.success) {
@@ -93,7 +93,10 @@ export function ServiceRowActions({ service, tenantSlug }: Props) {
 
   const handleDelete = () => {
     startTransition(async () => {
-      const result = await deleteClinicServiceAction(tenantSlug, service.id);
+      const result = await deleteClinicServiceAction(
+        tenantSlug,
+        service.id ?? "",
+      );
       if (result.success) {
         toast.success("تم الحذف بنجاح");
         setIsDeleteOpen(false);

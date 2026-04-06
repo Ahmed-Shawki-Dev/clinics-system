@@ -53,8 +53,8 @@ export async function generateMetadata({
     // 👇 السطر اللي أنت نسيته: إجبار الصفحة تقرأ المانيسفت الخاص بالعيادة
     manifest: `/${tenantSlug}/manifest.json`,
     openGraph: {
-      title: clinic.clinicName,
-      siteName: clinic.clinicName,
+      title: clinic.clinicName ?? "",
+      siteName: clinic.clinicName ?? "",
       images: absoluteShareImageUrl
         ? [{ url: absoluteShareImageUrl, alt: `صورة ${clinic.clinicName}` }]
         : [],
@@ -62,7 +62,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: clinic.clinicName,
+      title: clinic.clinicName ?? "",
       images: absoluteShareImageUrl ? [absoluteShareImageUrl] : [],
     },
   };

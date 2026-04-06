@@ -16,7 +16,9 @@ export default function WorkingHoursSection({
   if (!workingHours?.length) return null;
 
   const sortedHours = [...workingHours].sort(
-    (a, b) => (DAY_ORDER[a.dayOfWeek] ?? 99) - (DAY_ORDER[b.dayOfWeek] ?? 99),
+    (a, b) =>
+      (DAY_ORDER[a.dayOfWeek ?? ""] ?? 99) -
+      (DAY_ORDER[b.dayOfWeek ?? ""] ?? 99),
   );
 
   return (
@@ -49,7 +51,7 @@ export default function WorkingHoursSection({
         <div className="flex flex-col gap-3">
           {sortedHours.map((wh, index) => {
             const isActive = wh.isActive;
-            const dayName = DAYS_AR[wh.dayOfWeek] ?? wh.dayOfWeek;
+            const dayName = DAYS_AR[wh.dayOfWeek ?? ""] ?? wh.dayOfWeek;
 
             return (
               <motion.div
@@ -84,9 +86,9 @@ export default function WorkingHoursSection({
 
                 {isActive ? (
                   <div className="text-foreground flex items-center gap-2 text-sm font-medium md:text-base">
-                    <span>{formatTime(wh.startTime)}</span>
+                    <span>{formatTime(wh.startTime ?? "")}</span>
                     <span className="text-muted-foreground/50 mx-1">-</span>
-                    <span>{formatTime(wh.endTime)}</span>
+                    <span>{formatTime(wh.endTime ?? "")}</span>
                   </div>
                 ) : (
                   <div className="text-muted-foreground text-sm font-medium">

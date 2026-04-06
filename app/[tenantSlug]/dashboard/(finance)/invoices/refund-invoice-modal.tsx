@@ -1,13 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
 import { refundInvoiceAction } from "@/actions/finance/invoices";
-import { IInvoice } from "@/types/visit";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -15,6 +9,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { IInvoice } from "@/types/visit";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface Props {
   invoice: IInvoice;
@@ -36,14 +36,16 @@ export function RefundInvoiceDialog({
 
   const handleRefund = async () => {
     const numericAmount = Number(amount);
+    const paidAmount = invoice.paidAmount ?? 0;
+
     if (!amount || isNaN(numericAmount) || numericAmount <= 0) {
       return toast.error("أدخل مبلغ صحيح أكبر من الصفر");
     }
 
     // التحقق المنطقي: مينفعش نرجع فلوس أكتر من اللي دخلت الدرج أساساً
-    if (numericAmount > invoice.paidAmount) {
+    if (numericAmount > paidAmount) {
       return toast.error(
-        `لا يمكن استرداد مبلغ أكبر من المدفوع (${invoice.paidAmount} ج.م)`,
+        `لا يمكن استرداد مبلغ أكبر من المدفوع (${paidAmount} ج.م)`,
       );
     }
 
@@ -52,7 +54,7 @@ export function RefundInvoiceDialog({
     }
 
     setLoading(true);
-    const res = await refundInvoiceAction(tenantSlug, invoice.id, {
+    const res = await refundInvoiceAction(tenantSlug, invoice.id ?? "", {
       amount: numericAmount,
       reason: reason.trim(),
       referenceNumber: referenceNumber.trim(),
@@ -83,7 +85,9 @@ export function RefundInvoiceDialog({
             <span className="text-destructive">
               إجمالي المدفوع القابل للاسترداد:
             </span>
-            <span className="text-destructive">{invoice.paidAmount} ج.م</span>
+            <span className="text-destructive">
+              {invoice.paidAmount ?? 0} ج.م
+            </span>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { IVisit } from "@/types/visit";
+import { IVisit, VisitStatus } from "@/types/visit";
 import { VisitHeader } from "./VisitHeader";
 import { VisitLabRequests } from "./VisitLabRequests";
 import { VisitNotes } from "./VisitNotes";
@@ -13,7 +13,10 @@ interface Props {
 export function VisitCard({ visit }: Props) {
   return (
     <Card className="border-border/50 mb-6 overflow-hidden p-0 shadow-sm">
-      <VisitHeader startedAt={visit.startedAt} status={visit.status} />
+      <VisitHeader
+        startedAt={visit.startedAt ?? ""}
+        status={visit.status as VisitStatus}
+      />
 
       <CardContent className="space-y-6 p-6">
         <VisitVitals visit={visit} />
@@ -24,9 +27,9 @@ export function VisitCard({ visit }: Props) {
           notes={visit.notes}
         />
 
-        <VisitPrescriptions prescriptions={visit.prescriptions} />
+        <VisitPrescriptions prescriptions={visit.prescriptions ?? []} />
 
-        <VisitLabRequests requests={visit.labRequests} />
+        <VisitLabRequests requests={visit.labRequests??[]} />
       </CardContent>
     </Card>
   );

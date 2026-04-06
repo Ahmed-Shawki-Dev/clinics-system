@@ -55,7 +55,7 @@ export function HistoryTab({
                     د. {v.doctorName}
                   </div>
                   <span className="text-muted-foreground text-[10px]">
-                    {format(new Date(v.startedAt), "dd MMM yyyy", {
+                    {format(new Date(v.startedAt ?? ""), "dd MMM yyyy", {
                       locale: ar,
                     })}
                   </span>

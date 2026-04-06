@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
 import { addPaymentAction } from "@/actions/finance/invoices";
-import { IInvoice } from "@/types/visit";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -14,13 +17,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { IInvoice } from "@/types/visit";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface Props {
   invoice: IInvoice;
@@ -34,13 +34,14 @@ export function PaymentDialog({ invoice, tenantSlug, open, setOpen }: Props) {
   const [method, setMethod] = useState<string>("Cash");
   const [referenceNumber, setReferenceNumber] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const remainingAmount = invoice.remainingAmount ?? 0;
 
   const handlePayment = async () => {
     const numericAmount = Number(amount);
     if (!amount || isNaN(numericAmount) || numericAmount <= 0) {
       return toast.error("أدخل مبلغ صحيح");
     }
-    if (numericAmount > invoice.remainingAmount) {
+    if (numericAmount > remainingAmount) {
       return toast.error("المبلغ يتجاوز المتبقي من الفاتورة");
     }
     if (method !== "Cash" && !referenceNumber.trim()) {
@@ -49,7 +50,7 @@ export function PaymentDialog({ invoice, tenantSlug, open, setOpen }: Props) {
 
     setLoading(true);
     const res = await addPaymentAction(tenantSlug, {
-      invoiceId: invoice.id,
+      invoiceId: invoice.id ?? "",
       amount: numericAmount,
       paymentMethod: method,
       notes: "دفعة من لوحة التحكم",
@@ -75,9 +76,7 @@ export function PaymentDialog({ invoice, tenantSlug, open, setOpen }: Props) {
         <div className="space-y-4 py-4">
           <div className="bg-muted flex justify-between rounded-lg p-3 text-sm font-bold">
             <span>المتبقي للدفع:</span>
-            <span className="text-destructive">
-              {invoice.remainingAmount} ج.م
-            </span>
+            <span className="text-destructive">{remainingAmount} ج.م</span>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

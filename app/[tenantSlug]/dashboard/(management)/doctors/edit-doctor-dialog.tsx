@@ -58,9 +58,9 @@ export function EditDoctorDialog({
   const form = useForm<UpdateDoctorInput>({
     resolver: valibotResolver(UpdateDoctorSchema),
     defaultValues: {
-      name: doctor.name,
+      name: doctor.name ?? "",
       phone: doctor.phone || "",
-      specialty: doctor.specialty,
+      specialty: doctor.specialty ?? "",
       bio: doctor.bio || "",
       urgentInsertAfterCount: doctor.urgentInsertAfterCount ?? 0, // 👈 التعديل هنا
       avgVisitDurationMinutes: doctor.avgVisitDurationMinutes,
@@ -86,7 +86,7 @@ export function EditDoctorDialog({
     try {
       const res = await uploadDoctorPhotoAction(
         tenantSlug,
-        doctor.id,
+        doctor.id ?? "",
         formData,
       );
       if (res.success && res.data?.publicUrl) {
@@ -103,7 +103,7 @@ export function EditDoctorDialog({
   };
 
   const onSubmit = async (values: UpdateDoctorInput) => {
-    const res = await updateDoctorAction(doctor.id, tenantSlug, values);
+    const res = await updateDoctorAction(doctor.id ?? "", tenantSlug, values);
     if (res.success) {
       toast.success("تم تحديث بيانات الطبيب بنجاح");
       onClose();
@@ -128,7 +128,7 @@ export function EditDoctorDialog({
             ) : (
               <ClinicImage
                 src={previewUrl || watchPhotoUrl}
-                alt={doctor.name}
+                alt={doctor.name ?? ""}
                 fill
                 fallbackType="doctor"
                 className="h-full w-full object-cover"

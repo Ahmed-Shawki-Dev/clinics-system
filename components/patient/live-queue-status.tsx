@@ -28,10 +28,10 @@ export function LiveQueueStatus({ tenantSlug }: { tenantSlug: string }) {
 
   // TODO: هنستبدل دول لما الباك إند يبعتهم في الـ API زي ما اتفقنا
   const mockedCurrentServing = ticket
-    ? Math.max(1, ticket.ticketNumber - 2)
+    ? Math.max(1, ticket.ticketNumber ?? 0 - 2)
     : 0;
   const mockedPeopleAhead = ticket
-    ? Math.max(0, ticket.ticketNumber - mockedCurrentServing - 1)
+    ? Math.max(0, ticket.ticketNumber ?? 0 - mockedCurrentServing - 1)
     : 0;
 
   // 2. Empty State (Vercel Style: Dashed border, completely muted)

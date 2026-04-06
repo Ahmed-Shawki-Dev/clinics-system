@@ -91,10 +91,13 @@ export function DoctorNotesBell({ tenantSlug }: { tenantSlug: string }) {
                     د. {note.doctorName}
                   </span>
                   <span className="text-muted-foreground font-mono text-[10px]">
-                    {new Date(note.createdAt).toLocaleTimeString("ar-EG", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {new Date(note.createdAt ?? "").toLocaleTimeString(
+                      "ar-EG",
+                      {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      },
+                    )}
                   </span>
                 </div>
 
@@ -107,7 +110,7 @@ export function DoctorNotesBell({ tenantSlug }: { tenantSlug: string }) {
                     size="sm"
                     variant="ghost"
                     className="h-8 gap-1 text-xs font-bold text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
-                    onClick={(e) => handleMarkAsRead(e, note.id)}
+                    onClick={(e) => handleMarkAsRead(e, note.id ?? "")}
                     disabled={loadingId === note.id}
                   >
                     {loadingId === note.id ? (

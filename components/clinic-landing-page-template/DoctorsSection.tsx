@@ -87,7 +87,7 @@ export default function DoctorsSection({
                       {/* 👈 استخدام المكون الموحد: بيتعامل مع المسار الـ relative والـ absolute لوحده */}
                       <ClinicImage
                         src={doctor.photoUrl}
-                        alt={doctor.name}
+                        alt={doctor.name ?? ""}
                         fill
                         fallbackType="doctor"
                         className="object-cover object-top transition-transform duration-700 select-none group-hover:scale-110"

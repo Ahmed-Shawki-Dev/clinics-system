@@ -199,7 +199,7 @@ export function DoctorServicesView({
                                 <AlertDialogFooter>
                                   <AlertDialogAction
                                     onClick={() =>
-                                      handleUnlink(link.clinicServiceId)
+                                      handleUnlink(link.clinicServiceId ?? "")
                                     }
                                     disabled={isPending}
                                     variant={"destructive"}

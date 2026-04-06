@@ -50,7 +50,7 @@ export function PatientInfoCard({ patient }: { patient: IPatient }) {
             <span className="text-xs font-medium">تاريخ الانضمام</span>
           </div>
           <span className="text-foreground text-sm font-semibold">
-            {format(new Date(patient.createdAt), "dd MMM yyyy", { locale: ar })}
+            {format(new Date(patient.createdAt??''), "dd MMM yyyy", { locale: ar })}
           </span>
         </div>
 

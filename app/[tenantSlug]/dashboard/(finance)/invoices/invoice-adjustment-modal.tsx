@@ -47,7 +47,7 @@ export function InvoiceAdjustmentDialog({
     setLoading(true);
 
     // 2. Submit to Action (المبلغ موجب دايماً لزيادة الفاتورة)
-    const res = await addInvoiceAdjustmentAction(tenantSlug, invoice.id, {
+    const res = await addInvoiceAdjustmentAction(tenantSlug, invoice.id ?? "", {
       extraAmount: numericAmount,
       reason: reason.trim(),
     });

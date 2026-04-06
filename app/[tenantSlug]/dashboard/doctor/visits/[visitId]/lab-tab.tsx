@@ -71,7 +71,7 @@ export function LabsTab({ visit, tenantSlug, isClosed }: LabsTabProps) {
 
   const onSubmit = async (data: LabRequestFormInput) => {
     if (isClosed) return;
-    const res = await createLabRequestAction(tenantSlug, visit.id, data);
+    const res = await createLabRequestAction(tenantSlug, visit.id ?? "", data);
     if (res.success) {
       toast.success("تم إضافة طلب الفحص");
       form.reset({
@@ -88,7 +88,7 @@ export function LabsTab({ visit, tenantSlug, isClosed }: LabsTabProps) {
   };
 
   const handleDelete = async (id: string) => {
-    const res = await deleteLabRequestAction(tenantSlug, visit.id, id);
+    const res = await deleteLabRequestAction(tenantSlug, visit.id ?? "", id);
     if (res.success) toast.success("تم حذف طلب الفحص");
     else toast.error(res.message);
   };
@@ -330,7 +330,7 @@ export function LabsTab({ visit, tenantSlug, isClosed }: LabsTabProps) {
                       </AlertDialogCancel>
                       <AlertDialogAction
                         className="bg-destructive h-8 text-xs"
-                        onClick={() => handleDelete(lab.id)}
+                        onClick={() => handleDelete(lab.id ?? "")}
                       >
                         حذف
                       </AlertDialogAction>

@@ -189,7 +189,7 @@ export function AppointmentsView({
                       <div className="flex flex-col gap-1 text-right">
                         <div className="flex items-center gap-1.5 text-sm">
                           <Calendar className="text-muted-foreground h-3.5 w-3.5 shrink-0" />
-                          {format(new Date(booking.bookingDate), "PPP", {
+                          {format(new Date(booking.bookingDate!), "PPP", {
                             locale: ar,
                           })}
                         </div>
@@ -202,7 +202,7 @@ export function AppointmentsView({
 
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        {getStatusBadge(booking.status)}
+                        {getStatusBadge(booking.status!)}
                         {/* 🔴 نبض التنبيه لو الكشف شغال حالياً */}
                         {booking.isOperationalNow && (
                           <span className="flex animate-pulse items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold whitespace-nowrap text-emerald-600">

@@ -59,7 +59,7 @@ function TimelineItem({
               </Badge>
             </div>
             <p className="text-muted-foreground text-xs">
-              {format(new Date(visit.startedAt), "d MMM yyyy • p", {
+              {format(new Date(visit.startedAt??''), "d MMM yyyy • p", {
                 locale: ar,
               })}
             </p>

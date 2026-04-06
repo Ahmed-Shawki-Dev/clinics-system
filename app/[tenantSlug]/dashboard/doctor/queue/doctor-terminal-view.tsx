@@ -110,13 +110,13 @@ export function DoctorTerminalView({ initialData, tenantSlug }: Props) {
     <div className="animate-in fade-in space-y-8 duration-500">
       <CurrentPatientCard
         currentTicket={currentTicket}
-        waitingTickets={waitingTickets}
+        waitingTickets={waitingTickets??[]}
         isPending={isPending}
         onAction={handleAction}
       />
       <WaitingQueueList
-        waitingTickets={waitingTickets}
-        waitingCount={waitingCount}
+        waitingTickets={waitingTickets??[]}
+        waitingCount={waitingCount??0}
       />
     </div>
   );

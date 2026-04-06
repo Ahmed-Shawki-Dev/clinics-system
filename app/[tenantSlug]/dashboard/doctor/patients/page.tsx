@@ -104,7 +104,7 @@ export default async function DoctorPatientsPage({
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
-                      {getAge(patient.dateOfBirth)}
+                      {getAge(patient.dateOfBirth ?? "")}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {patient.gender === "Male" ? "ذكر" : "أنثى"}

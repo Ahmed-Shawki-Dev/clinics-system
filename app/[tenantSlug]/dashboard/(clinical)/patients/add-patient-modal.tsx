@@ -120,7 +120,7 @@ export function AddPatientModal({
       const result = await createPatientAction(values, tenantSlug);
 
       if (result.success && result.data) {
-        const patientId = result.data.patient.id;
+        const patientId = result.data.patient?.id??'';
 
         const hasChronicData =
           values.diabetes ||
@@ -154,8 +154,8 @@ export function AddPatientModal({
         });
 
         setNewPatientData({
-          id: result.data.patient.id,
-          name: result.data.patient.name,
+          id: result.data.patient?.id??'',
+          name: result.data.patient?.name??'',
         });
       } else {
         toast.error(result.message);

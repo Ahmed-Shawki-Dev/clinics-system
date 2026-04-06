@@ -129,7 +129,7 @@ export function TerminalHeader({
             <HistoryTab
               summary={summary}
               tenantSlug={tenantSlug}
-              currentVisitId={visit.id}
+              currentVisitId={visit.id ?? ""}
             />
           </SheetContent>
         </Sheet>
