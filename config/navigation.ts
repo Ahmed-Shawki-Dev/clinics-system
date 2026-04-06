@@ -140,13 +140,19 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
         roles: ["ClinicOwner", "ClinicManager", "SuperAdmin"],
       },
       {
-        title: "شئون العاملين", // مصطلح HR مظبوط
+        title: "شئون العاملين",
         href: "/staff",
         icon: ClipboardList,
         roles: ["ClinicOwner", "ClinicManager", "SuperAdmin"],
       },
       {
-        title: "لائحة الأسعار", // الكلمة السحرية في أي عيادة للخدمات
+        title: "الحضور والانصراف",
+        href: "/attendance",
+        icon: Clock,
+        roles: ["ClinicOwner", "ClinicManager", "SuperAdmin"],
+      },
+      {
+        title: "لائحة الأسعار", 
         href: "/services",
         icon: Banknote,
         roles: ["ClinicOwner", "SuperAdmin"],
