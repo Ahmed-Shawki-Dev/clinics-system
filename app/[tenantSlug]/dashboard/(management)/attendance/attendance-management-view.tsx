@@ -6,7 +6,6 @@ import { IDoctor } from "@/types/doctor";
 import { IStaff } from "@/types/staff";
 import { FormEvent } from "react";
 import { AbsenceMainTab } from "./absence-main-tab";
-import { AttendanceFilterBar } from "./attendance-filter-bar";
 import { AttendanceMainTab } from "./attendance-main-tab";
 import { useAttendanceManagement } from "./use-attendance-management";
 
@@ -16,6 +15,10 @@ interface Props {
   staff: IStaff[];
   initialAttendance: AttendanceRecord[];
   initialAbsence: AbsenceRecord[];
+  activeQuery: {
+    from?: string;
+    to?: string;
+  };
 }
 
 export function AttendanceManagementView({
@@ -24,6 +27,7 @@ export function AttendanceManagementView({
   staff,
   initialAttendance,
   initialAbsence,
+  activeQuery,
 }: Props) {
   const model = useAttendanceManagement({
     tenantSlug,
@@ -31,6 +35,7 @@ export function AttendanceManagementView({
     staff,
     initialAttendance,
     initialAbsence,
+    activeQuery,
   });
 
   const workforceOptions = {
@@ -54,28 +59,6 @@ export function AttendanceManagementView({
 
   return (
     <div className="space-y-4">
-      <AttendanceFilterBar
-        filters={model.filters}
-        personOptions={model.filterPersonOptions
-          .filter((option): option is { id: string; label: string } =>
-            Boolean(option.id),
-          )
-          .map((option) => ({
-            id: option.id,
-            label: option.label ?? "",
-          }))}
-        isRefreshing={model.isRefreshing}
-        onChange={model.updateFilters}
-        onReset={() =>
-          model.updateFilters({
-            from: model.filters.from,
-            to: model.filters.to,
-            personType: "all",
-            personId: "all",
-          })
-        }
-      />
-
       <Tabs defaultValue="attendance" className="w-full">
         <TabsList className="h-9">
           <TabsTrigger value="attendance">الحضور والانصراف</TabsTrigger>

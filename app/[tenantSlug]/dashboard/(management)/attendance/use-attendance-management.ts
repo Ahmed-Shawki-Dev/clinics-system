@@ -10,9 +10,9 @@ import {
 import { AbsenceRecord, AttendanceRecord } from "@/types/attendance";
 import { IDoctor } from "@/types/doctor";
 import { IStaff } from "@/types/staff";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { AttendanceFiltersState, WorkforceType } from "./attendance-types";
+import { WorkforceType } from "./attendance-types";
 import { toDateInputValue, toIsoFromDateInput } from "./attendance-utils";
 
 interface UseAttendanceManagementParams {
@@ -21,6 +21,10 @@ interface UseAttendanceManagementParams {
   staff: IStaff[];
   initialAttendance: AttendanceRecord[];
   initialAbsence: AbsenceRecord[];
+  activeQuery: {
+    from?: string;
+    to?: string;
+  };
 }
 
 export function useAttendanceManagement({
@@ -29,25 +33,18 @@ export function useAttendanceManagement({
   staff,
   initialAttendance,
   initialAbsence,
+  activeQuery,
 }: UseAttendanceManagementParams) {
   const [attendanceRows, setAttendanceRows] =
     useState<AttendanceRecord[]>(initialAttendance);
   const [absenceRows, setAbsenceRows] =
     useState<AbsenceRecord[]>(initialAbsence);
 
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSubmittingAttendance, setIsSubmittingAttendance] = useState(false);
   const [isSubmittingAbsence, setIsSubmittingAbsence] = useState(false);
   const [checkoutLoadingId, setCheckoutLoadingId] = useState<string | null>(
     null,
   );
-
-  const [filters, setFilters] = useState<AttendanceFiltersState>({
-    from: toDateInputValue(new Date()),
-    to: toDateInputValue(new Date()),
-    personType: "all",
-    personId: "all",
-  });
 
   const [attendanceType, setAttendanceType] = useState<WorkforceType>("doctor");
   const [attendanceWorkerId, setAttendanceWorkerId] = useState("");
@@ -72,73 +69,33 @@ export function useAttendanceManagement({
     [doctors, staff],
   );
 
-  const filterPersonOptions =
-    filters.personType === "doctor"
-      ? workforceOptions.doctor
-      : filters.personType === "staff"
-        ? workforceOptions.staff
-        : [];
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setAttendanceRows(initialAttendance);
+    setAbsenceRows(initialAbsence);
+  }, [initialAttendance, initialAbsence]);
 
-  const getQueryParamsFromFilters = useCallback(
-    (sourceFilters: AttendanceFiltersState) => {
-      return {
-        from:
-          sourceFilters.from && sourceFilters.from !== ""
-            ? toIsoFromDateInput(sourceFilters.from)
-            : undefined,
-        to:
-          sourceFilters.to && sourceFilters.to !== ""
-            ? toIsoFromDateInput(sourceFilters.to, true)
-            : undefined,
-        doctorId:
-          sourceFilters.personType === "doctor" &&
-          sourceFilters.personId &&
-          sourceFilters.personId !== "all"
-            ? sourceFilters.personId
-            : undefined,
-        employeeId:
-          sourceFilters.personType === "staff" &&
-          sourceFilters.personId &&
-          sourceFilters.personId !== "all"
-            ? sourceFilters.personId
-            : undefined,
-      };
-    },
-    [],
-  );
+  const refreshLists = useCallback(async () => {
+    const params = {
+      from: activeQuery.from,
+      to: activeQuery.to,
+    };
 
-  const refreshLists = useCallback(
-    async (nextFilters?: AttendanceFiltersState) => {
-      const sourceFilters = nextFilters ?? filters;
-      const params = getQueryParamsFromFilters(sourceFilters);
+    const [attendanceRes, absenceRes] = await Promise.all([
+      getAttendanceListAction(tenantSlug, params),
+      getAbsenceListAction(tenantSlug, params),
+    ]);
 
-      setIsRefreshing(true);
-      const [attendanceRes, absenceRes] = await Promise.all([
-        getAttendanceListAction(tenantSlug, params),
-        getAbsenceListAction(tenantSlug, params),
-      ]);
-      setIsRefreshing(false);
+    if (!attendanceRes.success) {
+      toast.error(attendanceRes.message || "فشل تحميل سجلات الحضور");
+    }
+    if (!absenceRes.success) {
+      toast.error(absenceRes.message || "فشل تحميل سجلات الإجازات");
+    }
 
-      if (!attendanceRes.success) {
-        toast.error(attendanceRes.message || "فشل تحميل سجلات الحضور");
-      }
-      if (!absenceRes.success) {
-        toast.error(absenceRes.message || "فشل تحميل سجلات الإجازات");
-      }
-
-      setAttendanceRows(attendanceRes.data ?? []);
-      setAbsenceRows(absenceRes.data ?? []);
-    },
-    [filters, getQueryParamsFromFilters, tenantSlug],
-  );
-
-  const updateFilters = useCallback(
-    async (nextFilters: AttendanceFiltersState) => {
-      setFilters(nextFilters);
-      await refreshLists(nextFilters);
-    },
-    [refreshLists],
-  );
+    setAttendanceRows(attendanceRes.data ?? []);
+    setAbsenceRows(absenceRes.data ?? []);
+  }, [activeQuery.from, activeQuery.to, tenantSlug]);
 
   const submitAttendance = useCallback(async () => {
     if (!attendanceWorkerId) {
@@ -246,11 +203,7 @@ export function useAttendanceManagement({
   return {
     attendanceRows,
     absenceRows,
-    filters,
-    isRefreshing,
-    updateFilters,
     refreshLists,
-    filterPersonOptions,
     workforceOptions,
 
     attendanceType,

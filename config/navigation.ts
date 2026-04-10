@@ -169,12 +169,7 @@ export const SIDEBAR_NAVIGATION: NavCategory[] = [
         icon: Store,
         roles: ["ClinicOwner", "ClinicManager", "SuperAdmin"],
       },
-      {
-        title: "الصيدلة",
-        href: "/pharmacy",
-        icon: BriefcaseMedicalIcon,
-        roles: ["ClinicOwner", "ClinicManager", "SuperAdmin"],
-      },
+
       {
         title: "بيانات المنشأة", // أشيك من "إعدادات العيادة"
         href: "/settings",
