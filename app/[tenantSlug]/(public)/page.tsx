@@ -18,7 +18,7 @@ interface PageProps {
   params: Promise<{ tenantSlug: string }>;
 }
 
-export default async function Page({ params }: PageProps) {
+export default async function Page({ params }: Readonly<PageProps>) {
   const { tenantSlug } = await params;
 
   const [clinicRes, doctorsRes, workingHoursRes] = await Promise.all([

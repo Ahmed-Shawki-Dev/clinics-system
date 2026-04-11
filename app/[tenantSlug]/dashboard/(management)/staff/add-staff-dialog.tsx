@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,14 +9,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus } from "lucide-react";
+import { useState } from "react";
 import { CreateStaffForm } from "./create-staff-form";
 
 interface Props {
   tenantSlug: string;
 }
 
-export function AddStaffDialog({ tenantSlug }: Props) {
+export function AddStaffDialog({ tenantSlug }: Readonly<Props>) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -32,14 +33,32 @@ export function AddStaffDialog({ tenantSlug }: Props) {
         <DialogHeader>
           <DialogTitle>إضافة موظف جديد</DialogTitle>
           <DialogDescription>
-            بيانات الدخول وصلاحيات الموظف على السيستم.
+            اختر نوع الموظف ثم اكمل البيانات.
           </DialogDescription>
         </DialogHeader>
 
-        <CreateStaffForm
-          tenantSlug={tenantSlug}
-          onSuccess={() => setOpen(false)}
-        />
+        <Tabs defaultValue="login-based" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="login-based">له حساب على السيستم</TabsTrigger>
+            <TabsTrigger value="payroll-only">بدون حساب</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="login-based" className="pt-4">
+            <CreateStaffForm
+              mode="login-based"
+              tenantSlug={tenantSlug}
+              onSuccess={() => setOpen(false)}
+            />
+          </TabsContent>
+
+          <TabsContent value="payroll-only" className="pt-4">
+            <CreateStaffForm
+              mode="payroll-only"
+              tenantSlug={tenantSlug}
+              onSuccess={() => setOpen(false)}
+            />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

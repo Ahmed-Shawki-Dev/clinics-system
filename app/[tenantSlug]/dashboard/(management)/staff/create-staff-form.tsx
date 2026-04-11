@@ -1,5 +1,6 @@
 "use client";
 
+import { createPayrollOnlyStaffAction } from "@/actions/staff/create-payroll-only-staff";
 import { createStaffAction } from "@/actions/staff/create-staff";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,18 +25,21 @@ import { Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { ROLE_CONFIG, ROLES } from "../../../../../config/roles";
 import {
+  CreatePayrollOnlyStaffInput,
+  createPayrollOnlyStaffSchema,
   CreateStaffInput,
   createStaffSchema,
 } from "../../../../../validation/staff";
-import { ROLE_CONFIG, ROLES } from "../../../../../config/roles";
 
 interface Props {
   tenantSlug: string;
   onSuccess: () => void;
+  mode: "login-based" | "payroll-only";
 }
 
-export function CreateStaffForm({ tenantSlug, onSuccess }: Props) {
+function CreateLoginBasedStaffForm({ tenantSlug, onSuccess }: Readonly<Props>) {
   const [loading, setLoading] = useState(false);
 
   const form = useForm<CreateStaffInput>({
@@ -223,5 +227,169 @@ export function CreateStaffForm({ tenantSlug, onSuccess }: Props) {
         </Button>
       </form>
     </Form>
+  );
+}
+
+function CreatePayrollOnlyStaffForm({
+  tenantSlug,
+  onSuccess,
+}: Readonly<Props>) {
+  const [loading, setLoading] = useState(false);
+
+  const form = useForm<CreatePayrollOnlyStaffInput>({
+    resolver: valibotResolver(createPayrollOnlyStaffSchema),
+    defaultValues: {
+      name: "",
+      phone: "",
+      role: "",
+      salary: 0,
+      notes: "",
+      hireDate: new Date().toISOString().split("T")[0],
+    },
+  });
+
+  async function onSubmit(values: CreatePayrollOnlyStaffInput) {
+    setLoading(true);
+    const res = await createPayrollOnlyStaffAction(values, tenantSlug);
+    setLoading(false);
+
+    if (res.success) {
+      toast.success(res.message);
+      form.reset();
+      onSuccess();
+    } else {
+      toast.error(res.message);
+    }
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>الاسم</FormLabel>
+                <FormControl>
+                  <Input placeholder="الاسم بالكامل" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>الوظيفة</FormLabel>
+                <FormControl>
+                  <Input placeholder="مثال: محاسب" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>الهاتف</FormLabel>
+                <FormControl>
+                  <Input placeholder="01xxxxxxxxx" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="salary"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>الراتب</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    {...field}
+                    value={Number.isNaN(field.value) ? "" : field.value}
+                    onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="hireDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>تاريخ التعيين</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="notes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>ملاحظات</FormLabel>
+              <FormControl>
+                <Textarea {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" disabled={loading} className="w-full">
+          {loading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Plus className="mr-2 h-4 w-4" />
+          )}
+          إضافة موظف
+        </Button>
+      </form>
+    </Form>
+  );
+}
+
+export function CreateStaffForm({
+  tenantSlug,
+  onSuccess,
+  mode,
+}: Readonly<Props>) {
+  if (mode === "payroll-only") {
+    return (
+      <CreatePayrollOnlyStaffForm
+        tenantSlug={tenantSlug}
+        onSuccess={onSuccess}
+        mode={mode}
+      />
+    );
+  }
+
+  return (
+    <CreateLoginBasedStaffForm
+      tenantSlug={tenantSlug}
+      onSuccess={onSuccess}
+      mode={mode}
+    />
   );
 }

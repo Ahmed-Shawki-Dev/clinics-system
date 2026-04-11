@@ -16,7 +16,7 @@ export const createStaffSchema = v.object({
   role: v.pipe(v.string("الوظيفة مطلوبة"), v.minLength(1, "يرجى اختيار وظيفة")),
   phone: v.pipe(
     v.string("رقم الهاتف مطلوب"),
-    v.regex(/^01[0125][0-9]{8}$/, "رقم الهاتف غير صحيح"),
+    v.regex(/^01[0125]\d{8}$/, "رقم الهاتف غير صحيح"),
   ),
   salary: v.pipe(
     v.number("الراتب مطلوب"),
@@ -30,6 +30,31 @@ export const createStaffSchema = v.object({
 });
 
 export type CreateStaffInput = v.InferInput<typeof createStaffSchema>;
+
+export const createPayrollOnlyStaffSchema = v.object({
+  name: v.pipe(
+    v.string("الاسم مطلوب"),
+    v.minLength(2, "الاسم يجب أن يكون حرفين على الأقل"),
+  ),
+  phone: v.pipe(
+    v.string("رقم الهاتف مطلوب"),
+    v.regex(/^01[0125]\d{8}$/, "رقم الهاتف غير صحيح"),
+  ),
+  role: v.pipe(v.string("الوظيفة مطلوبة"), v.minLength(2, "أدخل مسمى وظيفي")),
+  salary: v.pipe(
+    v.number("الراتب مطلوب"),
+    v.minValue(0, "الراتب لا يمكن أن يكون سالب"),
+  ),
+  hireDate: v.pipe(
+    v.string("تاريخ التعيين مطلوب"),
+    v.isoDate("صيغة التاريخ غير صحيحة"),
+  ),
+  notes: v.optional(v.string()),
+});
+
+export type CreatePayrollOnlyStaffInput = v.InferInput<
+  typeof createPayrollOnlyStaffSchema
+>;
 
 export const updateStaffSchema = v.object({
   id: v.string(),

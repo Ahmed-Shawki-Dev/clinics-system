@@ -44,7 +44,7 @@ export const columns = [
         ? "مدير عيادة"
         : info.getValue() === "Receptionist"
           ? "إستقبال"
-          : "أخرى",
+          : info.getValue(),
   }),
 
   // الهاتف
